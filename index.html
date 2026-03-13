@@ -11,7 +11,7 @@
 :root {
   --bg:#05050d;--surface:#0c0c1a;--card:#101020;--border:rgba(255,255,255,0.07);
   --accent:#00ffaa;--accent2:#ff6b35;--accent3:#6b8aff;
-  --text:#a0a0bc;--text-light:#dde0f0;--text-dim:#404058;
+  --text:#c2c2d8;--text-light:#eeeef8;--text-dim:#7878a0;
   --junior:#4a9eff;--middle:#00e8d3;--senior:#ffa500;--lead:#ff6b35;--supervisor:#ff3366;--head:#cc44ff;
 }
 *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
@@ -27,7 +27,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .loader-logo em{font-style:normal;color:var(--accent);}
 .loader-bar-wrap{width:280px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
 .loader-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent3),var(--accent));border-radius:2px;transition:width .4s ease;}
-.loader-status{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text-dim);letter-spacing:.08em;}
+.loader-status{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:#9090b8;letter-spacing:.08em;}
 #error-screen{display:none;position:fixed;inset:0;background:var(--bg);z-index:1001;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem;text-align:center;}
 #error-screen.show{display:flex;}
 .err-title{font-size:1.4rem;color:#ff3366;font-weight:700;}
@@ -46,7 +46,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .stat-item{display:flex;flex-direction:column;gap:.2rem;}
 .stat-num{font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:600;color:var(--text-light);line-height:1;}
 .stat-num span{font-size:.9rem;color:var(--accent);}
-.stat-lbl{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);}
+.stat-lbl{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:#9090b8;}
 
 /* ── NAV TABS ── */
 .nav-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 5vw;background:var(--surface);}
@@ -56,7 +56,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 
 /* ── MY SALARY ── */
 .my-salary-bar{padding:1.5rem 5vw;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:3rem;flex-wrap:wrap;}
-.sal-label{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.4rem;}
+.sal-label{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:#9090b8;margin-bottom:.4rem;}
 .salary-input-wrap{display:flex;align-items:center;gap:.5rem;border:1px solid var(--border);border-radius:5px;padding:.5rem 1rem;background:var(--card);transition:border-color .2s;}
 .salary-input-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,255,170,.1);}
 .salary-input-wrap .prefix{font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:1.1rem;}
@@ -95,8 +95,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .city-top-list{display:flex;flex-direction:column;gap:.4rem;max-height:220px;overflow-y:auto;}
 .city-top-item{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;padding:.2rem 0;border-bottom:1px solid var(--border);}
 .city-top-item:last-child{border-bottom:none;}
-.city-name{color:var(--text);}
-.city-avg{font-family:'JetBrains Mono',monospace;color:var(--accent);}
+.city-name{color:var(--text-light);}
+.city-avg{font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:600;}
 
 /* ── CHARTS ── */
 .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
@@ -139,7 +139,7 @@ thead th.sort-desc::after{content:' ↓';color:var(--accent);}
 tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .12s;}
 tbody tr:hover{background:rgba(255,255,255,.03);}
 tbody tr.my-row{background:rgba(0,255,170,.04);}
-tbody td{padding:.55rem 1rem;color:var(--text);}
+tbody td{padding:.55rem 1rem;color:var(--text-light);}
 .lvl-badge{display:inline-block;padding:.1rem .5rem;border-radius:3px;font-size:.72rem;font-weight:600;letter-spacing:.04em;}
 .sal-cell{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--text-light);}
 .sal-bar{display:inline-block;height:3px;background:var(--accent2);border-radius:2px;vertical-align:middle;margin-left:.4rem;opacity:.6;}
@@ -264,6 +264,7 @@ tbody td{padding:.55rem 1rem;color:var(--text);}
     <select class="spec-filter" id="spec-level"><option value="">Все уровни</option><option>Junior</option><option>Middle</option><option>Senior</option><option>Lead</option><option>Supervisor</option><option>Head</option></select>
     <select class="spec-filter" id="spec-emp"><option value="">Все типы</option><option value="staff">Штатный</option><option value="freelance">Фрилансер</option><option value="own">Своя компания</option></select>
     <select class="spec-filter" id="spec-color"><option value="level">Цвет: Уровень</option><option value="emp">Цвет: Занятость</option><option value="fmt">Цвет: Формат</option></select>
+    <span style="font-size:.72rem;color:#9090b8;margin-left:.5rem;">X = зарплата $/мес &nbsp;·&nbsp; Y = визуальный разброс для читаемости (не несёт смысла)</span>
   </div>
   <div id="spectrum-container">
     <div class="spectrum-canvas-wrap">
@@ -302,9 +303,9 @@ tbody td{padding:.55rem 1rem;color:var(--text);}
 // ══════════════════════════════════════════════════════
 // CONSTANTS
 // ══════════════════════════════════════════════════════
-const SHEET_ID = '1hZ2UOT0x8FSEHmjUh_8JEAzHeOn_A3kL7wRrrsX7B9I';
-const GID      = '1862435225';
-const CSV_URL  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+// URL encoded — decodes at runtime only
+const _x=(s,k=0x5f)=>atob(s).split('').map(c=>String.fromCharCode(c.charCodeAt(0)^k)).join('');
+const CSV_URL=_x('NysrLyxlcHA7MDwscTgwMDgzOnE8MDJwLC8tOj47LDc6OisscDtwbjcFbQoQC28nZxkMGhcyNQo3AGcVGh4lFzoQMQAebDQTaCgNLS0sB2gdZhZwOicvMC0rYDkwLTI+K2I8LCl5ODY7Ym5naW1rbGptbWo=');
 
 const LEVEL_ORDER  = ['Junior','Middle','Senior','Lead','Supervisor','Head'];
 const LEVEL_COLORS = {Junior:'#4a9eff',Middle:'#00e8d3',Senior:'#ffa500',Lead:'#ff6b35',Supervisor:'#ff3366',Head:'#cc44ff'};
@@ -736,63 +737,176 @@ function initGlobe(){
   const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
   renderer.setSize(W,H); renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
   renderer.setClearColor(0x000000,0); container.appendChild(renderer.domElement);
-  scene.add(new THREE.AmbientLight(0x1a1a4a,3));
-  const pl=new THREE.PointLight(0x4477ff,2.5,10); pl.position.set(3,2,3); scene.add(pl);
-  const group=new THREE.Group(); scene.add(group);
-  group.add(new THREE.Mesh(new THREE.SphereGeometry(1,64,64),new THREE.MeshPhongMaterial({color:0x040418,emissive:0x020210,specular:0x224466,shininess:60})));
-  scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.06,32,32),new THREE.MeshBasicMaterial({color:0x0022aa,transparent:true,opacity:0.06,side:THREE.BackSide})));
-  const gridMat=new THREE.LineBasicMaterial({color:0x112244,transparent:true,opacity:0.25});
-  for(let lat=-60;lat<=60;lat+=30){const pts=[];for(let ln=-180;ln<=180;ln+=4)pts.push(latToVec3(lat,ln,1.004));group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));}
-  for(let ln=-180;ln<=180;ln+=30){const pts=[];for(let la=-90;la<=90;la+=4)pts.push(latToVec3(la,ln,1.004));group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));}
 
+  // Flat lighting — no specular bloom
+  scene.add(new THREE.AmbientLight(0x2a3a6a,5));
+  const dLight=new THREE.DirectionalLight(0x3355aa,0.6);
+  dLight.position.set(2,1,2); scene.add(dLight);
+
+  const group=new THREE.Group(); scene.add(group);
+
+  // Globe sphere — MeshLambertMaterial: no specular, no shininess
+  group.add(new THREE.Mesh(
+    new THREE.SphereGeometry(1,64,64),
+    new THREE.MeshLambertMaterial({color:0x060618,emissive:0x03030f})
+  ));
+
+  // Subtle atmosphere
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.07,32,32),
+    new THREE.MeshBasicMaterial({color:0x001a44,transparent:true,opacity:0.04,side:THREE.BackSide})));
+
+  // Lat/lng grid
+  const gridMat=new THREE.LineBasicMaterial({color:0x0e1e3a,transparent:true,opacity:0.4});
+  for(let lat=-60;lat<=60;lat+=30){const pts=[];for(let ln=-180;ln<=180;ln+=3)pts.push(latToVec3(lat,ln,1.001));group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));}
+  for(let ln=-180;ln<=180;ln+=30){const pts=[];for(let la=-88;la<=88;la+=3)pts.push(latToVec3(la,ln,1.001));group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));}
+
+  // Build city data
   const cityMap={};
   D.filter(d=>d.lat!==null).forEach(d=>{
     if(!cityMap[d.city]) cityMap[d.city]={city:d.city,lat:d.lat,lng:d.lng,salaries:[],levels:[]};
     cityMap[d.city].salaries.push(d.salary); cityMap[d.city].levels.push(d.level);
   });
+  const maxCount=Math.max(...Object.values(cityMap).map(c=>c.salaries.length),1);
+  const yUp=new THREE.Vector3(0,1,0);
+  const barMeshes=[];
 
-  const dotMeshes=[], glowMeshes=[];
   Object.values(cityMap).forEach(ci=>{
     const med_s=median(ci.salaries);
     const col=salaryColor(med_s);
     const colHex=parseInt(col.replace('rgb(','').replace(')','').split(',').map(x=>parseInt(x).toString(16).padStart(2,'0')).join(''),16);
-    const pos=latToVec3(ci.lat,ci.lng,1.015);
-    const dot=new THREE.Mesh(new THREE.SphereGeometry(0.016,8,8),new THREE.MeshBasicMaterial({color:colHex}));
-    dot.position.copy(pos); dot.userData={...ci,avgSalary:Math.round(med_s)}; group.add(dot); dotMeshes.push(dot);
-    const glow=new THREE.Mesh(new THREE.SphereGeometry(0.03,8,8),new THREE.MeshBasicMaterial({color:colHex,transparent:true,opacity:0.2}));
-    glow.position.copy(pos); group.add(glow); glowMeshes.push(glow);
+    const count=ci.salaries.length;
+    const barH=0.035+(count/maxCount)*0.20; // height proportional to respondents
+    const normal=latToVec3(ci.lat,ci.lng,1).normalize();
+    // Place bar so its base sits at globe surface
+    const center=normal.clone().multiplyScalar(1.0+barH/2);
+
+    const barGeo=new THREE.CylinderGeometry(0.007,0.011,barH,6,1);
+    const barMat=new THREE.MeshBasicMaterial({color:colHex});
+    const bar=new THREE.Mesh(barGeo,barMat);
+    bar.position.copy(center);
+    bar.quaternion.setFromUnitVectors(yUp,normal);
+    bar.userData={...ci,avgSalary:Math.round(med_s),count};
+    group.add(bar); barMeshes.push(bar);
+
+    // Glowing top cap
+    const capPos=normal.clone().multiplyScalar(1.0+barH+0.001);
+    const capGeo=new THREE.CircleGeometry(0.013,6);
+    const capMat=new THREE.MeshBasicMaterial({color:colHex,transparent:true,opacity:0.7,side:THREE.DoubleSide});
+    const cap=new THREE.Mesh(capGeo,capMat);
+    cap.position.copy(capPos);
+    cap.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),normal);
+    group.add(cap);
   });
+
+  // ── WORLD COUNTRY BORDERS (topojson from CDN) ──
+  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+    .then(r=>r.json())
+    .then(world=>{
+      const sc=world.transform.scale, tr=world.transform.translate;
+      const rawArcs=world.arcs;
+
+      function decodeArc(idx){
+        const rev=idx<0;
+        const arc=rawArcs[rev?~idx:idx];
+        let x=0,y=0;
+        const pts=arc.map(p=>{x+=p[0];y+=p[1];return[x*sc[0]+tr[0],y*sc[1]+tr[1]];});
+        if(rev)pts.reverse();
+        return pts; // [lon,lat]
+      }
+
+      const borderMat=new THREE.LineBasicMaterial({color:0x1e4a8c,transparent:true,opacity:0.55});
+
+      function drawArcs(arcIdxArrays){
+        arcIdxArrays.forEach(ring=>{
+          let coords=[];
+          ring.forEach(i=>coords=coords.concat(decodeArc(i)));
+          const v3=coords.map(([lon,lat])=>latToVec3(lat,lon,1.0025));
+          if(v3.length>1) group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(v3),borderMat));
+        });
+      }
+
+      world.objects.countries.geometries.forEach(g=>{
+        if(g.type==='Polygon') drawArcs(g.arcs);
+        else if(g.type==='MultiPolygon') g.arcs.forEach(p=>drawArcs(p));
+      });
+    })
+    .catch(()=>{}); // borders are optional decoration
 
   // Top cities list
   const topCities=Object.values(cityMap).filter(c=>c.salaries.length>1).map(c=>({city:c.city,med:median(c.salaries),count:c.salaries.length})).sort((a,b)=>b.med-a.med).slice(0,14);
   const listEl=document.getElementById('city-top-list');
-  listEl.innerHTML=topCities.map(c=>`<div class="city-top-item"><span class="city-name">${c.city} <small style="color:var(--text-dim)">(${c.count})</small></span><span class="city-avg">$${Math.round(c.med).toLocaleString()}</span></div>`).join('');
+  listEl.innerHTML=topCities.map(c=>`<div class="city-top-item"><span class="city-name">${c.city} <small style="color:#7878a0">(${c.count})</small></span><span class="city-avg">$${Math.round(c.med).toLocaleString()}</span></div>`).join('');
 
+  // Raycaster for bar hover
   const raycaster=new THREE.Raycaster(),mouse2=new THREE.Vector2();
   const tooltip=document.getElementById('globe-tooltip');
   container.addEventListener('mousemove',e=>{
     const rect=container.getBoundingClientRect();
     mouse2.x=((e.clientX-rect.left)/W)*2-1; mouse2.y=-((e.clientY-rect.top)/H)*2+1;
     raycaster.setFromCamera(mouse2,camera);
-    const hits=raycaster.intersectObjects(dotMeshes);
+    const hits=raycaster.intersectObjects(barMeshes);
     if(hits.length>0){
       const d=hits[0].object.userData;
-      tooltip.innerHTML=`<b>${d.city}</b><br>Медиана: <b style="color:var(--accent)">${fmtSalary(d.avgSalary)}</b><br>Человек: ${d.salaries.length}<br>Уровни: ${[...new Set(d.levels)].join(', ')}`;
-      tooltip.style.display='block'; tooltip.style.left=(e.clientX-rect.left+16)+'px'; tooltip.style.top=(e.clientY-rect.top-10)+'px';
+      tooltip.innerHTML=`<b>${d.city}</b><br>Медиана: <b style="color:var(--accent)">${fmtSalary(d.avgSalary)}</b><br>Человек: <b>${d.count}</b><br>Уровни: ${[...new Set(d.levels)].join(', ')}`;
+      // Smart tooltip positioning within container
+      const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+      const tw=200,th=80;
+      tooltip.style.left=((mx+tw+20>W)?mx-tw-8:mx+14)+'px';
+      tooltip.style.top=((my+th>H)?my-th-4:my-6)+'px';
+      tooltip.style.display='block';
     } else tooltip.style.display='none';
   });
   container.addEventListener('mouseleave',()=>tooltip.style.display='none');
 
   let isDragging=false,prevX=0,prevY=0;
-  container.addEventListener('mousedown',e=>{isDragging=true;prevX=e.clientX;prevY=e.clientY;});
-  window.addEventListener('mousemove',e=>{if(!isDragging)return;group.rotation.y+=(e.clientX-prevX)*0.006;group.rotation.x=Math.max(-1.2,Math.min(1.2,group.rotation.x+(e.clientY-prevY)*0.006));prevX=e.clientX;prevY=e.clientY;});
-  window.addEventListener('mouseup',()=>isDragging=false);
+  let autoRotate=true;  // click toggles this
+
+  // Click to pause/resume (only if not dragging)
+  let didDrag=false;
+  container.addEventListener('mousedown',e=>{isDragging=true;didDrag=false;prevX=e.clientX;prevY=e.clientY;});
+  window.addEventListener('mousemove',e=>{
+    if(!isDragging)return;
+    const dx=e.clientX-prevX, dy=e.clientY-prevY;
+    if(Math.abs(dx)+Math.abs(dy)>3) didDrag=true;
+    group.rotation.y+=dx*0.006;
+    group.rotation.x=Math.max(-1.2,Math.min(1.2,group.rotation.x+dy*0.006));
+    prevX=e.clientX;prevY=e.clientY;
+  });
+  window.addEventListener('mouseup',()=>{
+    if(isDragging && !didDrag) autoRotate=!autoRotate; // toggle on clean click
+    isDragging=false;
+  });
+
+  // Update hint text to reflect toggle
+  const hintEl=container.parentElement.querySelector('.globe-hint');
+  setInterval(()=>{
+    if(hintEl) hintEl.textContent = autoRotate
+      ? 'drag · scroll to zoom · click to pause'
+      : '⏸ paused — click to resume · scroll to zoom';
+  },200);
+
+  // Wheel zoom
+  container.addEventListener('wheel',e=>{
+    e.preventDefault();
+    camera.position.z=Math.max(1.4,Math.min(5.0,camera.position.z+e.deltaY*0.003));
+  },{passive:false});
+
   let tPrev={x:0,y:0};
   container.addEventListener('touchstart',e=>{tPrev={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
   container.addEventListener('touchmove',e=>{group.rotation.y+=(e.touches[0].clientX-tPrev.x)*0.005;group.rotation.x=Math.max(-1.2,Math.min(1.2,group.rotation.x+(e.touches[0].clientY-tPrev.y)*0.005));tPrev={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
 
-  let t=0;
-  (function animate(){requestAnimationFrame(animate);t+=0.016;if(!isDragging)group.rotation.y+=0.003;glowMeshes.forEach((g,i)=>g.scale.setScalar(1+0.3*Math.sin(t*2+i*0.7)));renderer.render(scene,camera);})();
+  // Pinch zoom on touch
+  let lastDist=0;
+  container.addEventListener('touchstart',e=>{if(e.touches.length===2)lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);},{passive:true});
+  container.addEventListener('touchmove',e=>{
+    if(e.touches.length===2){
+      const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      camera.position.z=Math.max(1.4,Math.min(5.0,camera.position.z-(d-lastDist)*0.008));
+      lastDist=d;
+    }
+  },{passive:true});
+
+  (function animate(){requestAnimationFrame(animate);if(!isDragging && autoRotate)group.rotation.y+=0.003;renderer.render(scene,camera);})();
   window.addEventListener('resize',()=>{const nW=container.clientWidth;camera.aspect=nW/H;camera.updateProjectionMatrix();renderer.setSize(nW,H);});
 }
 
@@ -802,8 +916,8 @@ function initGlobe(){
 let chartsInited=false;
 function initCharts(){
   if(chartsInited)return; chartsInited=true;
-  Chart.defaults.color='#a0a0bc'; Chart.defaults.font={family:"'Rajdhani',sans-serif",size:11};
-  const g='rgba(255,255,255,0.04)', t='#505068';
+  Chart.defaults.color='#c2c2d8'; Chart.defaults.font={family:"'Rajdhani',sans-serif",size:11};
+  const g='rgba(255,255,255,0.05)', t='#9090b8';
   const byLevel={};
   D.forEach(d=>{if(!byLevel[d.level])byLevel[d.level]=[];byLevel[d.level].push(d.salary);});
   const lo=LEVEL_ORDER.filter(l=>byLevel[l]);
@@ -840,7 +954,7 @@ function drawSpectrum(){
   const maxS=Math.max(...filtered.map(d=>d.salary),1), PAD=60, plotW=W-PAD*2, H=380;
   ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=1;
   ctx.beginPath(); ctx.moveTo(PAD,H-60); ctx.lineTo(W-PAD,H-60); ctx.stroke();
-  ctx.fillStyle='#505068'; ctx.font="11px 'JetBrains Mono',monospace"; ctx.textAlign='center';
+  ctx.fillStyle='#8888aa'; ctx.font="11px 'JetBrains Mono',monospace"; ctx.textAlign='center';
   [0,1000,2000,4000,6000,10000,16000].filter(t=>t<=maxS*1.1).forEach(t=>{
     const x=PAD+(t/maxS)*plotW; if(x>W-PAD+10)return;
     ctx.beginPath(); ctx.moveTo(x,H-60); ctx.lineTo(x,H-54); ctx.stroke();
@@ -863,11 +977,42 @@ function drawSpectrum(){
     const col=getSpecColor(d,cm);
     ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fillStyle=col+'cc'; ctx.fill(); ctx.strokeStyle=col; ctx.lineWidth=0.8; ctx.stroke();
   });
+  // Y-axis label (rotated)
+  ctx.save();
+  ctx.translate(14, (H-60)/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillStyle='#585878';
+  ctx.font="10px 'JetBrains Mono',monospace";
+  ctx.textAlign='center';
+  ctx.fillText('разброс для читаемости', 0, 0);
+  ctx.restore();
+  // X-axis label
+  ctx.fillStyle='#585878';
+  ctx.font="10px 'JetBrains Mono',monospace";
+  ctx.textAlign='center';
+  ctx.fillText('зарплата $/мес →', W/2, H-28);
+
   const legEl=document.getElementById('spec-legend'); legEl.innerHTML='';
   const items=cm==='level'?LEVEL_ORDER.map(l=>({label:l,color:LEVEL_COLORS[l]})):cm==='emp'?Object.entries(EMP_LABELS).map(([k,v])=>({label:v,color:EMP_COLORS[k]})):Object.entries(FMT_LABELS).map(([k,v])=>({label:v,color:FMT_COLORS[k]}));
   items.forEach(i=>legEl.innerHTML+=`<div class="sl-item"><div class="sl-dot" style="background:${i.color}"></div>${i.label}</div>`);
   const specTip=document.getElementById('spectrum-tooltip');
-  canvas.onmousemove=function(e){const rect=canvas.getBoundingClientRect(),sx=canvas.width/rect.width,sy=canvas.height/rect.height;const cx=(e.clientX-rect.left)*sx,cy=(e.clientY-rect.top)*sy;const hit=(canvas._points||[]).find(p=>Math.hypot(p.x-cx,p.y-cy)<10);if(hit){const d=hit.d;specTip.style.display='block';specTip.style.left=(e.clientX-rect.left+10)+'px';specTip.style.top=(e.clientY-rect.top-10)+'px';specTip.innerHTML=`<b>${d.city}</b> · ${d.level}<br>${d.dept}<br><b style="color:var(--accent)">${fmtSalary(d.salary)}</b> · ${expLabel(d.exp)}<br>${EMP_LABELS[d.emp]} · ${FMT_LABELS[d.fmt]}`;}else specTip.style.display='none';};
+  canvas.onmousemove=function(e){
+    const rect=canvas.getBoundingClientRect(),sx=canvas.width/rect.width,sy=canvas.height/rect.height;
+    const cx=(e.clientX-rect.left)*sx,cy=(e.clientY-rect.top)*sy;
+    const hit=(canvas._points||[]).find(p=>Math.hypot(p.x-cx,p.y-cy)<10);
+    if(hit){
+      const d=hit.d;
+      specTip.innerHTML=`<b>${d.city}</b> · ${d.level}<br>${d.dept}<br><b style="color:var(--accent)">${fmtSalary(d.salary)}</b> · ${expLabel(d.exp)}<br>${EMP_LABELS[d.emp]} · ${FMT_LABELS[d.fmt]}`;
+      specTip.style.display='block';
+      // Smart positioning — flip left/up if too close to edge
+      const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+      const TW=222, TH=88;
+      const left=(mx+TW+14>rect.width) ? mx-TW-8 : mx+10;
+      const top=(my+TH>rect.height) ? my-TH-6 : my-10;
+      specTip.style.left=Math.max(2,left)+'px';
+      specTip.style.top=Math.max(2,top)+'px';
+    } else specTip.style.display='none';
+  };
   canvas.onmouseleave=()=>specTip.style.display='none';
 }
 ['spec-level','spec-emp','spec-color'].forEach(id=>document.getElementById(id).addEventListener('change',drawSpectrum));

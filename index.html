@@ -16,9 +16,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;}
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity:0.035;}
+
 
 /* ── LOADING SCREEN ── */
 #loading-screen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;transition:opacity .5s;}
@@ -132,7 +130,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .t-search{background:var(--card);border:1px solid var(--border);color:var(--text);padding:.45rem .9rem;border-radius:5px;font-family:'Rajdhani',sans-serif;font-size:.88rem;outline:none;width:200px;transition:border-color .2s;}
 .t-search:focus{border-color:var(--accent);}
 .t-search::placeholder{color:var(--text-dim);}
-.table-wrap{overflow:auto;border-radius:8px;border:1px solid var(--border);max-height:70vh;}
+.table-wrap{overflow:visible;border-radius:8px;border:1px solid var(--border);}
 table{width:100%;border-collapse:collapse;font-size:.85rem;}
 thead th{background:var(--surface);padding:.7rem 1rem;text-align:left;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);cursor:pointer;user-select:none;white-space:nowrap;border-bottom:1px solid var(--border);transition:color .15s;position:sticky;top:0;z-index:2;}
 thead th:hover{color:var(--accent);}
@@ -259,10 +257,10 @@ tbody td{padding:.55rem 1rem;color:var(--text-light);}
     <div class="chart-card"><h3>Зарплата по уровню (медиана $)</h3><div class="chart-container"><canvas id="chart-level"></canvas></div></div>
     <div class="chart-card"><h3>Тип занятости — распределение</h3><div class="chart-container"><canvas id="chart-emp"></canvas></div></div>
     <div class="chart-card full"><h3>Топ городов по медианной зарплате ($)</h3><div class="chart-container"><canvas id="chart-city"></canvas></div></div>
+    <div class="chart-card"><h3>Сфера — медианная зарплата ($)</h3><div class="chart-container"><canvas id="chart-sphere"></canvas></div></div>
+    <div class="chart-card"><h3>Топ софт — популярность</h3><div class="chart-container"><canvas id="chart-soft"></canvas></div></div>
     <div class="chart-card"><h3>Зарплата vs Опыт</h3><div class="chart-container"><canvas id="chart-scatter"></canvas></div></div>
     <div class="chart-card"><h3>Опыт в индустрии — распределение</h3><div class="chart-container"><canvas id="chart-exp"></canvas></div></div>
-    <div class="chart-card"><h3>Сфера — распределение</h3><div class="chart-container"><canvas id="chart-sphere"></canvas></div></div>
-    <div class="chart-card"><h3>Топ софт — популярность</h3><div class="chart-container"><canvas id="chart-soft"></canvas></div></div>
   </div>
 </div>
 
@@ -1345,25 +1343,30 @@ function initCharts(){
   const ec={staff:0,freelance:0,own:0}; D.forEach(d=>ec[d.emp]++);
   new Chart(document.getElementById('chart-emp'),{type:'doughnut',data:{labels:['Штатный','Фрилансер','Своя компания'],datasets:[{data:[ec.staff,ec.freelance,ec.own],backgroundColor:['#00e8d3','#ffa500','#cc44ff'],borderColor:'var(--card)',borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:16}}}}});
   const cm={}; D.forEach(d=>{if(!cm[d.city])cm[d.city]=[];cm[d.city].push(d.salary);});
-  const topC=Object.entries(cm).filter(([,v])=>v.length>1).map(([k,v])=>({k,med:Math.round(median(v)),cnt:v.length})).sort((a,b)=>b.med-a.med).slice(0,12);
-  new Chart(document.getElementById('chart-city'),{type:'bar',data:{labels:topC.map(c=>c.k+' ('+c.cnt+')'),datasets:[{label:'Медиана $',data:topC.map(c=>c.med),backgroundColor:topC.map(c=>salaryColor(c.med)),borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
-  new Chart(document.getElementById('chart-scatter'),{type:'scatter',data:{datasets:LEVEL_ORDER.map(l=>({label:l,data:D.filter(d=>d.level===l).map(d=>({x:d.exp,y:d.salary})),backgroundColor:(LEVEL_COLORS[l]||'#aaa')+'aa',pointRadius:5,pointHoverRadius:8}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10},padding:8}}},scales:{x:{title:{display:true,text:'Опыт (лет)',color:t},grid:{color:g},ticks:{color:t}},y:{title:{display:true,text:'Зарплата $/мес',color:t},grid:{color:g},ticks:{color:t}}}}});
-  const eb={'0–2':0,'3–5':0,'6–9':0,'10–14':0,'15+':0};
-  D.forEach(d=>{if(d.exp<=1)eb['0–2']++;else if(d.exp<=4)eb['3–5']++;else if(d.exp<=7.5)eb['6–9']++;else if(d.exp<=12)eb['10–14']++;else eb['15+']++;});
-  new Chart(document.getElementById('chart-exp'),{type:'bar',data:{labels:Object.keys(eb),datasets:[{label:'Чел.',data:Object.values(eb),backgroundColor:['#4a9eff','#00e8d3','#ffa500','#ff6b35','#cc44ff'],borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:g},ticks:{color:t}},x:{grid:{color:g},ticks:{color:t}}}}});
-  // Sphere (project type) chart
-  const sphereCount={};
+  // Require at least 3 respondents for relevance; sort by median salary
+  const MIN_CITY_COUNT = 3;
+  const topC=Object.entries(cm)
+    .filter(([,v])=>v.length>=MIN_CITY_COUNT)
+    .map(([k,v])=>({k,med:Math.round(median(v)),cnt:v.length}))
+    .sort((a,b)=>b.med-a.med)
+    .slice(0,12);
+  new Chart(document.getElementById('chart-city'),{type:'bar',data:{labels:topC.map(c=>c.k+' (n='+c.cnt+')'),datasets:[{label:'Медиана $',data:topC.map(c=>c.med),backgroundColor:topC.map(c=>salaryColor(c.med)),borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`$${ctx.parsed.x.toLocaleString('en-US')}`}}},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
+  // Sphere chart — median salary per sphere (not count)
+  const sphereSalaries={};
   D.forEach(d=>{
     if(!d.projects)return;
     d.projects.split(/[,/]/).map(s=>s.trim()).filter(Boolean).forEach(p=>{
-      // Normalize common categories
-      const k=p.replace(/сериалы\s*\/?\s*тв/i,'Сериалы/ТВ').replace(/ивенты/i,'Ивенты');
-      sphereCount[k]=(sphereCount[k]||0)+1;
+      const k=p.replace(/сериалы\s*\/?\s*тв/i,'Сериалы/ТВ').replace(/ивенты/i,'Ивенты').trim();
+      if(!sphereSalaries[k])sphereSalaries[k]=[];
+      sphereSalaries[k].push(d.salary);
     });
   });
-  const topSpheres=Object.entries(sphereCount).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  const sphereColors=['#4a9eff','#00e8d3','#ffa500','#ff6b35','#cc44ff','#ff3366','#6b8aff','#00ffaa','#e844ff','#ffcc00'];
-  if(topSpheres.length) new Chart(document.getElementById('chart-sphere'),{type:'bar',data:{labels:topSpheres.map(s=>s[0]),datasets:[{label:'Чел.',data:topSpheres.map(s=>s[1]),backgroundColor:sphereColors.slice(0,topSpheres.length),borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
+  const sphereMedians=Object.entries(sphereSalaries)
+    .filter(([,v])=>v.length>=2)
+    .map(([k,v])=>({k,med:Math.round(median(v)),cnt:v.length}))
+    .sort((a,b)=>b.med-a.med);
+  const sphereColors2=['#ff3366','#ffa500','#4a9eff','#00e8d3','#ff6b35','#cc44ff','#6b8aff','#00ffaa','#e844ff','#ffcc00'];
+  if(sphereMedians.length) new Chart(document.getElementById('chart-sphere'),{type:'bar',data:{labels:sphereMedians.map(s=>s.k+' (n='+s.cnt+')'),datasets:[{label:'Медиана $',data:sphereMedians.map(s=>s.med),backgroundColor:sphereColors2.slice(0,sphereMedians.length),borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`$${ctx.parsed.x.toLocaleString('en-US')}`}}},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
   // Software chart
   const softCount={};
   D.forEach(d=>{
@@ -1391,6 +1394,12 @@ function initCharts(){
   const topSoft=Object.entries(softCount).sort((a,b)=>b[1]-a[1]).slice(0,12);
   const softColors=['#00ffaa','#4a9eff','#ffa500','#ff6b35','#cc44ff','#00e8d3','#ff3366','#6b8aff','#e844ff','#ffcc00','#33ff99','#ff9966'];
   if(topSoft.length) new Chart(document.getElementById('chart-soft'),{type:'bar',data:{labels:topSoft.map(s=>s[0]),datasets:[{label:'Чел.',data:topSoft.map(s=>s[1]),backgroundColor:softColors.slice(0,topSoft.length),borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
+  // Scatter: salary vs experience
+  new Chart(document.getElementById('chart-scatter'),{type:'scatter',data:{datasets:LEVEL_ORDER.map(l=>({label:l,data:D.filter(d=>d.level===l).map(d=>({x:d.exp,y:d.salary})),backgroundColor:(LEVEL_COLORS[l]||'#aaa')+'aa',pointRadius:5,pointHoverRadius:8}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10},padding:8}}},scales:{x:{title:{display:true,text:'Опыт (лет)',color:t},grid:{color:g},ticks:{color:t}},y:{title:{display:true,text:'Зарплата $/мес',color:t},grid:{color:g},ticks:{color:t}}}}});
+  // Experience distribution
+  const eb={'0–2':0,'3–5':0,'6–9':0,'10–14':0,'15+':0};
+  D.forEach(d=>{if(d.exp<=1)eb['0–2']++;else if(d.exp<=4)eb['3–5']++;else if(d.exp<=7.5)eb['6–9']++;else if(d.exp<=12)eb['10–14']++;else eb['15+']++;});
+  new Chart(document.getElementById('chart-exp'),{type:'bar',data:{labels:Object.keys(eb),datasets:[{label:'Чел.',data:Object.values(eb),backgroundColor:['#4a9eff','#00e8d3','#ffa500','#ff6b35','#cc44ff'],borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:g},ticks:{color:t}},x:{grid:{color:g},ticks:{color:t}}}}});
 }
 
 // ══════════════════════════════════════════════════════
@@ -1619,10 +1628,12 @@ function renderTable(){
   tableRendered=end;
 }
 
-// Lazy load more rows on scroll
-document.querySelector('.table-wrap').addEventListener('scroll',function(){
+// Lazy load more rows on window scroll (table has no inner scroll now)
+window.addEventListener('scroll',function(){
+  const tabTable=document.getElementById('tab-table');
+  if(!tabTable||tabTable.style.display==='none')return;
   if(tableRendered>=tableRows.length)return;
-  if(this.scrollTop+this.clientHeight>=this.scrollHeight-200){
+  if(window.scrollY+window.innerHeight>=document.documentElement.scrollHeight-400){
     renderTableChunk();
   }
 });

@@ -545,6 +545,95 @@ function normalizeExp(v) {
   if (!isNaN(n)) return n;
   return 4;
 }
+// ── CITY NAME CANONICALIZATION ──
+// Maps all spelling variants to one canonical display name
+const CITY_CANONICAL_MAP = {
+  // Moscow
+  'москва':'Москва','мск':'Москва','moscow':'Москва','moskva':'Москва',
+  'не мск':'Москва (регион)',
+  // Saint Petersburg
+  'санкт-петербург':'Санкт-Петербург','санкт петербург':'Санкт-Петербург',
+  'спб':'Санкт-Петербург','питер':'Санкт-Петербург',
+  'saint petersburg':'Санкт-Петербург','st petersburg':'Санкт-Петербург','st. petersburg':'Санкт-Петербург',
+  // Almaty
+  'алматы':'Алматы','almaty':'Алматы','алма-ата':'Алматы',
+  // Yerevan
+  'ереван':'Ереван','yerevan':'Ереван','ереванe':'Ереван',
+  // Tbilisi
+  'тбилиси':'Тбилиси','tbilisi':'Тбилиси',
+  // Batumi
+  'батуми':'Батуми','batumi':'Батуми',
+  // Minsk
+  'минск':'Минск','minsk':'Минск',
+  // Tashkent
+  'ташкент':'Ташкент','tashkent':'Ташкент',
+  // Podgorica
+  'подгорица':'Подгорица','podgorica':'Подгорица',
+  // Larnaca
+  'ларнака':'Ларнака','larnaca':'Ларнака',
+  'лимассол':'Лимассол','limassol':'Лимассол',
+  // Yekaterinburg
+  'екатеринбург':'Екатеринбург','ekaterinburg':'Екатеринбург','yekaterinburg':'Екатеринбург',
+  // Novosibirsk
+  'новосибирск':'Новосибирск','novosibirsk':'Новосибирск',
+  // Tel Aviv
+  'тель-авив':'Тель-Авив','тель авив':'Тель-Авив','tel aviv':'Тель-Авив','tel-aviv':'Тель-Авив',
+  // Warsaw
+  'варшава':'Варшава','warsaw':'Варшава',
+  // Wroclaw
+  'вроцлав':'Вроцлав','wroclaw':'Вроцлав',
+  // Berlin
+  'берлин':'Берлин','berlin':'Берлин',
+  // Frankfurt
+  'франкфурт':'Франкфурт','frankfurt':'Франкфурт',
+  // Zurich
+  'цюрих':'Цюрих','zurich':'Цюрих','zürich':'Цюрих',
+  // Sofia
+  'софия':'София','sofia':'София',
+  // Tokyo
+  'токио':'Токио','tokyo':'Токио',
+  // Kyiv
+  'киев':'Киев','kyiv':'Киев','kiev':'Киев',
+  // London
+  'лондон':'Лондон','london':'Лондон',
+  // Barcelona
+  'барселона':'Барселона','barcelona':'Барселона',
+  // Los Angeles
+  'лос-анджелес':'Лос-Анджелес','лос анджелес':'Лос-Анджелес',
+  'los angeles':'Лос-Анджелес','la':'Лос-Анджелес',
+  // Odesa
+  'одесса':'Одесса','odesa':'Одесса','odessa':'Одесса',
+  // Belgrade
+  'белград':'Белград','belgrade':'Белград',
+  // Krasnodar
+  'краснодар':'Краснодар','krasnodar':'Краснодар',
+  // Samara
+  'самара':'Самара','samara':'Самара',
+  // Bishkek
+  'бишкек':'Бишкек','bishkek':'Бишкек',
+  // Poland (country-level)
+  'польша':'Польша','poland':'Польша','polska':'Польша',
+  // EU
+  'eu':'EU / Европа','european union':'EU / Европа','европа':'EU / Европа',
+};
+
+function normalizeCity(cityRaw) {
+  if (!cityRaw) return cityRaw;
+  let key = cityRaw.toLowerCase().trim()
+    .replace(/\s*\(.*?\)/g, '')
+    .replace(/,?\s*(россия|russia|рф|украина|ukraine|беларусь|belarus|казахстан|kazakhstan|кипр|cyprus|грузия|georgia|польша|poland|германия|germany|но работаю.*$)/gi, '')
+    .replace(/,$/, '')
+    .trim();
+  if (CITY_CANONICAL_MAP[key]) return CITY_CANONICAL_MAP[key];
+  // try without/with dashes
+  const noDash = key.replace(/-/g, ' ');
+  if (CITY_CANONICAL_MAP[noDash]) return CITY_CANONICAL_MAP[noDash];
+  const withDash = key.replace(/\s+/g, '-');
+  if (CITY_CANONICAL_MAP[withDash]) return CITY_CANONICAL_MAP[withDash];
+  // return capitalised original if no match found
+  return cityRaw.trim().replace(/^(.)/, c => c.toUpperCase());
+}
+
 function parseSalary(raw) {
   if (!raw) return null;
   raw = raw.toString().toLowerCase().trim();
@@ -741,8 +830,9 @@ function processCSVText(text, source) {
     const salary = parseSalary(salRaw);
     if (!salary || salary < 50 || salary > 100000) { skippedCount++; return; }
     const coords = resolveCoords(cityRaw);
+    const cityNorm = normalizeCity(cityRaw) || cityRaw || '—';
     result.push({
-      id: idx, city: cityRaw||'—',
+      id: idx, city: cityNorm, cityRaw: cityRaw||'—',
       emp: normalizeEmp(empRaw), fmt: normalizeFmt(fmtRaw),
       dept: deptRaw||'—', level: normalizeLevel(levelRaw),
       exp: normalizeExp(expRaw), salary,

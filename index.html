@@ -70,6 +70,12 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
 .median-badge .mb-val{font-family:'JetBrains Mono',monospace;font-size:1rem;color:#ffa500;}
 .median-badge .mb-lbl{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);}
 .last-updated{font-size:.65rem;letter-spacing:.08em;color:var(--text-dim);font-family:'JetBrains Mono',monospace;}
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+input[type=number]{-moz-appearance:textfield;}
+.sal-reset-btn{background:none;border:none;cursor:pointer;padding:0 2px;display:flex;align-items:center;opacity:.6;transition:opacity .2s;}
+.sal-reset-btn:hover{opacity:1;}
+.sal-reset-btn svg{display:block;}
 
 /* ── SECTIONS ── */
 .section{padding:3rem 5vw;display:none;}
@@ -194,6 +200,9 @@ tbody td{padding:.55rem 1rem;color:var(--text-light);}
     <div class="salary-input-wrap">
       <span class="prefix">$</span>
       <input type="number" id="my-salary-input" placeholder="3000" min="0" max="50000">
+      <button class="sal-reset-btn" id="sal-reset-btn" title="Сбросить">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#ff3366" opacity=".15"/><line x1="5" y1="5" x2="11" y2="11" stroke="#ff3366" stroke-width="2" stroke-linecap="round"/><line x1="11" y1="5" x2="5" y2="11" stroke="#ff3366" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
     </div>
   </div>
   <div class="percentile-block">
@@ -227,9 +236,10 @@ tbody td{padding:.55rem 1rem;color:var(--text-light);}
     </div>
     <div class="globe-sidebar">
       <div class="sidebar-card">
-        <h4>Зарплата ($/мес)</h4>
+        <h4>Цвет → зарплата ($/мес)</h4>
         <div class="legend-gradient-bar"></div>
         <div class="legend-lbl-row"><span>&lt;1k</span><span>3k</span><span>6k</span><span>16k+</span></div>
+        <div style="margin-top:.6rem;font-size:.68rem;color:var(--text-dim);line-height:1.5;">Высота пирамиды → кол-во респондентов</div>
       </div>
       <div class="sidebar-card">
         <h4>Топ городов (медиана)</h4>
@@ -244,7 +254,7 @@ tbody td{padding:.55rem 1rem;color:var(--text-light);}
   <div class="section-title">Аналитика по ключевым срезам</div>
   <div class="charts-grid">
     <div class="chart-card"><h3>Зарплата по уровню (медиана $)</h3><div class="chart-container"><canvas id="chart-level"></canvas></div></div>
-    <div class="chart-card"><h3>Тип занятости — распределение</h3><div class="chart-container"><canvas id="chart-emp"></canvas></div></div>
+    <div class="chart-card"><h3>Формат работы — распределение</h3><div class="chart-container"><canvas id="chart-emp"></canvas></div></div>
     <div class="chart-card full"><h3>Топ городов по медианной зарплате ($)</h3><div class="chart-container"><canvas id="chart-city"></canvas></div></div>
     <div class="chart-card"><h3>Сфера — медианная зарплата ($)</h3><div class="chart-container"><canvas id="chart-sphere"></canvas></div></div>
     <div class="chart-card"><h3>Топ софт — популярность</h3><div class="chart-container"><canvas id="chart-soft"></canvas></div></div>
@@ -428,10 +438,23 @@ const CITY_COORDS = {
   'сан-франциско':[37.77,-122.42],'san francisco':[37.77,-122.42],'sf':[37.77,-122.42],
   'чикаго':[41.88,-87.63],'chicago':[41.88,-87.63],
   'сиэтл':[47.61,-122.33],'seattle':[47.61,-122.33],
+  'портленд':[45.52,-122.68],'portland':[45.52,-122.68],'portland or':[45.52,-122.68],'portland oregon':[45.52,-122.68],
   'остин':[30.27,-97.74],'austin':[30.27,-97.74],
   'майами':[25.76,-80.19],'miami':[25.76,-80.19],
   'бостон':[42.36,-71.06],'boston':[42.36,-71.06],
   'атланта':[33.75,-84.39],'atlanta':[33.75,-84.39],
+  'денвер':[39.74,-104.98],'denver':[39.74,-104.98],
+  'даллас':[32.78,-96.80],'dallas':[32.78,-96.80],
+  'финикс':[33.45,-112.07],'phoenix':[33.45,-112.07],
+  'нэшвилл':[36.17,-86.78],'nashville':[36.17,-86.78],
+  'детройт':[42.33,-83.05],'detroit':[42.33,-83.05],
+  'миннеаполис':[44.98,-93.27],'minneapolis':[44.98,-93.27],
+  'балтимор':[39.29,-76.61],'baltimore':[39.29,-76.61],
+  'питтсбург':[40.44,-79.99],'pittsburgh':[40.44,-79.99],
+  'роли':[35.78,-78.64],'raleigh':[35.78,-78.64],
+  'солт-лейк-сити':[40.76,-111.89],'salt lake city':[40.76,-111.89],
+  'сан-диего':[32.72,-117.16],'san diego':[32.72,-117.16],
+  'сан-хосе':[37.34,-121.89],'san jose':[37.34,-121.89],
   'торонто':[43.65,-79.38],'toronto':[43.65,-79.38],
   'ванкувер':[49.25,-123.12],'vancouver':[49.25,-123.12],
   'монреаль':[45.50,-73.57],'montreal':[45.50,-73.57],
@@ -883,6 +906,11 @@ let mySalary = 0;
 document.getElementById('my-salary-input').addEventListener('input',function(){
   mySalary=parseFloat(this.value)||0; updateMySalary();
 });
+document.getElementById('sal-reset-btn').addEventListener('click',function(){
+  mySalary=0;
+  document.getElementById('my-salary-input').value='';
+  updateMySalary();
+});
 function updateMySalary(){
   const salaries=D.map(d=>d.salary);
   const pct=mySalary>0?salaries.filter(s=>s<mySalary).length/salaries.length*100:0;
@@ -953,7 +981,12 @@ const CITY_ISO={
   // USA 840
   'нью-йорк':840,'new york':840,'nyc':840,'лос-анджелес':840,'лос анджелес':840,
   'los angeles':840,'la':840,'сан-франциско':840,'san francisco':840,'чикаго':840,'chicago':840,
-  'сиэтл':840,'seattle':840,'остин':840,'austin':840,'сша':840,'usa':840,
+  'сиэтл':840,'seattle':840,'остин':840,'austin':840,'майами':840,'miami':840,
+  'бостон':840,'boston':840,'атланта':840,'atlanta':840,
+  'портленд':840,'portland':840,'denver':840,'денвер':840,'dallas':840,'даллас':840,
+  'phoenix':840,'финикс':840,'nashville':840,'detroit':840,'minneapolis':840,
+  'baltimore':840,'pittsburgh':840,'raleigh':840,'salt lake city':840,
+  'san diego':840,'san jose':840,'сша':840,'usa':840,
   // Canada 124
   'торонто':124,'toronto':124,'ванкувер':124,'vancouver':124,'монреаль':124,'montreal':124,'канада':124,
   // UK 826
@@ -1012,6 +1045,25 @@ function initGlobe(){
 
   const group=new THREE.Group(); scene.add(group);
 
+  // ── STARFIELD ──
+  const STAR_COUNT=2800;
+  const starPos=new Float32Array(STAR_COUNT*3);
+  const starColors=new Float32Array(STAR_COUNT*3);
+  for(let i=0;i<STAR_COUNT;i++){
+    const phi=Math.random()*Math.PI*2, theta=Math.acos(2*Math.random()-1);
+    const r=18+Math.random()*22;
+    starPos[i*3]=r*Math.sin(theta)*Math.cos(phi);
+    starPos[i*3+1]=r*Math.sin(theta)*Math.sin(phi);
+    starPos[i*3+2]=r*Math.cos(theta);
+    const t=Math.random();
+    starColors[i*3]=0.7+t*0.3; starColors[i*3+1]=0.7+t*0.3; starColors[i*3+2]=0.8+t*0.2;
+  }
+  const starGeo=new THREE.BufferGeometry();
+  starGeo.setAttribute('position',new THREE.BufferAttribute(starPos,3));
+  starGeo.setAttribute('color',new THREE.BufferAttribute(starColors,3));
+  const starMat=new THREE.PointsMaterial({size:0.12,vertexColors:true,transparent:true,opacity:0.85,sizeAttenuation:true});
+  group.add(new THREE.Points(starGeo,starMat));
+
   // Count data per country ISO
   const isoCount={};
   D.forEach(d=>{
@@ -1053,47 +1105,38 @@ function initGlobe(){
   });
 
   const maxSalary=Math.max(...Object.values(cityMap).map(c=>median(c.salaries)),1);
+  const maxCount=Math.max(...Object.values(cityMap).map(c=>c.salaries.length),1);
   const yUp=new THREE.Vector3(0,1,0);
-  const zFwd=new THREE.Vector3(0,0,1);
   const barMeshes=[];
 
   Object.values(cityMap).forEach(ci=>{
     const med_s=median(ci.salaries);
-    const col=salaryColor(med_s);
+    const count=ci.salaries.length;
+    const col=salaryColor(med_s);           // colour = median salary
     const threeColor=new THREE.Color(col);
 
-    // Pyramid height encodes salary: taller = higher pay
-    const coneH=0.032+(med_s/maxSalary)*0.20;
-    const coneR=0.013; // fixed base radius — slim pyramid
+    // Height encodes respondent count; colour encodes median salary
+    const coneH=0.028+(count/maxCount)*0.26;
+    const coneR=0.011+Math.sqrt(count/maxCount)*0.012;
     const normal=latToVec3(ci.lat,ci.lng,1).normalize();
 
-    // ── Pyramid body (4-sided, like a tracking marker) ──
-    // ConeGeometry: tip at +Y, base at -Y — after rotation tip points outward
+    // ── Inverted pyramid: tip ON the surface, base sticks outward ──
+    // ConeGeometry local axes: tip at +Y (coneH/2), base at -Y (-coneH/2).
+    // We rotate local +Y → -normal (inward), so:
+    //   tip  = center - normal * coneH/2  → want this = normal * 1.0 (surface)
+    //   base = center + normal * coneH/2  → sticks outward
+    // Therefore: center = normal * (1.0 + coneH/2)
     const pyramidGeo=new THREE.ConeGeometry(coneR,coneH,4,1);
     const pyramidMat=new THREE.MeshLambertMaterial({
-      color:threeColor,
-      emissive:threeColor,
-      emissiveIntensity:0.25,
+      color:threeColor, emissive:threeColor, emissiveIntensity:0.3,
     });
     const pyramid=new THREE.Mesh(pyramidGeo,pyramidMat);
-    // Position center so base sits on globe surface
-    pyramid.position.copy(normal.clone().multiplyScalar(1.001+coneH/2));
-    pyramid.quaternion.setFromUnitVectors(yUp,normal);
-    // Rotate 45° around own axis so square base looks like a diamond ◆
+    pyramid.position.copy(normal.clone().multiplyScalar(1.0+coneH/2));
+    pyramid.quaternion.setFromUnitVectors(yUp, normal.clone().negate());
+    // 45° spin so square base looks like ◆ diamond
     pyramid.rotateOnAxis(new THREE.Vector3(0,1,0), Math.PI/4);
     pyramid.userData={...ci,avgSalary:Math.round(med_s),count:ci.salaries.length};
     group.add(pyramid); barMeshes.push(pyramid);
-
-    // ── Thin glowing square ring at base (tracking target feel) ──
-    const ringGeo=new THREE.RingGeometry(coneR*0.95,coneR*1.45,4);
-    const ringMat=new THREE.MeshBasicMaterial({
-      color:threeColor,transparent:true,opacity:0.5,side:THREE.DoubleSide,depthWrite:false,
-    });
-    const ring=new THREE.Mesh(ringGeo,ringMat);
-    ring.position.copy(normal.clone().multiplyScalar(1.002));
-    ring.quaternion.setFromUnitVectors(zFwd,normal);
-    ring.rotateOnAxis(normal,Math.PI/4); // align diamond with pyramid base
-    group.add(ring);
   });
 
   // ── LOAD TOPOJSON — fill countries + draw borders ──
@@ -1293,8 +1336,8 @@ function initCharts(){
   D.forEach(d=>{if(!byLevel[d.level])byLevel[d.level]=[];byLevel[d.level].push(d.salary);});
   const lo=LEVEL_ORDER.filter(l=>byLevel[l]);
   new Chart(document.getElementById('chart-level'),{type:'bar',data:{labels:lo,datasets:[{label:'Медиана $',data:lo.map(l=>Math.round(median(byLevel[l]))),backgroundColor:lo.map(l=>LEVEL_COLORS[l]),borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:g},ticks:{color:t}},x:{grid:{color:g},ticks:{color:t}}}}});
-  const ec={staff:0,freelance:0,own:0}; D.forEach(d=>ec[d.emp]++);
-  new Chart(document.getElementById('chart-emp'),{type:'doughnut',data:{labels:['Штатный','Фрилансер','Своя компания'],datasets:[{data:[ec.staff,ec.freelance,ec.own],backgroundColor:['#00e8d3','#ffa500','#cc44ff'],borderColor:'var(--card)',borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:16}}}}});
+  const fc={remote:0,hybrid:0,studio:0}; D.forEach(d=>fc[d.fmt]++);
+  new Chart(document.getElementById('chart-emp'),{type:'doughnut',data:{labels:['Удалённо','Гибрид','В студии'],datasets:[{data:[fc.remote,fc.hybrid,fc.studio],backgroundColor:['#4a9eff','#00ffaa','#ff6b35'],borderColor:'var(--card)',borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:16}}}}});
   const cm={}; D.forEach(d=>{if(!cm[d.city])cm[d.city]=[];cm[d.city].push(d.salary);});
   // Require at least 3 respondents for relevance; sort by median salary
   const MIN_CITY_COUNT = 3;

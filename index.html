@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VFX Salary Survey 2026</title>
+<title>VFX Salary Survey 2026 · CG Подкаст №1</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -40,6 +40,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .title-block h1 em{font-style:normal;color:var(--accent);}
 .title-block p{font-size:.8rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);margin-top:.4rem;}
 .live-badge{display:inline-flex;align-items:center;gap:.4rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;background:rgba(0,255,170,.08);border:1px solid rgba(0,255,170,.25);color:var(--accent);padding:.2rem .6rem;border-radius:20px;margin-top:.5rem;}
+.survey-btn{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600;background:var(--accent);color:var(--bg);padding:.35rem .9rem;border-radius:20px;margin-top:.5rem;margin-left:.5rem;text-decoration:none;transition:all .2s;font-family:'Rajdhani',sans-serif;}
+.survey-btn:hover{background:#00cc88;box-shadow:0 0 12px rgba(0,255,170,.4);}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,170,.5);}50%{opacity:.6;box-shadow:0 0 0 4px rgba(0,255,170,0);}}
 .stats-row{display:flex;gap:2.5rem;flex-wrap:wrap;}
@@ -80,7 +82,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 /* ── GLOBE ── */
 .globe-layout{display:grid;grid-template-columns:1fr 220px;gap:2rem;align-items:start;}
 .globe-wrap{position:relative;border-radius:12px;overflow:hidden;background:radial-gradient(ellipse at center,#0a0a22 0%,var(--bg) 75%);}
-#globe-canvas-container{width:100%;height:520px;cursor:grab;}
+#globe-canvas-container{width:100%;height:780px;cursor:grab;}
 #globe-canvas-container:active{cursor:grabbing;}
 .globe-hint{position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);background:rgba(5,5,13,.8);padding:.3rem .75rem;border-radius:20px;pointer-events:none;}
 #globe-tooltip{position:absolute;background:rgba(8,8,20,.95);border:1px solid var(--accent);border-radius:5px;padding:.6rem .9rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text-light);pointer-events:none;display:none;z-index:20;min-width:170px;line-height:1.6;}
@@ -111,7 +113,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .spectrum-section.active{display:block;}
 #spectrum-container{position:relative;margin-top:1rem;padding:1.5rem;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
 .spectrum-canvas-wrap{position:relative;}
-#spectrum-canvas{width:100%;display:block;cursor:crosshair;}
+#spectrum-canvas{width:100%;display:block;cursor:grab;}
 #spectrum-tooltip{position:absolute;pointer-events:none;display:none;background:rgba(8,8,20,.95);border:1px solid var(--accent);border-radius:5px;padding:.5rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text-light);z-index:10;line-height:1.6;}
 .spectrum-my-line{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);display:none;pointer-events:none;}
 .spectrum-my-label{position:absolute;top:4px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--accent);white-space:nowrap;transform:translateX(-50%);}
@@ -142,6 +144,8 @@ tbody tr.my-row{background:rgba(0,255,170,.04);}
 tbody td{padding:.55rem 1rem;color:var(--text-light);}
 .lvl-badge{display:inline-block;padding:.1rem .5rem;border-radius:3px;font-size:.72rem;font-weight:600;letter-spacing:.04em;}
 .sal-cell{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--text-light);}
+.dept-cell{color:var(--text-light);font-size:.84rem;font-weight:500;letter-spacing:.01em;}
+.extra-cell{color:var(--text-dim);font-size:.78rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .sal-bar{display:inline-block;height:3px;background:var(--accent2);border-radius:2px;vertical-align:middle;margin-left:.4rem;opacity:.6;}
 .my-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-left:.4rem;animation:blink 2s infinite;}
 @keyframes blink{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.6);}}
@@ -170,8 +174,9 @@ tbody td{padding:.55rem 1rem;color:var(--text-light);}
 <header class="header">
   <div class="title-block">
     <h1>VFX <em>ЗАРПЛАТЫ</em> 2026</h1>
-    <p>Анонимный опрос индустрии · CIS &amp; International</p>
+    <p>Анонимный опрос индустрии · <span style="color:var(--accent);font-weight:600;">CG ПОДКАСТ №1</span></p>
     <div class="live-badge"><span class="live-dot"></span>Live data · Google Sheets</div>
+    <a href="https://forms.gle/CvortdibP5ykNpDw8" target="_blank" class="survey-btn">Пройти опрос →</a>
   </div>
   <div class="stats-row">
     <div class="stat-item"><div class="stat-num" id="s-total">—</div><div class="stat-lbl">Респондентов</div></div>
@@ -205,10 +210,10 @@ tbody td{padding:.55rem 1rem;color:var(--text-light);}
 
 <!-- NAV TABS -->
 <nav class="nav-tabs">
-  <button class="tab-btn active" data-tab="globe">🌍 Карта мира</button>
-  <button class="tab-btn" data-tab="charts">📊 Чарты</button>
-  <button class="tab-btn" data-tab="spectrum">🎚 Спектр</button>
-  <button class="tab-btn" data-tab="table">⚙ Таблица</button>
+  <button class="tab-btn active" data-tab="globe">Карта мира</button>
+  <button class="tab-btn" data-tab="charts">Чарты</button>
+  <button class="tab-btn" data-tab="spectrum">Спектр</button>
+  <button class="tab-btn" data-tab="table">Таблица</button>
 </nav>
 
 <!-- GLOBE -->
@@ -254,6 +259,8 @@ tbody td{padding:.55rem 1rem;color:var(--text-light);}
     <div class="chart-card full"><h3>Топ городов по медианной зарплате ($)</h3><div class="chart-container"><canvas id="chart-city"></canvas></div></div>
     <div class="chart-card"><h3>Зарплата vs Опыт</h3><div class="chart-container"><canvas id="chart-scatter"></canvas></div></div>
     <div class="chart-card"><h3>Опыт в индустрии — распределение</h3><div class="chart-container"><canvas id="chart-exp"></canvas></div></div>
+    <div class="chart-card"><h3>Сфера — распределение</h3><div class="chart-container"><canvas id="chart-sphere"></canvas></div></div>
+    <div class="chart-card"><h3>Топ софт — популярность</h3><div class="chart-container"><canvas id="chart-soft"></canvas></div></div>
   </div>
 </div>
 
@@ -263,8 +270,9 @@ tbody td{padding:.55rem 1rem;color:var(--text-light);}
   <div class="spectrum-controls">
     <select class="spec-filter" id="spec-level"><option value="">Все уровни</option><option>Junior</option><option>Middle</option><option>Senior</option><option>Lead</option><option>Supervisor</option><option>Head</option></select>
     <select class="spec-filter" id="spec-emp"><option value="">Все типы</option><option value="staff">Штатный</option><option value="freelance">Фрилансер</option><option value="own">Своя компания</option></select>
-    <select class="spec-filter" id="spec-color"><option value="level">Цвет: Уровень</option><option value="emp">Цвет: Занятость</option><option value="fmt">Цвет: Формат</option></select>
-    <span style="font-size:.72rem;color:#9090b8;margin-left:.5rem;">X = зарплата $/мес &nbsp;·&nbsp; Y = визуальный разброс для читаемости (не несёт смысла)</span>
+    <select class="spec-filter" id="spec-sphere"><option value="">Все сферы</option></select>
+    <select class="spec-filter" id="spec-color"><option value="level">Цвет: Уровень</option><option value="emp">Цвет: Занятость</option><option value="fmt">Цвет: Формат</option><option value="sphere">Цвет: Сфера</option></select>
+    <span style="font-size:.72rem;color:#9090b8;margin-left:.5rem;">X = зарплата $/мес &nbsp;·&nbsp; Y = визуальный разброс &nbsp;·&nbsp; scroll=zoom &nbsp;·&nbsp; перетаскивай для навигации</span>
   </div>
   <div id="spectrum-container">
     <div class="spectrum-canvas-wrap">
@@ -296,6 +304,8 @@ tbody td{padding:.55rem 1rem;color:var(--text-light);}
     <th data-col="emp">Занятость</th>
     <th data-col="fmt">Формат</th>
     <th data-col="tax">Налоги</th>
+    <th data-col="projects">Сфера</th>
+    <th data-col="software">Софт</th>
   </tr></thead><tbody id="table-body"></tbody></table></div>
 </div>
 
@@ -476,105 +486,105 @@ function resolveCoords(cityRaw) {
 // При открытии с веб-сервера страница попытается
 // подтянуть свежие данные поверх этого снапшота.
 // ══════════════════════════════════════════════════════
-const SNAPSHOT_CSV = `Timestamp,Город,Тип занятости,Формат работы,Департамент / специализация,Позиция / уровень,Опыт в индустрии (лет),Возраст,Средний доход в месяц в USD,Указан доход до налогов или после
-2/19/2026 1:23:11,Москва,Контрактор / фрилансер,Удалённо,Groom / CFX,Senior,3–5,30–34,3500,После налогов
-2/19/2026 1:27:34,Санкт-Петербург,Штатный сотрудник,Удалённо,FX Artist (Houdini),Middle,3–5,25–29,1800,После налогов
-2/19/2026 2:55:46,Москва,Штатный сотрудник,Удалённо,Композ,Middle,3–5,25–29,3800,После налогов
-2/19/2026 4:51:52,Алматы,Штатный сотрудник,В студии,t-shape: compose as main,Lead,3–5,30–34,1200,После налогов
-2/19/2026 5:05:20,Москва,Контрактор / фрилансер,Удалённо,Compose / Lighting / On-set,Supervisor,15+,35–39,4000,После налогов
-2/19/2026 5:11:21,Алматы,Контрактор / фрилансер,Удалённо,On-set/Композ/Мачмув,Senior,10–14,30–34,2000,До налогов
-2/19/2026 7:04:59,Дальний Восток,Контрактор / фрилансер,Удалённо,Compositing artist,Junior,0–2,До 25,900,После налогов
-2/19/2026 9:29:59,Алматы,Штатный сотрудник,Удалённо,VFX / CG,Supervisor,3–5,25–29,2000,После налогов
-2/19/2026 12:52:46,Подгорица,Контрактор / фрилансер,Удалённо,Lookdev / lighting,Middle,6–9,30–34,2900,До налогов
-2/20/2026 3:33:27,Ларнака,Контрактор / фрилансер,Удалённо,Compositing,Senior,15+,40–44,6000,До налогов
-2/22/2026 14:57:16,Франкфурт,Штатный сотрудник,Гибрид,3d gameplay/cinematic animator,Senior,6–9,40–44,4650,До налогов
-2/23/2026 4:09:40,Москва,Контрактор / фрилансер,Удалённо,Композер,Senior,10–14,40–44,5000,После налогов
-2/24/2026 10:30:51,Москва,Штатный сотрудник,В студии,-,Supervisor,15+,35–39,3000,До налогов
-2/25/2026 22:23:51,Новороссийск,Контрактор / фрилансер,Гибрид,Моушен дизайн,Middle,6–9,35–39,1000,После налогов
-2/25/2026 23:08:05,Москва,Штатный сотрудник,Гибрид,2д моушен/оперативка/телик,Middle,6–9,30–34,3300,После налогов
-2/25/2026 23:44:50,Пуэрто-Галера,Контрактор / фрилансер,Удалённо,3d artist,Senior,6–9,30–34,2000,После налогов
-2/25/2026 23:51:12,Альметьевск,Штатный сотрудник,Удалённо,Motion designer,Middle,3–5,30–34,1560,После налогов
-2/26/2026 0:00:07,Нижний Новгород,Контрактор / фрилансер,Удалённо,3d modeling/motion,Junior,0–2,25–29,200,После налогов
-2/26/2026 0:13:30,Екатеринбург,Контрактор / фрилансер,Удалённо,Motion designer,Junior,0–2,До 25,1000,После налогов
-2/26/2026 0:18:57,Москва,Штатный сотрудник,Удалённо,Моушн дизайн 2д/3d / lookdev,Senior,6–9,25–29,1500,После налогов
-2/26/2026 0:34:50,Ташкент,Своя компания,Гибрид,VFX/3D/AI,Supervisor,15+,45+,5000,После налогов
-2/26/2026 0:39:27,Санкт-Петербург,Контрактор / фрилансер,Удалённо,3D дизайнер,Supervisor,3–5,До 25,30,После налогов
-2/26/2026 0:44:50,Минск,Штатный сотрудник,В студии,CG Generalist,Middle,3–5,До 25,1200,До налогов
-2/26/2026 0:55:50,Екатеринбург,Контрактор / фрилансер,Гибрид,Unreal Engine Tech Artist,Senior,6–9,25–29,3250,После налогов
-2/26/2026 1:07:27,Цюрих,Штатный сотрудник,Удалённо,Gaming,Senior,10–14,30–34,16300,После налогов
-2/26/2026 1:17:30,Ставрополь,Контрактор / фрилансер,Удалённо,3D Cinematic / 2D 3D Motion,Middle,3–5,До 25,1500,До налогов
-2/26/2026 1:21:10,Ереван,Штатный сотрудник,Удалённо,Motion Designer,Middle,3–5,30–34,3000,После налогов
-2/26/2026 1:31:46,Москва,Контрактор / фрилансер,Удалённо,Environment artist,Middle,3–5,30–34,2400,До налогов
-2/26/2026 1:44:02,Москва,Штатный сотрудник,Удалённо,Vfx,Middle,0–2,35–39,2930,До налогов
-2/26/2026 1:44:17,Москва,Контрактор / фрилансер,Удалённо,риггинг,Supervisor,3–5,35–39,1300,После налогов
-2/26/2026 1:44:26,Москва,Штатный сотрудник,Гибрид,Compositing,Lead,10–14,35–39,2500,После налогов
-2/26/2026 1:44:33,Алматы,Штатный сотрудник,Удалённо,comp,Senior,10–14,30–34,3000,До налогов
-2/26/2026 1:45:06,Батуми,Контрактор / фрилансер,Удалённо,Art director / 3D Generalist,Lead,6–9,30–34,5000,После налогов
-2/26/2026 1:45:16,Тбилиси,Контрактор / фрилансер,Удалённо,3D generalist,Middle,3–5,25–29,2300,После налогов
-2/26/2026 1:45:39,Москва,Штатный сотрудник,Гибрид,houdini generalist,Middle,3–5,25–29,1500,После налогов
-2/26/2026 1:46:04,Екатеринбург,Контрактор / фрилансер,Удалённо,генералист,Middle,3–5,30–34,3800,После налогов
-2/26/2026 1:46:08,Санкт-Петербург,Контрактор / фрилансер,Удалённо,Motion Design,Middle,0–2,25–29,1000,После налогов
-2/26/2026 1:46:35,Абакан,Своя компания,Удалённо,3D / пром. дизайн / видео,Head of Department,15+,35–39,19500,После налогов
-2/26/2026 1:47:05,Тула,Контрактор / фрилансер,Удалённо,Motion design,Middle,3–5,25–29,1300,До налогов
-2/26/2026 1:48:25,Санкт-Петербург,Штатный сотрудник,Удалённо,cg-artist,Middle,3–5,25–29,2080,После налогов
-2/26/2026 1:48:30,Красноярск,Контрактор / фрилансер,В студии,3D Generalist,Middle,0–2,До 25,2000,До налогов
-2/26/2026 1:49:38,Москва,Штатный сотрудник,В студии,Лайтинг артист,Middle,3–5,30–34,2350,После налогов
-2/26/2026 1:49:51,Ереван,Штатный сотрудник,Удалённо,VFX,Senior,6–9,40–44,4000,После налогов
-2/26/2026 1:50:01,Минск,Штатный сотрудник,Удалённо,графический дизайнер,Middle,3–5,25–29,1050,После налогов
-2/26/2026 1:51:23,Санкт-Петербург,Контрактор / фрилансер,Удалённо,CG / cinematics / unreal engine,Supervisor,6–9,35–39,3000,До налогов
-2/26/2026 1:51:34,Санкт-Петербург,Контрактор / фрилансер,Удалённо,3D Character Artist,Middle,3–5,30–34,1800,После налогов
-2/26/2026 1:51:43,Москва,Штатный сотрудник,Удалённо,CG generalist,Middle,3–5,25–29,4000,После налогов
-2/26/2026 1:51:54,Польша,Контрактор / фрилансер,Удалённо,VFX viral / 3d motion,Senior,3–5,30–34,1500,До налогов
-2/26/2026 1:51:56,Москва,Контрактор / фрилансер,Удалённо,compose,Middle,6–9,30–34,2000,После налогов
-2/26/2026 1:53:15,Новосибирск,Контрактор / фрилансер,Удалённо,Креативный и арт-дирекшн,Head of Department,10–14,30–34,7000,После налогов
-2/26/2026 1:54:33,Москва,Штатный сотрудник,В студии,Stage Design,Middle,3–5,30–34,1900,После налогов
-2/26/2026 1:55:00,Нижний Новгород,Контрактор / фрилансер,Удалённо,Motion Design,Middle,3–5,30–34,500,После налогов
-2/26/2026 1:55:08,Москва,Штатный сотрудник,Удалённо,Режиссёр анимации,Lead,15+,40–44,3000,После налогов
-2/26/2026 1:55:17,Санкт-Петербург,Штатный сотрудник,Удалённо,Cinematic Artist,Middle,3–5,25–29,2800,До налогов
-2/26/2026 1:55:54,Москва,Штатный сотрудник,Гибрид,grooming artist,Middle,3–5,35–39,1800,После налогов
-2/26/2026 1:56:30,Калининград,Штатный сотрудник,Гибрид,Промо арт,Middle,6–9,30–34,1944,После налогов
-2/26/2026 1:56:33,Москва,Штатный сотрудник,Удалённо,CG дженералист,Senior,3–5,25–29,3400,После налогов
-2/26/2026 1:56:37,Москва,Штатный сотрудник,В студии,compositing artist,Middle,3–5,25–29,2000,После налогов
-2/26/2026 1:58:02,Москва,Штатный сотрудник,Гибрид,Графический дизайнер,Middle,3–5,25–29,3200,После налогов
-2/26/2026 1:59:25,Москва,Штатный сотрудник,В студии,Композитинг,Junior,0–2,До 25,1400,После налогов
-2/26/2026 2:00:24,Бишкек,Контрактор / фрилансер,Удалённо,CG generalist,Middle,3–5,25–29,1200,До налогов
-2/26/2026 2:00:34,Новосибирск,Контрактор / фрилансер,Гибрид,Generalist / пост-прод продюсер,Middle,10–14,30–34,1700,После налогов
-2/26/2026 2:01:05,Новосибирск,Контрактор / фрилансер,Удалённо,Generalist,Middle,6–9,30–34,1750,До налогов
-2/26/2026 2:03:17,Тюмень,Контрактор / фрилансер,Удалённо,3d generalist,Middle,6–9,30–34,2000,После налогов
-2/26/2026 2:07:52,Москва,Контрактор / фрилансер,Удалённо,3D Generalist / Lookdev / Art-Dir,Lead,6–9,До 25,4000,После налогов
-2/26/2026 2:08:38,EU,Штатный сотрудник,В студии,2D - Compositing,Lead,6–9,30–34,3500,После налогов
-2/26/2026 2:10:47,Саратов,Штатный сотрудник,Удалённо,3д художник. Продуктовый рендер,Junior,0–2,25–29,1250,До налогов
-2/26/2026 2:11:58,Санкт-Петербург,Контрактор / фрилансер,Удалённо,Compositing Artist,Middle,3–5,35–39,2300,До налогов
-2/26/2026 2:13:09,Москва,Контрактор / фрилансер,В студии,Vfx,Middle,0–2,35–39,2250,После налогов
-2/26/2026 2:14:27,Тель-Авив,Контрактор / фрилансер,Удалённо,3D Motion Design,Middle,3–5,25–29,6000,До налогов
-2/26/2026 2:14:51,Польша,Штатный сотрудник,Удалённо,цг реклама / синьер и супервайзер,Senior,6–9,30–34,3700,После налогов
-2/26/2026 2:15:18,Самара,Контрактор / фрилансер,Удалённо,3D generalist,Senior,3–5,30–34,5000,До налогов
-2/26/2026 2:16:15,Самара,Контрактор / фрилансер,Гибрид,3d modeling / animation / compositing,Senior,15+,45+,2500,После налогов
-2/26/2026 2:26:59,Томск,Штатный сотрудник,Удалённо,3d artist (Environment),Middle,3–5,25–29,1300,После налогов
-2/26/2026 2:31:21,София,Контрактор / фрилансер,Удалённо,CG generalist,Middle,3–5,25–29,500,До налогов
-2/26/2026 2:42:11,Москва,Штатный сотрудник,Удалённо,cfx,Junior,0–2,25–29,1170,После налогов
-2/26/2026 2:45:53,Тбилиси,Контрактор / фрилансер,Удалённо,VFX / 3D Generalist,Middle,3–5,25–29,1000,После налогов
-2/26/2026 2:48:12,Алматы,Контрактор / фрилансер,Удалённо,композ,Senior,6–9,25–29,2000,До налогов
-2/26/2026 2:49:01,Краснодар,Штатный сотрудник,В студии,3D Generalist,Junior,0–2,До 25,1300,После налогов
-2/26/2026 2:50:11,Москва,Штатный сотрудник,Удалённо,Producer,Senior,10–14,30–34,2000,После налогов
-2/26/2026 2:54:09,Санкт-Петербург,Контрактор / фрилансер,Удалённо,3D generalist,Senior,6–9,30–34,1700,После налогов
-2/26/2026 2:58:15,Саратов,Контрактор / фрилансер,Удалённо,General/Character 3d artist,Middle,3–5,До 25,2000,До налогов
-2/26/2026 2:58:28,Новосибирск,Контрактор / фрилансер,Удалённо,моушен,Senior,15+,35–39,3000,После налогов
-2/26/2026 2:59:40,Москва,Штатный сотрудник,В студии,Композер,Senior,3–5,30–34,2700,До налогов
-2/26/2026 3:01:09,Токио,Контрактор / фрилансер,В студии,Композ,Senior,6–9,35–39,2000,До налогов
-2/26/2026 3:02:39,Ташкент,Контрактор / фрилансер,Удалённо,Motion Design / Анимации,Senior,6–9,35–39,1600,До налогов
-2/26/2026 3:03:07,Новосибирск,Контрактор / фрилансер,Удалённо,Generalist,Middle,6–9,35–39,200,До налогов
-2/26/2026 3:04:05,Москва,Контрактор / фрилансер,Удалённо,concept,Middle,3–5,До 25,1500,После налогов
-2/26/2026 3:04:29,Алматы,Контрактор / фрилансер,Удалённо,lead 3d character artist,Lead,3–5,35–39,5000,После налогов
-2/26/2026 3:05:54,Москва,Штатный сотрудник,В студии,3D Generalist,Senior,6–9,30–34,2550,После налогов
-2/26/2026 3:07:18,Москва,Штатный сотрудник,В студии,композ,Middle,3–5,30–34,1800,После налогов
-2/26/2026 3:10:44,Санкт-Петербург,Штатный сотрудник,В студии,Generalist,Middle,3–5,30–34,1100,После налогов
-2/26/2026 3:13:37,Киев,Своя компания,Удалённо,3d artist,Head of Department,10–14,45+,2000,До налогов
-2/26/2026 3:14:13,Вроцлав,Штатный сотрудник,Гибрид,Motion Designer,Senior,6–9,25–29,5000,До налогов
-2/26/2026 3:18:06,Санкт-Петербург,Контрактор / фрилансер,Удалённо,Motion,Middle,10–14,40–44,3000,После налогов
-2/26/2026 3:32:30,Санкт-Петербург,Контрактор / фрилансер,Удалённо,Cg Generalist,Middle,6–9,25–29,1000,До налогов
-2/26/2026 3:34:27,Одесса,Штатный сотрудник,Удалённо,Motion design,Senior,3–5,До 25,2000,До налогов
-2/26/2026 3:36:47,Москва,Контрактор / фрилансер,Удалённо,Render / compositing,Middle,3–5,30–34,2800,До налогов`;
+const SNAPSHOT_CSV = `Timestamp,Город,Тип занятости,Формат работы,Департамент / специализация,Позиция / уровень,Опыт в индустрии (лет),Возраст,Средний доход в месяц в USD,Указан доход до налогов или после,Часы в неделю,Оплата переработок,Сфера,Основной софт
+2/19/2026 1:23:11,Москва,Контрактор / фрилансер,Удалённо,Groom / CFX,Senior,3–5,30–34,3500,После налогов,40,Да,Анимация,Houdini
+2/19/2026 1:27:34,Санкт-Петербург,Штатный сотрудник,Удалённо,FX Artist (Houdini),Middle,3–5,25–29,1800,После налогов,41–50,Да,"Кино, Сериалы / ТВ","Houdini, Nuke"
+2/19/2026 2:55:46,Москва,Штатный сотрудник,Удалённо,Композ,Middle,3–5,25–29,3800,После налогов,40,Да,"Кино, Реклама",Nuke
+2/19/2026 4:51:52,Алматы,Штатный сотрудник,В студии,t-shape: compose as main,Lead,3–5,30–34,1200,После налогов,41–50,Нет,"Кино, Сериалы / ТВ, Реклама","Nuke, Maya, 3DE"
+2/19/2026 5:05:20,Москва,Контрактор / фрилансер,Удалённо,Compose / Lighting / On-set,Supervisor,15+,35–39,4000,После налогов,50+,Да,"Кино, Сериалы / ТВ, Реклама, Анимация",Nuke
+2/19/2026 5:11:21,Алматы,Контрактор / фрилансер,Удалённо,On-set/Композ/Мачмув,Senior,10–14,30–34,2000,До налогов,50+,Нет,"Кино, Сериалы / ТВ, Реклама","Nuke, Blender, 3DE"
+2/19/2026 7:04:59,Дальний Восток,Контрактор / фрилансер,Удалённо,Compositing artist,Junior,0–2,До 25,900,После налогов,41–50,Иногда,"Кино, Сериалы / ТВ, Реклама",Nuke
+2/19/2026 9:29:59,Алматы,Штатный сотрудник,Удалённо,VFX / CG,Supervisor,3–5,25–29,2000,После налогов,41–50,Да,Реклама,"Nuke, 3DEQ, Blender, UE5, Houdini"
+2/19/2026 12:52:46,Подгорица,Контрактор / фрилансер,Удалённо,Lookdev / lighting,Middle,6–9,30–34,2900,До налогов,До 40,Да,"Кино, Анимация","Houdini, Maya"
+2/20/2026 3:33:27,Ларнака,Контрактор / фрилансер,Удалённо,Compositing,Senior,15+,40–44,6000,До налогов,50+,Иногда,"Кино, Сериалы / ТВ, Реклама",Nuke
+2/22/2026 14:57:16,Франкфурт,Штатный сотрудник,Гибрид,3d gameplay/cinematic animator,Senior,6–9,40–44,4650,До налогов,40,Нет,"Игры, Анимация",Maya
+2/23/2026 4:09:40,Москва,Контрактор / фрилансер,Удалённо,Композер,Senior,10–14,40–44,5000,После налогов,40,Да,"Кино, Сериалы / ТВ",Nuke
+2/24/2026 10:30:51,Москва,Штатный сотрудник,В студии,-,Supervisor,15+,35–39,3000,До налогов,50+,Да,"Кино, Сериалы / ТВ, Реклама",-
+2/25/2026 22:23:51,Новороссийск,Контрактор / фрилансер,Гибрид,Моушен дизайн,Middle,6–9,35–39,1000,После налогов,До 40,Иногда,"Игры, Анимация, Ивенты","Blender, Unreal, AE, DaVinci"
+2/25/2026 23:08:05,Москва,Штатный сотрудник,Гибрид,2д моушен/оперативка/телик,Middle,6–9,30–34,3300,После налогов,50+,Да,Сериалы / ТВ,After Effects
+2/25/2026 23:44:50,Пуэрто-Галера,Контрактор / фрилансер,Удалённо,3d artist,Senior,6–9,30–34,2000,После налогов,До 40,Нет,Игры,"ZBrush, Maya, Substance Painter"
+2/25/2026 23:51:12,Альметьевск,Штатный сотрудник,Удалённо,Motion designer,Middle,3–5,30–34,1560,После налогов,41–50,Иногда,"Реклама, Ивенты",After Effects
+2/26/2026 0:00:07,Нижний Новгород,Контрактор / фрилансер,Удалённо,3d modeling/motion,Junior,0–2,25–29,200,После налогов,До 40,Нет,"Кино, Сериалы / ТВ, Реклама, Игры","C4D, Blender, SP, UE"
+2/26/2026 0:13:30,Екатеринбург,Контрактор / фрилансер,Удалённо,Motion designer,Junior,0–2,До 25,1000,После налогов,До 40,Иногда,"Реклама, Анимация",Cinema 4D
+2/26/2026 0:18:57,Москва,Штатный сотрудник,Удалённо,Моушн дизайн 2д/3d / lookdev,Senior,6–9,25–29,1500,После налогов,40,Да,"Реклама, Анимация, Ивенты","Cinema 4D, Redshift, After Effects"
+2/26/2026 0:34:50,Ташкент,Своя компания,Гибрид,VFX/3D/AI,Supervisor,15+,45+,5000,После налогов,50+,Нет,"Кино, Сериалы / ТВ, Реклама, Анимация","Maya, Nuke, AE, DaVinci"
+2/26/2026 0:39:27,Санкт-Петербург,Контрактор / фрилансер,Удалённо,3D дизайнер,Supervisor,3–5,До 25,30,После налогов,До 40,Нет,"Реклама, Анимация, Ивенты",Blender
+2/26/2026 0:44:50,Минск,Штатный сотрудник,В студии,CG Generalist,Middle,3–5,До 25,1200,До налогов,40,Иногда,"Реклама, Анимация",Houdini
+2/26/2026 0:55:50,Екатеринбург,Контрактор / фрилансер,Гибрид,Unreal Engine Tech Artist,Senior,6–9,25–29,3250,После налогов,40,Иногда,"Реклама, Игры, Анимация",Unreal Engine
+2/26/2026 1:07:27,Цюрих,Штатный сотрудник,Удалённо,Gaming,Senior,10–14,30–34,16300,После налогов,40,Нет,Игры,3Ds Max
+2/26/2026 1:17:30,Ставрополь,Контрактор / фрилансер,Удалённо,3D Cinematic / 2D 3D Motion,Middle,3–5,До 25,1500,До налогов,40,Да,"Игры, Анимация","Blender, Adobe"
+2/26/2026 1:21:10,Ереван,Штатный сотрудник,Удалённо,Motion Designer,Middle,3–5,30–34,3000,После налогов,40,Иногда,"Реклама, Ивенты","C4D, Blender, AE"
+2/26/2026 1:31:46,Москва,Контрактор / фрилансер,Удалённо,Environment artist,Middle,3–5,30–34,2400,До налогов,40,Да,Игры,Blender
+2/26/2026 1:44:02,Москва,Штатный сотрудник,Удалённо,Vfx,Middle,0–2,35–39,2930,До налогов,40,Иногда,"Кино, Сериалы / ТВ, Анимация",Houdini
+2/26/2026 1:44:17,Москва,Контрактор / фрилансер,Удалённо,риггинг,Supervisor,3–5,35–39,1300,После налогов,До 40,Нет,Анимация,Toon Boom Harmony
+2/26/2026 1:44:26,Москва,Штатный сотрудник,Гибрид,Compositing,Lead,10–14,35–39,2500,После налогов,40,Да,Анимация,Nuke
+2/26/2026 1:44:33,Алматы,Штатный сотрудник,Удалённо,comp,Senior,10–14,30–34,3000,До налогов,41–50,Да,Реклама,Nuke
+2/26/2026 1:45:06,Батуми,Контрактор / фрилансер,Удалённо,Art director / 3D Generalist,Lead,6–9,30–34,5000,После налогов,До 40,Нет,Реклама,"Cinema 4D, Adobe"
+2/26/2026 1:45:16,Тбилиси,Контрактор / фрилансер,Удалённо,3D generalist,Middle,3–5,25–29,2300,После налогов,41–50,Да,"Кино, Реклама",Houdini
+2/26/2026 1:45:39,Москва,Штатный сотрудник,Гибрид,houdini generalist,Middle,3–5,25–29,1500,После налогов,40,Иногда,Кино,Houdini
+2/26/2026 1:46:04,Екатеринбург,Контрактор / фрилансер,Удалённо,генералист,Middle,3–5,30–34,3800,После налогов,40,Нет,"Анимация, Ивенты","AE, Blender"
+2/26/2026 1:46:08,Санкт-Петербург,Контрактор / фрилансер,Удалённо,Motion Design,Middle,0–2,25–29,1000,После налогов,40,Нет,"Реклама, Ивенты",Cinema 4D
+2/26/2026 1:46:35,Абакан,Своя компания,Удалённо,3D / пром. дизайн / видео,Head of Department,15+,35–39,19500,После налогов,До 40,Да,Реклама,"Photoshop, Lightroom, FCPX, Blender"
+2/26/2026 1:47:05,Тула,Контрактор / фрилансер,Удалённо,Motion design,Middle,3–5,25–29,1300,До налогов,40,Иногда,"Реклама, Анимация","Cinema 4D, After Effects"
+2/26/2026 1:48:25,Санкт-Петербург,Штатный сотрудник,Удалённо,cg-artist,Middle,3–5,25–29,2080,После налогов,40,Да,"Реклама, Анимация",Cinema 4D
+2/26/2026 1:48:30,Красноярск,Контрактор / фрилансер,В студии,3D Generalist,Middle,0–2,До 25,2000,До налогов,До 40,Иногда,Сайты,Blender
+2/26/2026 1:49:38,Москва,Штатный сотрудник,В студии,Лайтинг артист,Middle,3–5,30–34,2350,После налогов,41–50,Иногда,"Кино, Сериалы / ТВ",Houdini
+2/26/2026 1:49:51,Ереван,Штатный сотрудник,Удалённо,VFX,Senior,6–9,40–44,4000,После налогов,41–50,Иногда,"Кино, Сериалы / ТВ","Houdini, Nuke"
+2/26/2026 1:50:01,Минск,Штатный сотрудник,Удалённо,графический дизайнер,Middle,3–5,25–29,1050,После налогов,50+,Нет,Реклама,"Photoshop, Figma, After Effects"
+2/26/2026 1:51:23,Санкт-Петербург,Контрактор / фрилансер,Удалённо,CG / cinematics / unreal engine,Supervisor,6–9,35–39,3000,До налогов,До 40,Нет,"Кино, Сериалы / ТВ, Игры",Unreal Engine
+2/26/2026 1:51:34,Санкт-Петербург,Контрактор / фрилансер,Удалённо,3D Character Artist,Middle,3–5,30–34,1800,После налогов,41–50,Да,Игры,"ZBrush, Blender, Substance Painter, UE"
+2/26/2026 1:51:43,Москва,Штатный сотрудник,Удалённо,CG generalist,Middle,3–5,25–29,4000,После налогов,41–50,Да,Реклама,"C4D, Houdini, Nuke"
+2/26/2026 1:51:54,Польша,Контрактор / фрилансер,Удалённо,VFX viral / 3d motion,Senior,3–5,30–34,1500,До налогов,До 40,Иногда,"Реклама, Анимация, Ивенты","C4D, Blender"
+2/26/2026 1:51:56,Москва,Контрактор / фрилансер,Удалённо,compose,Middle,6–9,30–34,2000,После налогов,41–50,Нет,"Кино, Сериалы / ТВ, Реклама",Nuke
+2/26/2026 1:53:15,Новосибирск,Контрактор / фрилансер,Удалённо,Креативный и арт-дирекшн,Head of Department,10–14,30–34,7000,После налогов,41–50,Да,"Реклама, Ивенты",Photoshop
+2/26/2026 1:54:33,Москва,Штатный сотрудник,В студии,Stage Design,Middle,3–5,30–34,1900,После налогов,41–50,Нет,Ивенты,"Unreal Engine, Blender"
+2/26/2026 1:55:00,Нижний Новгород,Контрактор / фрилансер,Удалённо,Motion Design,Middle,3–5,30–34,500,После налогов,До 40,Иногда,"Анимация, Ивенты",After Effects
+2/26/2026 1:55:08,Москва,Штатный сотрудник,Удалённо,Режиссёр анимации,Lead,15+,40–44,3000,После налогов,50+,Иногда,Анимация,"Maya, Adobe, Toon Boom, Blender"
+2/26/2026 1:55:17,Санкт-Петербург,Штатный сотрудник,Удалённо,Cinematic Artist,Middle,3–5,25–29,2800,До налогов,До 40,Иногда,Игры,Unreal Engine
+2/26/2026 1:55:54,Москва,Штатный сотрудник,Гибрид,grooming artist,Middle,3–5,35–39,1800,После налогов,41–50,Нет,"Кино, Сериалы / ТВ",Houdini
+2/26/2026 1:56:30,Калининград,Штатный сотрудник,Гибрид,Промо арт,Middle,6–9,30–34,1944,После налогов,До 40,Да,Игры,Adobe Photoshop
+2/26/2026 1:56:33,Москва,Штатный сотрудник,Удалённо,CG дженералист,Senior,3–5,25–29,3400,После налогов,40,Да,"Кино, Сериалы / ТВ","Houdini, Nuke"
+2/26/2026 1:56:37,Москва,Штатный сотрудник,В студии,compositing artist,Middle,3–5,25–29,2000,После налогов,50+,Иногда,"Кино, Сериалы / ТВ",Nuke
+2/26/2026 1:58:02,Москва,Штатный сотрудник,Гибрид,Графический дизайнер,Middle,3–5,25–29,3200,После налогов,40,Нет,"Реклама, Анимация",Blender
+2/26/2026 1:59:25,Москва,Штатный сотрудник,В студии,Композитинг,Junior,0–2,До 25,1400,После налогов,41–50,Иногда,Кино,Nuke
+2/26/2026 2:00:24,Бишкек,Контрактор / фрилансер,Удалённо,CG generalist,Middle,3–5,25–29,1200,До налогов,50+,Нет,"Реклама, Ивенты","After Effects, Blender"
+2/26/2026 2:00:34,Новосибирск,Контрактор / фрилансер,Гибрид,Generalist / пост-прод продюсер,Middle,10–14,30–34,1700,После налогов,41–50,Да,"Реклама, Ивенты","After Effects, Maya, Houdini"
+2/26/2026 2:01:05,Новосибирск,Контрактор / фрилансер,Удалённо,Generalist,Middle,6–9,30–34,1750,До налогов,40,Нет,"Реклама, Анимация, Ивенты","AE, Blender"
+2/26/2026 2:03:17,Тюмень,Контрактор / фрилансер,Удалённо,3d generalist,Middle,6–9,30–34,2000,После налогов,40,Иногда,"Кино, Сериалы / ТВ, Реклама, Анимация, Ивенты","Houdini, UE"
+2/26/2026 2:07:52,Москва,Контрактор / фрилансер,Удалённо,3D Generalist / Lookdev / Art-Dir,Lead,6–9,До 25,4000,После налогов,40,Иногда,"Реклама, Ивенты",Cinema 4D
+2/26/2026 2:08:38,EU,Штатный сотрудник,В студии,2D - Compositing,Lead,6–9,30–34,3500,После налогов,40,Иногда,"Кино, Сериалы / ТВ",Nuke
+2/26/2026 2:10:47,Саратов,Штатный сотрудник,Удалённо,3д художник. Продуктовый рендер,Junior,0–2,25–29,1250,До налогов,До 40,Нет,Реклама,Blender
+2/26/2026 2:11:58,Санкт-Петербург,Контрактор / фрилансер,Удалённо,Compositing Artist,Middle,3–5,35–39,2300,До налогов,41–50,Иногда,"Кино, Сериалы / ТВ",Nuke
+2/26/2026 2:13:09,Москва,Контрактор / фрилансер,В студии,Vfx,Middle,0–2,35–39,2250,После налогов,41–50,Да,Кино,Houdini
+2/26/2026 2:14:27,Тель-Авив,Контрактор / фрилансер,Удалённо,3D Motion Design,Middle,3–5,25–29,6000,До налогов,41–50,Нет,Реклама,Cinema 4D
+2/26/2026 2:14:51,Польша,Штатный сотрудник,Удалённо,цг реклама / синьер и супервайзер,Senior,6–9,30–34,3700,После налогов,40,Да,"Реклама, Игры, Анимация","C4D, Redshift"
+2/26/2026 2:15:18,Самара,Контрактор / фрилансер,Удалённо,3D generalist,Senior,3–5,30–34,5000,До налогов,50+,Нет,"Реклама, Игры, Анимация",Unreal
+2/26/2026 2:16:15,Самара,Контрактор / фрилансер,Гибрид,3d modeling / animation / compositing,Senior,15+,45+,2500,После налогов,41–50,Нет,"Сериалы / ТВ, Реклама, Анимация","3ds Max, After Effects, Maya, Houdini"
+2/26/2026 2:26:59,Томск,Штатный сотрудник,Удалённо,3d artist (Environment),Middle,3–5,25–29,1300,После налогов,40,Иногда,Игры,"Blender, Substance Painter, UE"
+2/26/2026 2:31:21,София,Контрактор / фрилансер,Удалённо,CG generalist,Middle,3–5,25–29,500,До налогов,До 40,Да,"Кино, Реклама, Игры","Photoshop, Blender, UE"
+2/26/2026 2:42:11,Москва,Штатный сотрудник,Удалённо,cfx,Junior,0–2,25–29,1170,После налогов,40,Нет,Анимация,Houdini
+2/26/2026 2:45:53,Тбилиси,Контрактор / фрилансер,Удалённо,VFX / 3D Generalist,Middle,3–5,25–29,1000,После налогов,40,Иногда,"Кино, Реклама, Игры, Анимация","Blender, Houdini"
+2/26/2026 2:48:12,Алматы,Контрактор / фрилансер,Удалённо,композ,Senior,6–9,25–29,2000,До налогов,До 40,Иногда,"Кино, Сериалы / ТВ, Реклама",Nuke
+2/26/2026 2:49:01,Краснодар,Штатный сотрудник,В студии,3D Generalist,Junior,0–2,До 25,1300,После налогов,41–50,Иногда,Реклама,"Blender, Substance, AE, DaVinci"
+2/26/2026 2:50:11,Москва,Штатный сотрудник,Удалённо,Producer,Senior,10–14,30–34,2000,После налогов,50+,Иногда,Реклама,-
+2/26/2026 2:54:09,Санкт-Петербург,Контрактор / фрилансер,Удалённо,3D generalist,Senior,6–9,30–34,1700,После налогов,До 40,Иногда,"Реклама, Ивенты",Houdini
+2/26/2026 2:58:15,Саратов,Контрактор / фрилансер,Удалённо,General/Character 3d artist,Middle,3–5,До 25,2000,До налогов,40,Нет,Игры,Blender
+2/26/2026 2:58:28,Новосибирск,Контрактор / фрилансер,Удалённо,моушен,Senior,15+,35–39,3000,После налогов,41–50,Да,"Сериалы / ТВ, Реклама, Ивенты","AE, Cinema 4D"
+2/26/2026 2:59:40,Москва,Штатный сотрудник,В студии,Композер,Senior,3–5,30–34,2700,До налогов,41–50,Да,"Кино, Сериалы / ТВ",Nuke
+2/26/2026 3:01:09,Токио,Контрактор / фрилансер,В студии,Композ,Senior,6–9,35–39,2000,До налогов,41–50,Иногда,"Кино, Сериалы / ТВ",Nuke
+2/26/2026 3:02:39,Ташкент,Контрактор / фрилансер,Удалённо,Motion Design / Анимации,Senior,6–9,35–39,1600,До налогов,41–50,Нет,"Реклама, Игры, Анимация","After Effects, Rive"
+2/26/2026 3:03:07,Новосибирск,Контрактор / фрилансер,Удалённо,Generalist,Middle,6–9,35–39,200,До налогов,До 40,Иногда,Реклама,Blender
+2/26/2026 3:04:05,Москва,Контрактор / фрилансер,Удалённо,concept,Middle,3–5,До 25,1500,После налогов,40,Иногда,Кино,"Photoshop, Blender"
+2/26/2026 3:04:29,Алматы,Контрактор / фрилансер,Удалённо,lead 3d character artist,Lead,3–5,35–39,5000,После налогов,41–50,Да,"Кино, Игры",Blender
+2/26/2026 3:05:54,Москва,Штатный сотрудник,В студии,3D Generalist,Senior,6–9,30–34,2550,После налогов,40,Нет,Ивенты,Cinema 4D
+2/26/2026 3:07:18,Москва,Штатный сотрудник,В студии,композ,Middle,3–5,30–34,1800,После налогов,40,Иногда,Кино,Nuke
+2/26/2026 3:10:44,Санкт-Петербург,Штатный сотрудник,В студии,Generalist,Middle,3–5,30–34,1100,После налогов,До 40,Иногда,"Реклама, Анимация, Ивенты",Blender
+2/26/2026 3:13:37,Киев,Своя компания,Удалённо,3d artist,Head of Department,10–14,45+,2000,До налогов,До 40,Да,Анимация,3ds Max
+2/26/2026 3:14:13,Вроцлав,Штатный сотрудник,Гибрид,Motion Designer,Senior,6–9,25–29,5000,До налогов,40,Нет,"Реклама, Игры, Анимация","After Effects, Blender, Cinema 4D, UE"
+2/26/2026 3:18:06,Санкт-Петербург,Контрактор / фрилансер,Удалённо,Motion,Middle,10–14,40–44,3000,После налогов,41–50,Нет,Ивенты,"Pr, AE, Ps, UE"
+2/26/2026 3:32:30,Санкт-Петербург,Контрактор / фрилансер,Удалённо,Cg Generalist,Middle,6–9,25–29,1000,До налогов,До 40,Нет,"Реклама, Анимация",Cinema 4D
+2/26/2026 3:34:27,Одесса,Штатный сотрудник,Удалённо,Motion design,Senior,3–5,До 25,2000,До налогов,До 40,Нет,"Реклама, Анимация","C4D, AE"
+2/26/2026 3:36:47,Москва,Контрактор / фрилансер,Удалённо,Render / compositing,Middle,3–5,30–34,2800,До налогов,До 40,Да,Игры,"Nuke, DaVinci"`;
 
 let D = [];
 let skippedCount = 0;
@@ -598,6 +608,8 @@ function processCSVText(text, source) {
     const expRaw   = (r[6]||'').trim();
     const salRaw   = (r[8]||'').trim();
     const taxRaw   = (r[9]||'').trim();
+    const projRaw  = (r[12]||'').trim();
+    const softRaw  = (r[13]||'').trim();
     const salary = parseSalary(salRaw);
     if (!salary || salary < 50 || salary > 100000) { skippedCount++; return; }
     const coords = resolveCoords(cityRaw);
@@ -608,6 +620,7 @@ function processCSVText(text, source) {
       exp: normalizeExp(expRaw), salary,
       afterTax: taxRaw.toLowerCase().includes('после'),
       lat: coords?coords[0]:null, lng: coords?coords[1]:null,
+      projects: projRaw, software: softRaw,
     });
   });
   return result;
@@ -631,12 +644,12 @@ async function loadData() {
     if (fresh.length > 0) {
       D = fresh;
       document.getElementById('last-updated').textContent =
-        `🟢 Live · обновлено ${new Date().toLocaleString('ru-RU')} · ${D.length} записей`;
+        `Live · обновлено ${new Date().toLocaleString('ru-RU')} · ${D.length} записей`;
     }
   } catch(e) {
     // CORS or network error — silently keep snapshot, just show badge
     document.getElementById('last-updated').textContent =
-      `📦 Снапшот от 26.02.2026 · ${D.length} записей · (live недоступен при открытии локально)`;
+      `Снапшот от 26.02.2026 · ${D.length} записей · (live недоступен при открытии локально)`;
   }
 
   if (skippedCount > 0) {
@@ -645,6 +658,14 @@ async function loadData() {
   }
 
   updateStats();
+  // Populate sphere filter
+  const sphereSet=new Set();
+  D.forEach(d=>{
+    if(!d.projects)return;
+    d.projects.split(/[,/]/).map(s=>s.trim()).filter(Boolean).forEach(p=>sphereSet.add(p));
+  });
+  const sphereSel=document.getElementById('spec-sphere');
+  [...sphereSet].sort().forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sphereSel.appendChild(o);});
   setLoader(100, 'Готово!');
   setTimeout(()=>{
     document.getElementById('loading-screen').classList.add('fade-out');
@@ -728,44 +749,98 @@ function latToVec3(lat,lng,r){
   const phi=(90-lat)*Math.PI/180, theta=(lng+180)*Math.PI/180;
   return new THREE.Vector3(-r*Math.sin(phi)*Math.cos(theta),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));
 }
+
+// City → ISO 3166-1 numeric code (for country fill coloring)
+const CITY_ISO={
+  'москва':643,'санкт-петербург':643,'мск':643,'спб':643,'moscow':643,'msk':643,'moskva':643,
+  'екатеринбург':643,'новосибирск':643,'нижний новгород':643,'самара':643,'краснодар':643,
+  'красноярск':643,'тюмень':643,'томск':643,'новороссийск':643,'саратов':643,'тула':643,
+  'калининград':643,'ставрополь':643,'абакан':643,'альметьевск':643,'дальний восток':643,
+  'дальний восток росси':643,'не мск':643,
+  'алматы':398,'almaty':398,'алма-ата':398,
+  'бишкек':417,
+  'ташкент':860,'tashkent':860,
+  'ереван':51,'yerevan':51,
+  'тбилиси':268,'tbilisi':268,'батуми':268,
+  'минск':112,
+  'киев':804,'kyiv':804,'одесса':804,'odesa':804,
+  'подгорица':499,
+  'ларнака':196,'larnaca':196,
+  'цюрих':756,'zurich':756,
+  'франкфурт':276,
+  'польша':616,'вроцлав':616,
+  'тель-авив':376,'tel aviv':376,
+  'токио':392,'tokyo':392,
+  'пуэрто-галера':608,'puerto galera':608,
+  'софия':100,'sofia':100,
+};
+
+function cityToISO(cityRaw){
+  const k=cityRaw.toLowerCase().trim().replace(/\s*\(.*?\)/g,'').trim();
+  if(CITY_ISO[k]) return CITY_ISO[k];
+  for(const key of Object.keys(CITY_ISO)){
+    if(k.startsWith(key)||key.startsWith(k.split(/[\s,]/)[0])) return CITY_ISO[key];
+  }
+  return null;
+}
+
 function initGlobe(){
   const container=document.getElementById('globe-canvas-container');
-  const W=container.clientWidth, H=container.clientHeight||520;
+  const W=container.clientWidth, H=container.clientHeight||780;
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(42,W/H,0.1,100);
   camera.position.z=2.85;
-  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,logarithmicDepthBuffer:true});
   renderer.setSize(W,H); renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
   renderer.setClearColor(0x000000,0); container.appendChild(renderer.domElement);
 
-  // Flat lighting — no specular bloom
-  scene.add(new THREE.AmbientLight(0x2a3a6a,5));
-  const dLight=new THREE.DirectionalLight(0x3355aa,0.6);
-  dLight.position.set(2,1,2); scene.add(dLight);
+  // Soft ambient + directional
+  scene.add(new THREE.AmbientLight(0x223355,3));
+  const dLight=new THREE.DirectionalLight(0x4466cc,0.6);
+  dLight.position.set(3,2,3); scene.add(dLight);
 
   const group=new THREE.Group(); scene.add(group);
 
-  // Globe sphere — MeshLambertMaterial: no specular, no shininess
-  group.add(new THREE.Mesh(
-    new THREE.SphereGeometry(1,64,64),
-    new THREE.MeshLambertMaterial({color:0x060618,emissive:0x03030f})
-  ));
+  // Count data per country ISO
+  const isoCount={};
+  D.forEach(d=>{
+    const iso=cityToISO(d.city);
+    if(iso) isoCount[iso]=(isoCount[iso]||0)+1;
+  });
+  const maxIsoCount=Math.max(...Object.values(isoCount),1);
 
-  // Subtle atmosphere
-  scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.07,32,32),
-    new THREE.MeshBasicMaterial({color:0x001a44,transparent:true,opacity:0.04,side:THREE.BackSide})));
+  // ── CANVAS TEXTURE for ocean/land/data fill ──
+  const TEX_W=2048, TEX_H=1024;
+  const texCanvas=document.createElement('canvas');
+  texCanvas.width=TEX_W; texCanvas.height=TEX_H;
+  const tctx=texCanvas.getContext('2d');
+  // Ocean fill
+  tctx.fillStyle='#040d1a'; tctx.fillRect(0,0,TEX_W,TEX_H);
 
-  // Lat/lng grid
-  const gridMat=new THREE.LineBasicMaterial({color:0x0e1e3a,transparent:true,opacity:0.4});
-  for(let lat=-60;lat<=60;lat+=30){const pts=[];for(let ln=-180;ln<=180;ln+=3)pts.push(latToVec3(lat,ln,1.001));group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));}
-  for(let ln=-180;ln<=180;ln+=30){const pts=[];for(let la=-88;la<=88;la+=3)pts.push(latToVec3(la,ln,1.001));group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));}
+  const globeTexture=new THREE.CanvasTexture(texCanvas);
+  const sphereMat=new THREE.MeshLambertMaterial({map:globeTexture,emissive:0x010308});
+  const sphereMesh=new THREE.Mesh(new THREE.SphereGeometry(1,64,64),sphereMat);
+  group.add(sphereMesh);
+
+  // No atmosphere sphere — it creates ring artifact at oblique angles
+
+  // Lat/lng grid (very subtle — nearly invisible, only visible on close zoom)
+  const gridMat=new THREE.LineBasicMaterial({color:0x0a1830,transparent:true,opacity:0.12,depthWrite:false});
+  for(let lat=-60;lat<=60;lat+=30){const pts=[];for(let ln=-180;ln<=180;ln+=3)pts.push(latToVec3(lat,ln,1.004));group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));}
+  for(let ln=-180;ln<=180;ln+=30){const pts=[];for(let la=-88;la<=88;la+=3)pts.push(latToVec3(la,ln,1.004));group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));}
 
   // Build city data
   const cityMap={};
   D.filter(d=>d.lat!==null).forEach(d=>{
-    if(!cityMap[d.city]) cityMap[d.city]={city:d.city,lat:d.lat,lng:d.lng,salaries:[],levels:[]};
-    cityMap[d.city].salaries.push(d.salary); cityMap[d.city].levels.push(d.level);
+    if(!cityMap[d.city]) cityMap[d.city]={city:d.city,lat:d.lat,lng:d.lng,salaries:[],levels:[],levelMap:{},projects:[],software:[]};
+    const cm=cityMap[d.city];
+    cm.salaries.push(d.salary); cm.levels.push(d.level);
+    if(!cm.levelMap[d.level]) cm.levelMap[d.level]=[];
+    cm.levelMap[d.level].push(d.salary);
+    if(d.projects) d.projects.split(',').forEach(p=>{p=p.trim();if(p)cm.projects.push(p);});
+    if(d.software) d.software.split(/[,/]/).forEach(s=>{s=s.trim();if(s)cm.software.push(s);});
   });
+
   const maxCount=Math.max(...Object.values(cityMap).map(c=>c.salaries.length),1);
   const yUp=new THREE.Vector3(0,1,0);
   const barMeshes=[];
@@ -775,115 +850,187 @@ function initGlobe(){
     const col=salaryColor(med_s);
     const colHex=parseInt(col.replace('rgb(','').replace(')','').split(',').map(x=>parseInt(x).toString(16).padStart(2,'0')).join(''),16);
     const count=ci.salaries.length;
-    const barH=0.035+(count/maxCount)*0.20; // height proportional to respondents
+    const barH=0.03+(count/maxCount)*0.22;
     const normal=latToVec3(ci.lat,ci.lng,1).normalize();
-    // Place bar so its base sits at globe surface
     const center=normal.clone().multiplyScalar(1.0+barH/2);
-
-    const barGeo=new THREE.CylinderGeometry(0.007,0.011,barH,6,1);
-    const barMat=new THREE.MeshBasicMaterial({color:colHex});
-    const bar=new THREE.Mesh(barGeo,barMat);
+    const bar=new THREE.Mesh(new THREE.CylinderGeometry(0.007,0.012,barH,6,1),new THREE.MeshBasicMaterial({color:colHex}));
     bar.position.copy(center);
     bar.quaternion.setFromUnitVectors(yUp,normal);
     bar.userData={...ci,avgSalary:Math.round(med_s),count};
     group.add(bar); barMeshes.push(bar);
-
-    // Glowing top cap
-    const capPos=normal.clone().multiplyScalar(1.0+barH+0.001);
-    const capGeo=new THREE.CircleGeometry(0.013,6);
-    const capMat=new THREE.MeshBasicMaterial({color:colHex,transparent:true,opacity:0.7,side:THREE.DoubleSide});
-    const cap=new THREE.Mesh(capGeo,capMat);
+    // Cap
+    const capPos=normal.clone().multiplyScalar(1.0+barH+0.002);
+    const cap=new THREE.Mesh(new THREE.CircleGeometry(0.014,6),new THREE.MeshBasicMaterial({color:colHex,transparent:true,opacity:0.75,side:THREE.DoubleSide}));
     cap.position.copy(capPos);
     cap.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),normal);
     group.add(cap);
   });
 
-  // ── WORLD COUNTRY BORDERS (topojson from CDN) ──
+  // ── LOAD TOPOJSON — fill countries + draw borders ──
   fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
     .then(r=>r.json())
     .then(world=>{
       const sc=world.transform.scale, tr=world.transform.translate;
       const rawArcs=world.arcs;
-
       function decodeArc(idx){
-        const rev=idx<0;
-        const arc=rawArcs[rev?~idx:idx];
+        const rev=idx<0, arc=rawArcs[rev?~idx:idx];
         let x=0,y=0;
         const pts=arc.map(p=>{x+=p[0];y+=p[1];return[x*sc[0]+tr[0],y*sc[1]+tr[1]];});
-        if(rev)pts.reverse();
-        return pts; // [lon,lat]
+        if(rev)pts.reverse(); return pts;
       }
+      function geoToTex(lon,lat){return[(lon+180)/360*TEX_W,(90-lat)/180*TEX_H];}
 
-      const borderMat=new THREE.LineBasicMaterial({color:0x1e4a8c,transparent:true,opacity:0.55});
-
-      function drawArcs(arcIdxArrays){
+      function fillCountry(arcIdxArrays, fillColor){
+        tctx.fillStyle=fillColor;
         arcIdxArrays.forEach(ring=>{
           let coords=[];
           ring.forEach(i=>coords=coords.concat(decodeArc(i)));
-          const v3=coords.map(([lon,lat])=>latToVec3(lat,lon,1.0025));
-          if(v3.length>1) group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(v3),borderMat));
+          if(!coords.length)return;
+          // Detect antimeridian crossing — if any consecutive pair jumps >90° lon, skip ring
+          // (these are wrapping polygons like Russia that create horizontal band artifacts)
+          let crosses=false;
+          for(let i=1;i<coords.length;i++){
+            if(Math.abs(coords[i][0]-coords[i-1][0])>90){crosses=true;break;}
+          }
+          if(crosses){
+            // Split into sub-paths at crossing points and fill each separately
+            let subCoords=[];
+            const fillSub=()=>{
+              if(subCoords.length<3)return;
+              tctx.beginPath();
+              subCoords.forEach(([lon,lat],i)=>{
+                const [cx,cy]=geoToTex(lon,lat);
+                i===0?tctx.moveTo(cx,cy):tctx.lineTo(cx,cy);
+              });
+              tctx.closePath();tctx.fill();
+            };
+            coords.forEach(([lon,lat],i)=>{
+              if(i>0&&Math.abs(lon-coords[i-1][0])>90){
+                fillSub(); subCoords=[];
+              }
+              subCoords.push([lon,lat]);
+            });
+            fillSub();
+            return;
+          }
+          tctx.beginPath();
+          coords.forEach(([lon,lat],i)=>{
+            const [cx,cy]=geoToTex(lon,lat);
+            i===0?tctx.moveTo(cx,cy):tctx.lineTo(cx,cy);
+          });
+          tctx.closePath();
+          tctx.fill();
         });
       }
 
+      // Fill land: first pass — all land (no-data color)
       world.objects.countries.geometries.forEach(g=>{
-        if(g.type==='Polygon') drawArcs(g.arcs);
-        else if(g.type==='MultiPolygon') g.arcs.forEach(p=>drawArcs(p));
+        const fill=(g.type==='Polygon')?[g.arcs]:g.arcs;
+        fill.forEach(p=>fillCountry(p,'#0d1d30'));
+      });
+
+      // Second pass — countries WITH data get gradient color
+      world.objects.countries.geometries.forEach(g=>{
+        const id=parseInt(g.id);
+        const count=isoCount[id]||0;
+        if(!count)return;
+        const t=Math.sqrt(count/maxIsoCount);
+        const r=Math.round(15+t*45), gv=Math.round(40+t*80), b=Math.round(80+t*120);
+        const fill=(g.type==='Polygon')?[g.arcs]:g.arcs;
+        fill.forEach(p=>fillCountry(p,`rgb(${r},${gv},${b})`));
+      });
+
+      // Update texture
+      globeTexture.needsUpdate=true;
+
+      // 3D border lines on top (crisp)
+      const borderMat=new THREE.LineBasicMaterial({color:0x1a3a6e,transparent:true,opacity:0.4,depthWrite:false});
+      function drawBorderArcs(arcIdxArrays){
+        arcIdxArrays.forEach(ring=>{
+          let coords=[];
+          ring.forEach(i=>coords=coords.concat(decodeArc(i)));
+          const v3=coords.map(([lon,lat])=>latToVec3(lat,lon,1.005));
+          if(v3.length>1) group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(v3),borderMat));
+        });
+      }
+      world.objects.countries.geometries.forEach(g=>{
+        if(g.type==='Polygon') drawBorderArcs(g.arcs);
+        else if(g.type==='MultiPolygon') g.arcs.forEach(p=>drawBorderArcs(p));
       });
     })
-    .catch(()=>{}); // borders are optional decoration
+    .catch(()=>{});
 
   // Top cities list
   const topCities=Object.values(cityMap).filter(c=>c.salaries.length>1).map(c=>({city:c.city,med:median(c.salaries),count:c.salaries.length})).sort((a,b)=>b.med-a.med).slice(0,14);
   const listEl=document.getElementById('city-top-list');
   listEl.innerHTML=topCities.map(c=>`<div class="city-top-item"><span class="city-name">${c.city} <small style="color:#7878a0">(${c.count})</small></span><span class="city-avg">$${Math.round(c.med).toLocaleString()}</span></div>`).join('');
 
-  // Raycaster for bar hover
+  // Raycaster hover
   const raycaster=new THREE.Raycaster(),mouse2=new THREE.Vector2();
   const tooltip=document.getElementById('globe-tooltip');
   container.addEventListener('mousemove',e=>{
+    if(isDragging){tooltip.style.display='none';return;}
     const rect=container.getBoundingClientRect();
     mouse2.x=((e.clientX-rect.left)/W)*2-1; mouse2.y=-((e.clientY-rect.top)/H)*2+1;
     raycaster.setFromCamera(mouse2,camera);
     const hits=raycaster.intersectObjects(barMeshes);
     if(hits.length>0){
       const d=hits[0].object.userData;
-      tooltip.innerHTML=`<b>${d.city}</b><br>Медиана: <b style="color:var(--accent)">${fmtSalary(d.avgSalary)}</b><br>Человек: <b>${d.count}</b><br>Уровни: ${[...new Set(d.levels)].join(', ')}`;
-      // Smart tooltip positioning within container
-      const mx=e.clientX-rect.left, my=e.clientY-rect.top;
-      const tw=200,th=80;
-      tooltip.style.left=((mx+tw+20>W)?mx-tw-8:mx+14)+'px';
-      tooltip.style.top=((my+th>H)?my-th-4:my-6)+'px';
+      // Per-level breakdown
+      const lvlRows=LEVEL_ORDER.filter(l=>d.levelMap[l]).map(l=>{
+        const cnt=d.levelMap[l].length;
+        const med=Math.round(median(d.levelMap[l]));
+        const dot=`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${LEVEL_COLORS[l]};margin-right:4px;"></span>`;
+        return `${dot}<b>${l}</b>: $${med.toLocaleString()} <span style="color:#7878a0">(${cnt})</span>`;
+      }).join('<br>');
+      // Top software
+      const swCount={};
+      d.software.forEach(s=>{swCount[s]=(swCount[s]||0)+1;});
+      const topSw=Object.entries(swCount).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([s])=>s).join(', ');
+      // Top projects
+      const projCount={};
+      d.projects.forEach(p=>{projCount[p]=(projCount[p]||0)+1;});
+      const topProj=Object.entries(projCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([p])=>p).join(', ');
+      tooltip.innerHTML=`<b style="font-size:.9rem">${d.city}</b><br><span style="color:#7878a0;font-size:.72rem">${d.count} респондентов</span><br><hr style="border-color:#1a2a4a;margin:4px 0">${lvlRows}${topProj?`<br><span style="color:#6b8aff;font-size:.7rem">${topProj}</span>`:''}${topSw?`<br><span style="color:#7878a0;font-size:.7rem">${topSw}</span>`:''}`;
+      const rect2=container.getBoundingClientRect();
+      const mx=e.clientX-rect2.left,my=e.clientY-rect2.top;
+      const TW=230,TH=130;
+      tooltip.style.left=((mx+TW+14>W)?mx-TW-8:mx+14)+'px';
+      tooltip.style.top=((my+TH>H)?my-TH-4:my-6)+'px';
       tooltip.style.display='block';
     } else tooltip.style.display='none';
   });
   container.addEventListener('mouseleave',()=>tooltip.style.display='none');
 
-  let isDragging=false,prevX=0,prevY=0;
-  let autoRotate=true;  // click toggles this
+  // ── STOP on first click/drag — never auto-resume ──
+  let isDragging=false, prevX=0, prevY=0;
+  let autoRotate=true;
 
-  // Click to pause/resume (only if not dragging)
-  let didDrag=false;
-  container.addEventListener('mousedown',e=>{isDragging=true;didDrag=false;prevX=e.clientX;prevY=e.clientY;});
+  container.addEventListener('mousedown',e=>{
+    if(e.button===0||e.button===1){ // left or middle
+      e.preventDefault(); // prevent middle-click auto-scroll
+      isDragging=true; autoRotate=false;
+      prevX=e.clientX; prevY=e.clientY;
+      tooltip.style.display='none';
+    }
+  });
+  // prevent middle-click default scroll icon
+  container.addEventListener('auxclick',e=>{if(e.button===1)e.preventDefault();});
   window.addEventListener('mousemove',e=>{
     if(!isDragging)return;
-    const dx=e.clientX-prevX, dy=e.clientY-prevY;
-    if(Math.abs(dx)+Math.abs(dy)>3) didDrag=true;
-    group.rotation.y+=dx*0.006;
-    group.rotation.x=Math.max(-1.2,Math.min(1.2,group.rotation.x+dy*0.006));
-    prevX=e.clientX;prevY=e.clientY;
+    group.rotation.y+=(e.clientX-prevX)*0.006;
+    group.rotation.x=Math.max(-1.2,Math.min(1.2,group.rotation.x+(e.clientY-prevY)*0.006));
+    prevX=e.clientX; prevY=e.clientY;
   });
-  window.addEventListener('mouseup',()=>{
-    if(isDragging && !didDrag) autoRotate=!autoRotate; // toggle on clean click
-    isDragging=false;
-  });
+  window.addEventListener('mouseup',()=>{isDragging=false;});
 
-  // Update hint text to reflect toggle
+  // Update hint
   const hintEl=container.parentElement.querySelector('.globe-hint');
-  setInterval(()=>{
-    if(hintEl) hintEl.textContent = autoRotate
-      ? 'drag · scroll to zoom · click to pause'
-      : '⏸ paused — click to resume · scroll to zoom';
-  },200);
+  if(hintEl){
+    const updateHint=()=>{hintEl.textContent=autoRotate?'drag / MMB to rotate · scroll to zoom · click to stop':'drag / MMB to rotate · scroll to zoom';};
+    updateHint();
+    container.addEventListener('mousedown',updateHint);
+  }
 
   // Wheel zoom
   container.addEventListener('wheel',e=>{
@@ -891,22 +1038,16 @@ function initGlobe(){
     camera.position.z=Math.max(1.4,Math.min(5.0,camera.position.z+e.deltaY*0.003));
   },{passive:false});
 
+  // Touch drag
   let tPrev={x:0,y:0};
-  container.addEventListener('touchstart',e=>{tPrev={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
+  container.addEventListener('touchstart',e=>{autoRotate=false;tPrev={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
   container.addEventListener('touchmove',e=>{group.rotation.y+=(e.touches[0].clientX-tPrev.x)*0.005;group.rotation.x=Math.max(-1.2,Math.min(1.2,group.rotation.x+(e.touches[0].clientY-tPrev.y)*0.005));tPrev={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
-
-  // Pinch zoom on touch
+  // Pinch zoom
   let lastDist=0;
   container.addEventListener('touchstart',e=>{if(e.touches.length===2)lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);},{passive:true});
-  container.addEventListener('touchmove',e=>{
-    if(e.touches.length===2){
-      const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-      camera.position.z=Math.max(1.4,Math.min(5.0,camera.position.z-(d-lastDist)*0.008));
-      lastDist=d;
-    }
-  },{passive:true});
+  container.addEventListener('touchmove',e=>{if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);camera.position.z=Math.max(1.4,Math.min(5.0,camera.position.z-(d-lastDist)*0.008));lastDist=d;}},{passive:true});
 
-  (function animate(){requestAnimationFrame(animate);if(!isDragging && autoRotate)group.rotation.y+=0.003;renderer.render(scene,camera);})();
+  (function animate(){requestAnimationFrame(animate);if(autoRotate&&!isDragging)group.rotation.y+=0.003;renderer.render(scene,camera);})();
   window.addEventListener('resize',()=>{const nW=container.clientWidth;camera.aspect=nW/H;camera.updateProjectionMatrix();renderer.setSize(nW,H);});
 }
 
@@ -931,91 +1072,210 @@ function initCharts(){
   const eb={'0–2':0,'3–5':0,'6–9':0,'10–14':0,'15+':0};
   D.forEach(d=>{if(d.exp<=1)eb['0–2']++;else if(d.exp<=4)eb['3–5']++;else if(d.exp<=7.5)eb['6–9']++;else if(d.exp<=12)eb['10–14']++;else eb['15+']++;});
   new Chart(document.getElementById('chart-exp'),{type:'bar',data:{labels:Object.keys(eb),datasets:[{label:'Чел.',data:Object.values(eb),backgroundColor:['#4a9eff','#00e8d3','#ffa500','#ff6b35','#cc44ff'],borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:g},ticks:{color:t}},x:{grid:{color:g},ticks:{color:t}}}}});
+  // Sphere (project type) chart
+  const sphereCount={};
+  D.forEach(d=>{
+    if(!d.projects)return;
+    d.projects.split(/[,/]/).map(s=>s.trim()).filter(Boolean).forEach(p=>{
+      // Normalize common categories
+      const k=p.replace(/сериалы\s*\/?\s*тв/i,'Сериалы/ТВ').replace(/ивенты/i,'Ивенты');
+      sphereCount[k]=(sphereCount[k]||0)+1;
+    });
+  });
+  const topSpheres=Object.entries(sphereCount).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const sphereColors=['#4a9eff','#00e8d3','#ffa500','#ff6b35','#cc44ff','#ff3366','#6b8aff','#00ffaa','#e844ff','#ffcc00'];
+  if(topSpheres.length) new Chart(document.getElementById('chart-sphere'),{type:'bar',data:{labels:topSpheres.map(s=>s[0]),datasets:[{label:'Чел.',data:topSpheres.map(s=>s[1]),backgroundColor:sphereColors.slice(0,topSpheres.length),borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
+  // Software chart
+  const softCount={};
+  D.forEach(d=>{
+    if(!d.software||d.software==='-')return;
+    d.software.split(/[,/]/).map(s=>s.trim()).filter(Boolean).forEach(s=>{
+      // Normalize common names
+      let k=s;
+      if(/^ae$/i.test(k)||/after\s*effect/i.test(k))k='After Effects';
+      if(/^c4d$/i.test(k)||/cinema\s*4/i.test(k)||/синь/i.test(k))k='Cinema 4D';
+      if(/^ue$/i.test(k)||/^ue5$/i.test(k)||/unreal/i.test(k))k='Unreal Engine';
+      if(/^nuke$/i.test(k)||/^нюк$/i.test(k)||/^нбк$/i.test(k))k='Nuke';
+      if(/^houdini$/i.test(k))k='Houdini';
+      if(/^blender$/i.test(k)||/блендер/i.test(k))k='Blender';
+      if(/^maya$/i.test(k))k='Maya';
+      if(/^zbrush$/i.test(k))k='ZBrush';
+      if(/substance/i.test(k))k='Substance';
+      if(/photoshop/i.test(k)||/^ps$/i.test(k))k='Photoshop';
+      if(/davinci/i.test(k))k='DaVinci';
+      if(/3ds\s*max/i.test(k))k='3ds Max';
+      if(/redshift/i.test(k))k='Redshift';
+      if(/figma/i.test(k))k='Figma';
+      softCount[k]=(softCount[k]||0)+1;
+    });
+  });
+  const topSoft=Object.entries(softCount).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const softColors=['#00ffaa','#4a9eff','#ffa500','#ff6b35','#cc44ff','#00e8d3','#ff3366','#6b8aff','#e844ff','#ffcc00','#33ff99','#ff9966'];
+  if(topSoft.length) new Chart(document.getElementById('chart-soft'),{type:'bar',data:{labels:topSoft.map(s=>s[0]),datasets:[{label:'Чел.',data:topSoft.map(s=>s[1]),backgroundColor:softColors.slice(0,topSoft.length),borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
 }
 
 // ══════════════════════════════════════════════════════
 // SPECTRUM
 // ══════════════════════════════════════════════════════
+const SPHERE_COLORS={'Кино':'#ff3366','Сериалы / ТВ':'#ff6b35','Реклама':'#ffa500','Игры':'#4a9eff','Анимация':'#00e8d3','Ивенты':'#cc44ff','Сериалы/ТВ':'#ff6b35'};
+const SPHERE_LABELS_ORDER=['Кино','Сериалы / ТВ','Реклама','Игры','Анимация','Ивенты'];
+
 function getSpecColor(d,mode){
   if(mode==='level') return LEVEL_COLORS[d.level]||'#aaa';
-  if(mode==='emp') return EMP_COLORS[d.emp]||'#aaa';
-  if(mode==='fmt') return FMT_COLORS[d.fmt]||'#aaa';
+  if(mode==='emp')   return EMP_COLORS[d.emp]||'#aaa';
+  if(mode==='fmt')   return FMT_COLORS[d.fmt]||'#aaa';
+  if(mode==='sphere'){
+    if(!d.projects)return '#555';
+    const p=d.projects.toLowerCase();
+    if(p.includes('кино'))return SPHERE_COLORS['Кино'];
+    if(p.includes('сериал'))return SPHERE_COLORS['Сериалы / ТВ'];
+    if(p.includes('игр'))return SPHERE_COLORS['Игры'];
+    if(p.includes('реклам'))return SPHERE_COLORS['Реклама'];
+    if(p.includes('анимац'))return SPHERE_COLORS['Анимация'];
+    if(p.includes('ивент'))return SPHERE_COLORS['Ивенты'];
+    return '#666';
+  }
   return '#aaa';
 }
+let specZoom=1.0, specPanFrac=0;
 function drawSpectrum(){
   const canvas=document.getElementById('spectrum-canvas');
   const fL=document.getElementById('spec-level').value;
   const fE=document.getElementById('spec-emp').value;
+  const fS=document.getElementById('spec-sphere').value;
   const cm=document.getElementById('spec-color').value;
-  let filtered=D.filter(d=>(!fL||d.level===fL)&&(!fE||d.emp===fE)).sort((a,b)=>a.salary-b.salary);
-  const W=canvas.parentElement.clientWidth; canvas.width=W; canvas.height=380;
-  const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,W,380);
+  let filtered=D.filter(d=>(!fL||d.level===fL)&&(!fE||d.emp===fE)&&(!fS||(d.projects||'').toLowerCase().includes(fS.toLowerCase()))).sort((a,b)=>a.salary-b.salary);
+  const W=canvas.parentElement.clientWidth, H=420;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,W,H);
   if(!filtered.length) return;
-  const maxS=Math.max(...filtered.map(d=>d.salary),1), PAD=60, plotW=W-PAD*2, H=380;
-  ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(PAD,H-60); ctx.lineTo(W-PAD,H-60); ctx.stroke();
-  ctx.fillStyle='#8888aa'; ctx.font="11px 'JetBrains Mono',monospace"; ctx.textAlign='center';
-  [0,1000,2000,4000,6000,10000,16000].filter(t=>t<=maxS*1.1).forEach(t=>{
-    const x=PAD+(t/maxS)*plotW; if(x>W-PAD+10)return;
-    ctx.beginPath(); ctx.moveTo(x,H-60); ctx.lineTo(x,H-54); ctx.stroke();
-    ctx.fillText('$'+t.toLocaleString(),x,H-42);
-  });
-  const medS=median(filtered.map(d=>d.salary)), medX=PAD+(medS/maxS)*plotW;
-  ctx.strokeStyle='rgba(255,165,0,0.4)'; ctx.setLineDash([4,4]); ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(medX,20); ctx.lineTo(medX,H-65); ctx.stroke(); ctx.setLineDash([]);
-  ctx.fillStyle='#ffa500'; ctx.font="10px 'JetBrains Mono',monospace"; ctx.fillText('Медиана',medX,16);
-  const myLine=document.getElementById('spec-my-line'), myLabel=document.getElementById('spec-my-label');
-  if(mySalary>0){const myX=PAD+(Math.min(mySalary,maxS)/maxS)*plotW;myLine.style.display='block';myLine.style.left=myX+'px';myLabel.textContent='Ты: '+fmtSalary(mySalary);}
+  const PAD=70, plotW=W-PAD*2, plotH=H-90;
+  const allMax=Math.max(...D.map(d=>d.salary),1);
+  const visibleFrac=1/specZoom;
+  specPanFrac=Math.max(0,Math.min(1-visibleFrac,specPanFrac));
+  const viewMin=specPanFrac*allMax;
+  const viewMax=viewMin+allMax*visibleFrac;
+  const viewRange=viewMax-viewMin;
+  function salToX(s){return PAD+((s-viewMin)/viewRange)*plotW;}
+  // Grid step
+  const rawStep=viewRange/6;
+  const mag=Math.pow(10,Math.floor(Math.log10(Math.max(rawStep,1))));
+  const gridStep=mag*([1,2,2.5,5,10].find(s=>mag*s>=rawStep)||10);
+  const gridStart=Math.ceil(viewMin/gridStep)*gridStep;
+  // Vertical grid
+  const ROWS=7, rowH=plotH/ROWS;
+  ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1;
+  for(let r=0;r<=ROWS;r++){const gy=22+r*rowH;ctx.beginPath();ctx.moveTo(PAD,gy);ctx.lineTo(W-PAD,gy);ctx.stroke();}
+  ctx.strokeStyle='rgba(255,255,255,0.06)';
+  for(let g=gridStart;g<=viewMax+gridStep*0.01;g+=gridStep){
+    const gx=salToX(g); if(gx<PAD-1||gx>W-PAD+1)continue;
+    ctx.beginPath();ctx.moveTo(gx,22);ctx.lineTo(gx,H-65);ctx.stroke();
+  }
+  // X axis line
+  ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(PAD,H-65);ctx.lineTo(W-PAD,H-65);ctx.stroke();
+  // Tick labels
+  ctx.fillStyle='#8888aa'; ctx.font="10px 'JetBrains Mono',monospace"; ctx.textAlign='center';
+  for(let g=gridStart;g<=viewMax+gridStep*0.01;g+=gridStep){
+    const gx=salToX(g); if(gx<PAD-1||gx>W-PAD+2)continue;
+    ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(gx,H-65);ctx.lineTo(gx,H-59);ctx.stroke();
+    ctx.fillStyle='#8888aa';
+    const lbl=g>=1000?'$'+(g/1000).toLocaleString('ru-RU')+'K':'$'+g;
+    ctx.fillText(lbl,gx,H-46);
+  }
+  // Median
+  const medS=median(filtered.map(d=>d.salary)), medX=salToX(medS);
+  if(medX>=PAD&&medX<=W-PAD){
+    ctx.strokeStyle='rgba(255,165,0,0.5)'; ctx.setLineDash([5,4]); ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(medX,22);ctx.lineTo(medX,H-66);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#ffa500'; ctx.font="10px 'JetBrains Mono',monospace"; ctx.textAlign='center';
+    ctx.fillText('Медиана $'+Math.round(medS).toLocaleString(),medX,16);
+  }
+  // My salary
+  const myLine=document.getElementById('spec-my-line'),myLabel=document.getElementById('spec-my-label');
+  if(mySalary>0){const myX=salToX(mySalary);myLine.style.display='block';myLine.style.left=myX+'px';myLabel.textContent='Ты: '+fmtSalary(mySalary);}
   else myLine.style.display='none';
-  const ROWS=6, rowH=(H-100)/ROWS, used=[];
-  canvas._points=[];
+  // Dots (beeswarm)
+  const used=[];canvas._points=[];
   filtered.forEach(d=>{
-    const x=PAD+(d.salary/maxS)*plotW;
+    const x=salToX(d.salary);
+    if(x<PAD-8||x>W-PAD+8){canvas._points.push({x,y:-999,d,hidden:true});return;}
     let best=0,bestO=Infinity;
-    for(let r=0;r<ROWS;r++){const yc=25+r*rowH+rowH/2,o=used.filter(u=>Math.abs(u.x-x)<14&&Math.abs(u.y-yc)<14).length;if(o<bestO){bestO=o;best=r;}}
-    const y=25+best*rowH+rowH/2+(Math.random()-0.5)*4; used.push({x,y,d}); canvas._points.push({x,y,d});
+    for(let r=0;r<ROWS;r++){const yc=24+r*rowH+rowH/2,o=used.filter(u=>Math.abs(u.x-x)<13&&Math.abs(u.y-yc)<13).length;if(o<bestO){bestO=o;best=r;}}
+    const y=24+best*rowH+rowH/2+(Math.random()-0.5)*3;
+    used.push({x,y,d});canvas._points.push({x,y,d,hidden:false});
     const col=getSpecColor(d,cm);
-    ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fillStyle=col+'cc'; ctx.fill(); ctx.strokeStyle=col; ctx.lineWidth=0.8; ctx.stroke();
+    ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fillStyle=col+'cc';ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=0.8;ctx.stroke();
   });
-  // Y-axis label (rotated)
-  ctx.save();
-  ctx.translate(14, (H-60)/2);
-  ctx.rotate(-Math.PI/2);
-  ctx.fillStyle='#585878';
-  ctx.font="10px 'JetBrains Mono',monospace";
-  ctx.textAlign='center';
-  ctx.fillText('разброс для читаемости', 0, 0);
-  ctx.restore();
-  // X-axis label
-  ctx.fillStyle='#585878';
-  ctx.font="10px 'JetBrains Mono',monospace";
-  ctx.textAlign='center';
-  ctx.fillText('зарплата $/мес →', W/2, H-28);
-
-  const legEl=document.getElementById('spec-legend'); legEl.innerHTML='';
-  const items=cm==='level'?LEVEL_ORDER.map(l=>({label:l,color:LEVEL_COLORS[l]})):cm==='emp'?Object.entries(EMP_LABELS).map(([k,v])=>({label:v,color:EMP_COLORS[k]})):Object.entries(FMT_LABELS).map(([k,v])=>({label:v,color:FMT_COLORS[k]}));
+  // Axis labels
+  ctx.save();ctx.translate(14,(H-65)/2);ctx.rotate(-Math.PI/2);
+  ctx.fillStyle='#555575';ctx.font="9px 'JetBrains Mono',monospace";ctx.textAlign='center';
+  ctx.fillText('разброс для читаемости',0,0);ctx.restore();
+  ctx.fillStyle='#555575';ctx.font="9px 'JetBrains Mono',monospace";ctx.textAlign='center';
+  ctx.fillText('зарплата $/мес →',W/2,H-28);
+  ctx.fillStyle='#444466';ctx.textAlign='right';
+  ctx.fillText(specZoom>1.05?`zoom ×${specZoom.toFixed(1)}  ·  drag=pan`:'scroll=zoom  ·  drag=pan',W-PAD,H-28);
+  // Legend
+  const legEl=document.getElementById('spec-legend');legEl.innerHTML='';
+  let items;
+  if(cm==='level') items=LEVEL_ORDER.map(l=>({label:l,color:LEVEL_COLORS[l]}));
+  else if(cm==='emp') items=Object.entries(EMP_LABELS).map(([k,v])=>({label:v,color:EMP_COLORS[k]}));
+  else if(cm==='sphere') items=SPHERE_LABELS_ORDER.map(l=>({label:l,color:SPHERE_COLORS[l]}));
+  else items=Object.entries(FMT_LABELS).map(([k,v])=>({label:v,color:FMT_COLORS[k]}));
   items.forEach(i=>legEl.innerHTML+=`<div class="sl-item"><div class="sl-dot" style="background:${i.color}"></div>${i.label}</div>`);
+  // Tooltip
   const specTip=document.getElementById('spectrum-tooltip');
   canvas.onmousemove=function(e){
-    const rect=canvas.getBoundingClientRect(),sx=canvas.width/rect.width,sy=canvas.height/rect.height;
-    const cx=(e.clientX-rect.left)*sx,cy=(e.clientY-rect.top)*sy;
-    const hit=(canvas._points||[]).find(p=>Math.hypot(p.x-cx,p.y-cy)<10);
+    const rect=canvas.getBoundingClientRect(),sx=canvas.width/rect.width;
+    const cx=(e.clientX-rect.left)*sx,cy=(e.clientY-rect.top)*(canvas.height/rect.height);
+    const hit=(canvas._points||[]).filter(p=>!p.hidden).find(p=>Math.hypot(p.x-cx,p.y-cy)<10);
     if(hit){
       const d=hit.d;
-      specTip.innerHTML=`<b>${d.city}</b> · ${d.level}<br>${d.dept}<br><b style="color:var(--accent)">${fmtSalary(d.salary)}</b> · ${expLabel(d.exp)}<br>${EMP_LABELS[d.emp]} · ${FMT_LABELS[d.fmt]}`;
+      const sw=d.software?d.software.split(/[,/]/).map(s=>s.trim()).filter(Boolean).slice(0,4).join(', '):'';
+      const proj=d.projects?d.projects.split(/[,/]/).map(s=>s.trim()).filter(Boolean).slice(0,3).join(', '):'';
+      specTip.innerHTML=`<b>${d.city}</b> · <span style="color:${LEVEL_COLORS[d.level]}">${d.level}</span><br>${d.dept}<br><b style="color:var(--accent)">${fmtSalary(d.salary)}</b> · ${expLabel(d.exp)}<br>${EMP_LABELS[d.emp]} · ${FMT_LABELS[d.fmt]}${proj?`<br><span style="color:#6b8aff;font-size:.7rem">${proj}</span>`:''}${sw?`<br><span style="color:#7878a0;font-size:.7rem">${sw}</span>`:''}`;
       specTip.style.display='block';
-      // Smart positioning — flip left/up if too close to edge
-      const mx=e.clientX-rect.left, my=e.clientY-rect.top;
-      const TW=222, TH=88;
-      const left=(mx+TW+14>rect.width) ? mx-TW-8 : mx+10;
-      const top=(my+TH>rect.height) ? my-TH-6 : my-10;
-      specTip.style.left=Math.max(2,left)+'px';
-      specTip.style.top=Math.max(2,top)+'px';
+      const mx=e.clientX-rect.left,my=e.clientY-rect.top,TW=230,TH=108;
+      specTip.style.left=Math.max(2,(mx+TW+14>rect.width?mx-TW-8:mx+10))+'px';
+      specTip.style.top=Math.max(2,(my+TH>rect.height?my-TH-6:my-10))+'px';
     } else specTip.style.display='none';
   };
   canvas.onmouseleave=()=>specTip.style.display='none';
 }
-['spec-level','spec-emp','spec-color'].forEach(id=>document.getElementById(id).addEventListener('change',drawSpectrum));
+// Wheel: zoom or pan
+document.getElementById('spectrum-canvas').addEventListener('wheel',function(e){
+  e.preventDefault();
+  const rect=this.getBoundingClientRect();
+  const mxFrac=Math.max(0,Math.min(1,(e.clientX-rect.left-70)/(rect.width-140)));
+  if(e.shiftKey){
+    specPanFrac+=0.05*(e.deltaY>0?1:-1)/specZoom;
+  } else {
+    const zf=e.deltaY>0?0.82:1.22;
+    const oldV=1/specZoom;
+    const pFrac=specPanFrac+mxFrac*oldV;
+    specZoom=Math.max(1,Math.min(25,specZoom*zf));
+    specPanFrac=pFrac-mxFrac*(1/specZoom);
+  }
+  drawSpectrum();
+},{passive:false});
+['spec-level','spec-emp','spec-color','spec-sphere'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{specZoom=1;specPanFrac=0;drawSpectrum();}));
+// Left mouse drag pan for spectrum
+(function(){
+  const specCanvas=document.getElementById('spectrum-canvas');
+  let specDrag=false, specDragX=0;
+  specCanvas.addEventListener('mousedown',e=>{
+    if(e.button===0){e.preventDefault();specDrag=true;specDragX=e.clientX;specCanvas.style.cursor='grabbing';}
+  });
+  window.addEventListener('mousemove',e=>{
+    if(!specDrag)return;
+    const dx=e.clientX-specDragX;
+    specPanFrac-=dx*0.0008/specZoom;
+    specDragX=e.clientX;
+    drawSpectrum();
+  });
+  window.addEventListener('mouseup',()=>{specDrag=false;specCanvas.style.cursor='grab';});
+})();
 
 // ══════════════════════════════════════════════════════
 // TABLE
@@ -1036,7 +1296,7 @@ function renderTable(){
   const fmt=document.getElementById('tf-fmt').value;
   const maxSal=Math.max(...D.map(d=>d.salary),1);
   let rows=D.filter(d=>{
-    if(q&&!d.city.toLowerCase().includes(q)&&!d.dept.toLowerCase().includes(q)&&!d.level.toLowerCase().includes(q))return false;
+    if(q&&!d.city.toLowerCase().includes(q)&&!d.dept.toLowerCase().includes(q)&&!d.level.toLowerCase().includes(q)&&!(d.projects||'').toLowerCase().includes(q)&&!(d.software||'').toLowerCase().includes(q))return false;
     if(lvl&&d.level!==lvl)return false; if(emp&&d.emp!==emp)return false; if(fmt&&d.fmt!==fmt)return false; return true;
   });
   rows.sort((a,b)=>{
@@ -1049,7 +1309,7 @@ function renderTable(){
   const tbody=document.getElementById('table-body');
   tbody.innerHTML=rows.map(d=>{
     const bw=Math.round((d.salary/maxSal)*80), isMy=mySalary>0&&Math.abs(d.salary-mySalary)<150;
-    return `<tr class="${isMy?'my-row':''}"><td>${d.city}</td><td><span class="lvl-badge" style="background:${LEVEL_COLORS[d.level]}22;color:${LEVEL_COLORS[d.level]}">${d.level}</span></td><td style="color:var(--text-dim);font-size:.8rem">${d.dept}</td><td class="sal-cell">${fmtSalary(d.salary)}<span class="sal-bar" style="width:${bw}px"></span>${isMy?'<span class="my-dot"></span>':''}</td><td>${expLabel(d.exp)}</td><td>${EMP_LABELS[d.emp]}</td><td>${FMT_LABELS[d.fmt]}</td><td style="color:var(--text-dim);font-size:.8rem">${d.afterTax?'после':'до'} нал.</td></tr>`;
+    return `<tr class="${isMy?'my-row':''}"><td>${d.city}</td><td><span class="lvl-badge" style="background:${LEVEL_COLORS[d.level]}22;color:${LEVEL_COLORS[d.level]}">${d.level}</span></td><td class="dept-cell">${d.dept}</td><td class="sal-cell">${fmtSalary(d.salary)}<span class="sal-bar" style="width:${bw}px"></span>${isMy?'<span class="my-dot"></span>':''}</td><td>${expLabel(d.exp)}</td><td>${EMP_LABELS[d.emp]}</td><td>${FMT_LABELS[d.fmt]}</td><td style="color:var(--text-dim);font-size:.8rem">${d.afterTax?'после':'до'} нал.</td><td class="extra-cell">${d.projects||'—'}</td><td class="extra-cell">${d.software||'—'}</td></tr>`;
   }).join('');
 }
 

@@ -132,15 +132,17 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .t-search{background:var(--card);border:1px solid var(--border);color:var(--text);padding:.45rem .9rem;border-radius:5px;font-family:'Rajdhani',sans-serif;font-size:.88rem;outline:none;width:200px;transition:border-color .2s;}
 .t-search:focus{border-color:var(--accent);}
 .t-search::placeholder{color:var(--text-dim);}
-.table-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border);}
+.table-wrap{overflow:auto;border-radius:8px;border:1px solid var(--border);max-height:70vh;}
 table{width:100%;border-collapse:collapse;font-size:.85rem;}
-thead th{background:var(--surface);padding:.7rem 1rem;text-align:left;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);cursor:pointer;user-select:none;white-space:nowrap;border-bottom:1px solid var(--border);transition:color .15s;}
+thead th{background:var(--surface);padding:.7rem 1rem;text-align:left;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);cursor:pointer;user-select:none;white-space:nowrap;border-bottom:1px solid var(--border);transition:color .15s;position:sticky;top:0;z-index:2;}
 thead th:hover{color:var(--accent);}
 thead th.sort-asc::after{content:' ↑';color:var(--accent);}
 thead th.sort-desc::after{content:' ↓';color:var(--accent);}
 tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .12s;}
-tbody tr:hover{background:rgba(255,255,255,.03);}
+tbody tr:nth-child(even){background:rgba(255,255,255,.018);}
+tbody tr:hover{background:rgba(255,255,255,.05);}
 tbody tr.my-row{background:rgba(0,255,170,.04);}
+tbody tr.my-row:hover{background:rgba(0,255,170,.07);}
 tbody td{padding:.55rem 1rem;color:var(--text-light);}
 .lvl-badge{display:inline-block;padding:.1rem .5rem;border-radius:3px;font-size:.72rem;font-weight:600;letter-spacing:.04em;}
 .sal-cell{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--text-light);}
@@ -270,6 +272,7 @@ tbody td{padding:.55rem 1rem;color:var(--text-light);}
   <div class="spectrum-controls">
     <select class="spec-filter" id="spec-level"><option value="">Все уровни</option><option>Junior</option><option>Middle</option><option>Senior</option><option>Lead</option><option>Supervisor</option><option>Head</option></select>
     <select class="spec-filter" id="spec-emp"><option value="">Все типы</option><option value="staff">Штатный</option><option value="freelance">Фрилансер</option><option value="own">Своя компания</option></select>
+    <select class="spec-filter" id="spec-city"><option value="">Все города</option></select>
     <select class="spec-filter" id="spec-sphere"><option value="">Все сферы</option></select>
     <select class="spec-filter" id="spec-color"><option value="level">Цвет: Уровень</option><option value="emp">Цвет: Занятость</option><option value="fmt">Цвет: Формат</option><option value="sphere">Цвет: Сфера</option></select>
     <span style="font-size:.72rem;color:#9090b8;margin-left:.5rem;">X = зарплата $/мес &nbsp;·&nbsp; Y = визуальный разброс &nbsp;·&nbsp; scroll=zoom &nbsp;·&nbsp; перетаскивай для навигации</span>
@@ -791,6 +794,11 @@ async function loadData() {
   });
   const sphereSel=document.getElementById('spec-sphere');
   [...sphereSet].sort().forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sphereSel.appendChild(o);});
+  // Populate city filter (sorted by count desc)
+  const cityCount={};
+  D.forEach(d=>{cityCount[d.city]=(cityCount[d.city]||0)+1;});
+  const citySel=document.getElementById('spec-city');
+  Object.entries(cityCount).sort((a,b)=>b[1]-a[1]).forEach(([c,n])=>{const o=document.createElement('option');o.value=c;o.textContent=`${c} (${n})`;citySel.appendChild(o);});
   setLoader(100, 'Готово!');
   setTimeout(()=>{
     document.getElementById('loading-screen').classList.add('fade-out');
@@ -805,7 +813,7 @@ async function loadData() {
 // ══════════════════════════════════════════════════════
 function median(arr){const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;}
 function avg(arr){return arr.reduce((a,b)=>a+b,0)/arr.length;}
-function fmtSalary(n){return '$'+Math.round(n).toLocaleString('ru-RU');}
+function fmtSalary(n){return '$'+Math.round(n).toLocaleString('en-US');}
 function expLabel(e){if(e<=1)return'0–2 л';if(e<=4)return'3–5 л';if(e<=7.5)return'6–9 л';if(e<=12)return'10–14 л';return'15+ л';}
 function salaryColor(s){
   if(s<1000) return lerp3('#4a9eff','#00ffaa',s/1000);
@@ -819,12 +827,13 @@ function hexToRgb(h){const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),1
 function updateStats(){
   const salaries = D.map(d=>d.salary);
   const med = median(salaries);
+  const fmt=n=>Math.round(n).toLocaleString('en-US');
   document.getElementById('s-total').textContent = D.length;
-  document.getElementById('s-avg').innerHTML = '$'+Math.round(avg(salaries)).toLocaleString()+'<span>/мес</span>';
-  document.getElementById('s-median').innerHTML = '$'+Math.round(med).toLocaleString()+'<span>/мес</span>';
-  document.getElementById('s-max').innerHTML = '$'+Math.max(...salaries).toLocaleString()+'<span>/мес</span>';
+  document.getElementById('s-avg').innerHTML = '$'+fmt(avg(salaries))+'<span>/мес</span>';
+  document.getElementById('s-median').innerHTML = '$'+fmt(med)+'<span>/мес</span>';
+  document.getElementById('s-max').innerHTML = '$'+fmt(Math.max(...salaries))+'<span>/мес</span>';
   document.getElementById('s-cities').textContent = [...new Set(D.map(d=>d.city))].length;
-  document.getElementById('median-val').textContent = '$'+Math.round(med).toLocaleString();
+  document.getElementById('median-val').textContent = '$'+fmt(med);
 }
 
 // ══════════════════════════════════════════════════════
@@ -1028,19 +1037,19 @@ function initGlobe(){
   Object.values(cityMap).forEach(ci=>{
     const med_s=median(ci.salaries);
     const col=salaryColor(med_s);
-    const colHex=parseInt(col.replace('rgb(','').replace(')','').split(',').map(x=>parseInt(x).toString(16).padStart(2,'0')).join(''),16);
+    const threeColor=new THREE.Color(col);
     const count=ci.salaries.length;
     const barH=0.03+(count/maxCount)*0.22;
     const normal=latToVec3(ci.lat,ci.lng,1).normalize();
     const center=normal.clone().multiplyScalar(1.0+barH/2);
-    const bar=new THREE.Mesh(new THREE.CylinderGeometry(0.007,0.012,barH,6,1),new THREE.MeshBasicMaterial({color:colHex}));
+    const bar=new THREE.Mesh(new THREE.CylinderGeometry(0.007,0.012,barH,6,1),new THREE.MeshBasicMaterial({color:threeColor}));
     bar.position.copy(center);
     bar.quaternion.setFromUnitVectors(yUp,normal);
     bar.userData={...ci,avgSalary:Math.round(med_s),count};
     group.add(bar); barMeshes.push(bar);
     // Cap
     const capPos=normal.clone().multiplyScalar(1.0+barH+0.002);
-    const cap=new THREE.Mesh(new THREE.CircleGeometry(0.014,6),new THREE.MeshBasicMaterial({color:colHex,transparent:true,opacity:0.75,side:THREE.DoubleSide}));
+    const cap=new THREE.Mesh(new THREE.CircleGeometry(0.014,6),new THREE.MeshBasicMaterial({color:threeColor,transparent:true,opacity:0.75,side:THREE.DoubleSide}));
     cap.position.copy(capPos);
     cap.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),normal);
     group.add(cap);
@@ -1143,7 +1152,7 @@ function initGlobe(){
   // Top cities list
   const topCities=Object.values(cityMap).filter(c=>c.salaries.length>1).map(c=>({city:c.city,med:median(c.salaries),count:c.salaries.length})).sort((a,b)=>b.med-a.med).slice(0,14);
   const listEl=document.getElementById('city-top-list');
-  listEl.innerHTML=topCities.map(c=>`<div class="city-top-item"><span class="city-name">${c.city} <small style="color:#7878a0">(${c.count})</small></span><span class="city-avg">$${Math.round(c.med).toLocaleString()}</span></div>`).join('');
+  listEl.innerHTML=topCities.map(c=>`<div class="city-top-item"><span class="city-name">${c.city} <small style="color:#7878a0">(${c.count})</small></span><span class="city-avg">$${Math.round(c.med).toLocaleString('en-US')}</span></div>`).join('');
 
   // Raycaster hover
   const raycaster=new THREE.Raycaster(),mouse2=new THREE.Vector2();
@@ -1161,7 +1170,7 @@ function initGlobe(){
         const cnt=d.levelMap[l].length;
         const med=Math.round(median(d.levelMap[l]));
         const dot=`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${LEVEL_COLORS[l]};margin-right:4px;"></span>`;
-        return `${dot}<b>${l}</b>: $${med.toLocaleString()} <span style="color:#7878a0">(${cnt})</span>`;
+        return `${dot}<b>${l}</b>: $${med.toLocaleString('en-US')} <span style="color:#7878a0">(${cnt})</span>`;
       }).join('<br>');
       // Top software
       const swCount={};
@@ -1323,8 +1332,9 @@ function drawSpectrum(){
   const fL=document.getElementById('spec-level').value;
   const fE=document.getElementById('spec-emp').value;
   const fS=document.getElementById('spec-sphere').value;
+  const fC=document.getElementById('spec-city').value;
   const cm=document.getElementById('spec-color').value;
-  let filtered=D.filter(d=>(!fL||d.level===fL)&&(!fE||d.emp===fE)&&(!fS||(d.projects||'').toLowerCase().includes(fS.toLowerCase()))).sort((a,b)=>a.salary-b.salary);
+  let filtered=D.filter(d=>(!fL||d.level===fL)&&(!fE||d.emp===fE)&&(!fS||(d.projects||'').toLowerCase().includes(fS.toLowerCase()))&&(!fC||d.city===fC)).sort((a,b)=>a.salary-b.salary);
   const W=canvas.parentElement.clientWidth, H=420;
   canvas.width=W; canvas.height=H;
   const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,W,H);
@@ -1361,7 +1371,7 @@ function drawSpectrum(){
     ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1;
     ctx.beginPath();ctx.moveTo(gx,H-65);ctx.lineTo(gx,H-59);ctx.stroke();
     ctx.fillStyle='#8888aa';
-    const lbl=g>=1000?'$'+(g/1000).toLocaleString('ru-RU')+'K':'$'+g;
+    const lbl=g>=1000?'$'+(g/1000).toLocaleString('en-US')+'K':'$'+g;
     ctx.fillText(lbl,gx,H-46);
   }
   // Median
@@ -1370,7 +1380,7 @@ function drawSpectrum(){
     ctx.strokeStyle='rgba(255,165,0,0.5)'; ctx.setLineDash([5,4]); ctx.lineWidth=1.5;
     ctx.beginPath();ctx.moveTo(medX,22);ctx.lineTo(medX,H-66);ctx.stroke();ctx.setLineDash([]);
     ctx.fillStyle='#ffa500'; ctx.font="10px 'JetBrains Mono',monospace"; ctx.textAlign='center';
-    ctx.fillText('Медиана $'+Math.round(medS).toLocaleString(),medX,16);
+    ctx.fillText('Медиана $'+Math.round(medS).toLocaleString('en-US'),medX,16);
   }
   // My salary
   const myLine=document.getElementById('spec-my-line'),myLabel=document.getElementById('spec-my-label');
@@ -1439,7 +1449,7 @@ document.getElementById('spectrum-canvas').addEventListener('wheel',function(e){
   }
   drawSpectrum();
 },{passive:false});
-['spec-level','spec-emp','spec-color','spec-sphere'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{specZoom=1;specPanFrac=0;drawSpectrum();}));
+['spec-level','spec-emp','spec-color','spec-sphere','spec-city'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{specZoom=1;specPanFrac=0;drawSpectrum();}));
 // Left mouse drag pan for spectrum
 (function(){
   const specCanvas=document.getElementById('spectrum-canvas');
@@ -1461,6 +1471,8 @@ document.getElementById('spectrum-canvas').addEventListener('wheel',function(e){
 // TABLE
 // ══════════════════════════════════════════════════════
 let sortCol='salary', sortDir=-1;
+let tableRows=[], tableRendered=0;
+const TABLE_CHUNK=80;
 document.querySelectorAll('thead th[data-col]').forEach(th=>{
   th.addEventListener('click',()=>{
     const col=th.dataset.col; if(sortCol===col)sortDir*=-1; else{sortCol=col;sortDir=-1;}
@@ -1469,29 +1481,61 @@ document.querySelectorAll('thead th[data-col]').forEach(th=>{
   });
 });
 ['t-search','tf-level','tf-emp','tf-fmt'].forEach(id=>document.getElementById(id).addEventListener('input',renderTable));
+
+function rowHTML(d,maxSal){
+  const bw=Math.round((d.salary/maxSal)*80), isMy=mySalary>0&&Math.abs(d.salary-mySalary)<150;
+  return `<tr class="${isMy?'my-row':''}"><td>${d.city}</td><td><span class="lvl-badge" style="background:${LEVEL_COLORS[d.level]}22;color:${LEVEL_COLORS[d.level]}">${d.level}</span></td><td class="dept-cell">${d.dept}</td><td class="sal-cell">${fmtSalary(d.salary)}<span class="sal-bar" style="width:${bw}px"></span>${isMy?'<span class="my-dot"></span>':''}</td><td>${expLabel(d.exp)}</td><td>${EMP_LABELS[d.emp]}</td><td>${FMT_LABELS[d.fmt]}</td><td style="color:var(--text-dim);font-size:.8rem">${d.afterTax?'после':'до'} нал.</td><td class="extra-cell" title="${(d.projects||'—').replace(/"/g,'&quot;')}">${d.projects||'—'}</td><td class="extra-cell" title="${(d.software||'—').replace(/"/g,'&quot;')}">${d.software||'—'}</td></tr>`;
+}
+
+function renderTableChunk(){
+  if(tableRendered>=tableRows.length)return;
+  const maxSal=Math.max(...D.map(d=>d.salary),1);
+  const end=Math.min(tableRendered+TABLE_CHUNK,tableRows.length);
+  const frag=document.createDocumentFragment();
+  const tmp=document.createElement('tbody');
+  let html='';
+  for(let i=tableRendered;i<end;i++) html+=rowHTML(tableRows[i],maxSal);
+  tmp.innerHTML=html;
+  while(tmp.firstChild)frag.appendChild(tmp.firstChild);
+  document.getElementById('table-body').appendChild(frag);
+  tableRendered=end;
+}
+
 function renderTable(){
   const q=document.getElementById('t-search').value.toLowerCase();
   const lvl=document.getElementById('tf-level').value;
   const emp=document.getElementById('tf-emp').value;
   const fmt=document.getElementById('tf-fmt').value;
   const maxSal=Math.max(...D.map(d=>d.salary),1);
-  let rows=D.filter(d=>{
+  tableRows=D.filter(d=>{
     if(q&&!d.city.toLowerCase().includes(q)&&!d.dept.toLowerCase().includes(q)&&!d.level.toLowerCase().includes(q)&&!(d.projects||'').toLowerCase().includes(q)&&!(d.software||'').toLowerCase().includes(q))return false;
     if(lvl&&d.level!==lvl)return false; if(emp&&d.emp!==emp)return false; if(fmt&&d.fmt!==fmt)return false; return true;
   });
-  rows.sort((a,b)=>{
+  tableRows.sort((a,b)=>{
     let va=a[sortCol],vb=b[sortCol];
     if(sortCol==='level'){va=LEVEL_ORDER.indexOf(a.level);vb=LEVEL_ORDER.indexOf(b.level);}
     if(typeof va==='string')return sortDir*va.localeCompare(vb,'ru');
     return sortDir*(va-vb);
   });
-  document.getElementById('rows-count').textContent=rows.length+' записей';
+  document.getElementById('rows-count').textContent=tableRows.length+' записей';
   const tbody=document.getElementById('table-body');
-  tbody.innerHTML=rows.map(d=>{
-    const bw=Math.round((d.salary/maxSal)*80), isMy=mySalary>0&&Math.abs(d.salary-mySalary)<150;
-    return `<tr class="${isMy?'my-row':''}"><td>${d.city}</td><td><span class="lvl-badge" style="background:${LEVEL_COLORS[d.level]}22;color:${LEVEL_COLORS[d.level]}">${d.level}</span></td><td class="dept-cell">${d.dept}</td><td class="sal-cell">${fmtSalary(d.salary)}<span class="sal-bar" style="width:${bw}px"></span>${isMy?'<span class="my-dot"></span>':''}</td><td>${expLabel(d.exp)}</td><td>${EMP_LABELS[d.emp]}</td><td>${FMT_LABELS[d.fmt]}</td><td style="color:var(--text-dim);font-size:.8rem">${d.afterTax?'после':'до'} нал.</td><td class="extra-cell">${d.projects||'—'}</td><td class="extra-cell">${d.software||'—'}</td></tr>`;
-  }).join('');
+  tbody.innerHTML='';
+  tableRendered=0;
+  // Render first chunk
+  const end=Math.min(TABLE_CHUNK,tableRows.length);
+  let html='';
+  for(let i=0;i<end;i++) html+=rowHTML(tableRows[i],maxSal);
+  tbody.innerHTML=html;
+  tableRendered=end;
 }
+
+// Lazy load more rows on scroll
+document.querySelector('.table-wrap').addEventListener('scroll',function(){
+  if(tableRendered>=tableRows.length)return;
+  if(this.scrollTop+this.clientHeight>=this.scrollHeight-200){
+    renderTableChunk();
+  }
+});
 
 // ══════════════════════════════════════════════════════
 // START

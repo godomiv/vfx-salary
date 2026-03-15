@@ -1037,6 +1037,37 @@ function cityToISO(cityRaw){
   return null;
 }
 
+// Cost of Living: [expenses, rent_1bd_center] per month USD for a single person — Numbeo 2026
+const COST_OF_LIVING={
+// Cyrillic keys (from dataset) + Latin keys
+'лос-анджелес':[1650,2680],'берлин':[1090,1384],'тель-авив':[1508,1650],'лимассол':[1054,950],
+'барселона':[977,1100],'батуми':[540,461],'лондон':[1385,2965],'белград':[620,520],
+'дніпро':[420,280],'варшава':[750,750],'челябинск':[400,280],'ереван':[673,709],
+'тбилиси':[684,748],'москва':[679,1212],'киев':[450,450],'київ':[450,450],
+'санкт-петербург':[550,700],'санкт_петербург':[550,700],'минск':[430,420],
+'алматы':[400,450],'новосибирск':[400,320],'новосибирс':[400,320],
+'красноярск':[410,330],'казань':[420,350],'самара':[390,300],'ларнака':[900,800],
+'одесса':[380,300],'львов':[370,320],'сеул':[950,900],'токио':[894,1050],
+'мадрид':[830,950],'будапешт':[700,650],'софия':[600,500],'бангкок':[580,480],
+'франкфурт':[1100,1200],'краснодар':[430,380],'екатеринбург':[420,340],
+'ростов-на-дону':[400,320],'пермь':[380,280],'воронеж':[370,270],'уфа':[380,280],
+'омск':[370,260],'тюмень':[410,340],'иркутск':[390,300],'хабаровск':[420,350],
+'новороссийск':[400,320],'сочи':[500,600],'калининград':[430,400],'тула':[370,270],
+'ярославль':[380,280],'пятигорск':[360,260],'ставрополь':[350,250],
+'ташкент':[320,350],'бишкек':[300,280],'баку':[430,450],'кишинев':[360,350],
+'вильнюс':[650,650],'рига':[650,600],'пловдив':[480,350],'подгорица':[450,400],
+'загреб':[600,600],'цюрих':[1800,2600],'шанхай':[650,1050],'лиссабон':[750,850],
+'хайфа':[1200,1100],'тиват':[480,450],'асуньсон':[350,300],'буэнос-айрес':[450,400],
+'дананг':[350,300],'бали':[450,400],'пхувет':[420,380],'гюмри':[400,300],
+'ижевск':[350,240],'саратов':[350,240],'таганрог':[350,240],'томск':[360,260],'тверь':[360,250],
+// Latin keys
+'san francisco':[1610,3200],'bangkok':[580,480],'belgrad':[620,520],'erevan':[673,709],
+'madrid':[830,950],'riga':[650,600],'vilnius':[650,650],'calgary':[800,1200],
+'santa clara':[1500,2800],'bogota':[350,380],'novi sad':[430,350],'msk':[679,1212],
+'krasnoyarsk':[410,330],'voronezh':[370,270],'vrn':[370,270],'ufa':[380,280],
+'bucharest romania recent year':[550,500],'plovdiv':[480,350],'portland':[950,1500]
+};
+
 function initGlobe(){
   const container=document.getElementById('globe-canvas-container');
   const W=container.clientWidth, H=container.clientHeight||780;
@@ -1144,7 +1175,8 @@ function initGlobe(){
     pyramid.quaternion.setFromUnitVectors(yUp, normal.clone().negate());
     // 45° spin so square base looks like ◆ diamond
     pyramid.rotateOnAxis(new THREE.Vector3(0,1,0), Math.PI/4);
-    pyramid.userData={...ci,avgSalary:Math.round(med_s),count:ci.salaries.length};
+    const _ck=ci.city.toLowerCase().replace(/,.*$/,'').trim();
+    pyramid.userData={...ci,avgSalary:Math.round(med_s),count:ci.salaries.length,col:COST_OF_LIVING[_ck]||COST_OF_LIVING[ci.city.toLowerCase()]||null};
     group.add(pyramid); barMeshes.push(pyramid);
   });
 
@@ -1273,7 +1305,7 @@ function initGlobe(){
       const projCount={};
       d.projects.forEach(p=>{projCount[p]=(projCount[p]||0)+1;});
       const topProj=Object.entries(projCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([p])=>p).join(', ');
-      tooltip.innerHTML=`<b style="font-size:.9rem">${d.city}</b><br><span style="color:#7878a0;font-size:.72rem">${d.count} респондентов</span><br><hr style="border-color:#1a2a4a;margin:4px 0">${lvlRows}${topProj?`<br><span style="color:#6b8aff;font-size:.7rem">${topProj}</span>`:''}${topSw?`<br><span style="color:#7878a0;font-size:.7rem">${topSw}</span>`:''}`;
+      tooltip.innerHTML=`<b style="font-size:.9rem">${d.city}</b><br><span style="color:#7878a0;font-size:.72rem">${d.count} респондентов</span>${d.col?`<br><span style="color:#ffaa44;font-size:.72rem">~$${(d.col[0]+d.col[1]).toLocaleString('en-US')}/мес · cost of living</span>`:''}<br><hr style="border-color:#1a2a4a;margin:4px 0">${lvlRows}${topProj?`<br><span style="color:#6b8aff;font-size:.7rem">${topProj}</span>`:''}${topSw?`<br><span style="color:#7878a0;font-size:.7rem">${topSw}</span>`:''}`;
       const rect2=container.getBoundingClientRect();
       const mx=e.clientX-rect2.left,my=e.clientY-rect2.top;
       const TW=230,TH=130;

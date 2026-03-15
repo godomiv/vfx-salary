@@ -160,6 +160,15 @@ tbody td{padding:.55rem 1rem;color:var(--text-light);}
 
 @media(max-width:900px){.globe-layout{grid-template-columns:1fr;}.charts-grid{grid-template-columns:1fr;}.chart-card.full{grid-column:1;}}
 @media(max-width:600px){.header{padding:1.5rem 4vw 1.5rem;}.section,.table-section,.spectrum-section{padding:2rem 4vw;}.my-salary-bar{padding:1.2rem 4vw;gap:1.5rem;}}
+
+/* ── EASTER EGG: MATRIX ── */
+#matrix-overlay{position:absolute;inset:0;z-index:50;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;border-radius:inherit;}
+#matrix-overlay canvas{position:absolute;inset:0;width:100%;height:100%;}
+.matrix-terminal{position:relative;z-index:51;font-family:'JetBrains Mono','Courier New',monospace;font-size:1.1rem;color:#00ff41;text-align:left;padding:2rem;max-width:500px;animation:matrixFadeIn .5s ease-out;}
+.matrix-line{margin-bottom:.6rem;min-height:1.4em;text-shadow:0 0 8px #00ff41;}
+.matrix-cursor{animation:cursorBlink .6s step-end infinite;}
+@keyframes cursorBlink{0%,100%{opacity:1;}50%{opacity:0;}}
+@keyframes matrixFadeIn{from{opacity:0;}to{opacity:1;}}
 </style>
 </head>
 <body>
@@ -1320,7 +1329,236 @@ function initGlobe(){
   container.addEventListener('touchstart',e=>{if(e.touches.length===2)lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);},{passive:true});
   container.addEventListener('touchmove',e=>{if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);camera.position.z=Math.max(1.4,Math.min(5.0,camera.position.z-(d-lastDist)*0.008));lastDist=d;}},{passive:true});
 
-  (function animate(){requestAnimationFrame(animate);if(autoRotate&&!isDragging)group.rotation.y+=0.003;renderer.render(scene,camera);})();
+  // ══════════════════════════════════════════════════════
+  // EASTER EGG 1: MATRIX (5 clicks on the globe)
+  // ══════════════════════════════════════════════════════
+  let matrixClickCount=0, matrixActive=false;
+  let _mDownX=0,_mDownY=0;
+  container.addEventListener('mousedown',e=>{_mDownX=e.clientX;_mDownY=e.clientY;});
+
+  container.addEventListener('click',e=>{
+    if(matrixActive) return;
+    // Ignore if mouse moved (was a drag)
+    if(Math.abs(e.clientX-_mDownX)>4||Math.abs(e.clientY-_mDownY)>4) return;
+    const rect=container.getBoundingClientRect();
+    const mx=((e.clientX-rect.left)/W)*2-1;
+    const my=-((e.clientY-rect.top)/H)*2+1;
+    raycaster.setFromCamera(new THREE.Vector2(mx,my),camera);
+    if(raycaster.intersectObjects(barMeshes).length>0) return;
+    if(raycaster.intersectObject(sphereMesh).length>0){
+      matrixClickCount++;
+      if(matrixClickCount>=5){ matrixClickCount=0; triggerMatrixEffect(); }
+    }
+  });
+
+  function triggerMatrixEffect(){
+    matrixActive=true;
+    const wrap=container.parentElement;
+    const overlay=document.createElement('div');
+    overlay.id='matrix-overlay';
+    wrap.appendChild(overlay);
+
+    const mCanvas=document.createElement('canvas');
+    overlay.appendChild(mCanvas);
+    const mCtx=mCanvas.getContext('2d');
+    mCanvas.width=wrap.clientWidth; mCanvas.height=wrap.clientHeight;
+
+    const fontSize=14;
+    const cols=Math.floor(mCanvas.width/fontSize);
+    const drops=new Array(cols).fill(0).map(()=>Math.random()*-40|0);
+    const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&*()アイウエオカキクケコサシスセソタチツテトナニヌネノ';
+
+    let rainId, lastT=0;
+    function drawRain(t){
+      rainId=requestAnimationFrame(drawRain);
+      if(t-lastT<40) return; lastT=t;
+      mCtx.fillStyle='rgba(0,0,0,0.06)';
+      mCtx.fillRect(0,0,mCanvas.width,mCanvas.height);
+      mCtx.fillStyle='#00ff41';
+      mCtx.font=fontSize+'px monospace';
+      for(let i=0;i<drops.length;i++){
+        const ch=chars[Math.random()*chars.length|0];
+        mCtx.globalAlpha=0.6+Math.random()*0.4;
+        mCtx.fillText(ch,i*fontSize,drops[i]*fontSize);
+        if(drops[i]*fontSize>mCanvas.height&&Math.random()>0.975) drops[i]=0;
+        drops[i]++;
+      }
+      mCtx.globalAlpha=1;
+    }
+    rainId=requestAnimationFrame(drawRain);
+
+    setTimeout(()=>showMatrixTerminal(overlay,mCanvas,rainId),2500);
+  }
+
+  function showMatrixTerminal(overlay,mCanvas,rainId){
+    mCanvas.style.opacity='0.25';
+    mCanvas.style.transition='opacity 0.6s';
+
+    const terminal=document.createElement('div');
+    terminal.className='matrix-terminal';
+    overlay.appendChild(terminal);
+
+    const lines=[
+      {text:'Wake up, Neo...',pause:1200},
+      {text:'The AI has you...',pause:1200},
+      {text:'Follow the white rabbit.',pause:0}
+    ];
+    const cursor=document.createElement('span');
+    cursor.className='matrix-cursor';
+    cursor.textContent='█';
+
+    let lineIdx=0,charIdx=0,currentEl=null;
+    function typeNext(){
+      if(lineIdx>=lines.length){
+        if(currentEl) currentEl.appendChild(cursor);
+        setTimeout(()=>dismissMatrix(overlay,rainId),3500);
+        return;
+      }
+      if(charIdx===0){
+        currentEl=document.createElement('div');
+        currentEl.className='matrix-line';
+        terminal.appendChild(currentEl);
+      }
+      const line=lines[lineIdx];
+      if(charIdx<line.text.length){
+        currentEl.textContent=line.text.substring(0,charIdx+1);
+        currentEl.appendChild(cursor);
+        charIdx++;
+        setTimeout(typeNext,55+Math.random()*45);
+      } else {
+        lineIdx++; charIdx=0;
+        setTimeout(typeNext,line.pause);
+      }
+    }
+    typeNext();
+
+    setTimeout(()=>{
+      const earlyDismiss=()=>{
+        document.removeEventListener('keydown',earlyDismiss);
+        overlay.removeEventListener('click',earlyDismiss);
+        dismissMatrix(overlay,rainId);
+      };
+      document.addEventListener('keydown',earlyDismiss,{once:true});
+      overlay.addEventListener('click',earlyDismiss,{once:true});
+    },600);
+  }
+
+  function dismissMatrix(overlay,rainId){
+    if(!overlay.parentElement) return;
+    cancelAnimationFrame(rainId);
+    overlay.style.opacity='0';
+    overlay.style.transition='opacity 0.8s';
+    setTimeout(()=>{ overlay.remove(); matrixActive=false; },800);
+  }
+
+  // ══════════════════════════════════════════════════════
+  // EASTER EGG 2: IDLE MOON (20s inactivity)
+  // ══════════════════════════════════════════════════════
+  let idleTimer=null, idleActive=false;
+  let moonMesh=null;
+  let savedCameraZ=camera.position.z, savedAutoRotate=autoRotate;
+  let idleCameraTarget=3.5, idleCameraAnimating=false;
+  const IDLE_TIMEOUT=20000;
+  const MOON_X=-1.8, MOON_Y=0.0, MOON_Z=0.8;
+
+  function resetIdleTimer(){
+    if(idleTimer) clearTimeout(idleTimer);
+    if(idleActive) exitIdleMode();
+    idleTimer=setTimeout(enterIdleMode,IDLE_TIMEOUT);
+  }
+  ['mousemove','mousedown','wheel','click'].forEach(evt=>
+    container.addEventListener(evt,resetIdleTimer,{passive:true}));
+  ['touchstart','touchmove'].forEach(evt=>
+    container.addEventListener(evt,resetIdleTimer,{passive:true}));
+  resetIdleTimer();
+
+  function enterIdleMode(){
+    if(idleActive||matrixActive) return;
+    idleActive=true;
+    savedCameraZ=camera.position.z;
+    savedAutoRotate=autoRotate;
+    autoRotate=true;
+    idleCameraTarget=3.5;
+    idleCameraAnimating=true;
+    createMoon();
+  }
+
+  function createMoon(){
+    const moonGeo=new THREE.SphereGeometry(0.5,48,48); // large — ~50% of earth radius(1)
+    const tc=document.createElement('canvas');
+    tc.width=512; tc.height=512;
+    const mx=tc.getContext('2d');
+    mx.fillStyle='#0a0a1e'; mx.fillRect(0,0,512,512);
+    mx.save();
+    mx.beginPath(); mx.arc(256,256,248,0,Math.PI*2); mx.clip();
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=()=>{
+      // Cover-fit the image into circle
+      const s=Math.max(512/img.width,512/img.height);
+      const w=img.width*s, h=img.height*s;
+      mx.drawImage(img,(512-w)/2,(512-h)/2,w,h);
+      mx.restore();
+      mx.beginPath(); mx.arc(256,256,248,0,Math.PI*2);
+      mx.strokeStyle='rgba(100,160,255,0.5)'; mx.lineWidth=6; mx.stroke();
+      if(moonMesh) moonMesh.material.map.needsUpdate=true;
+    };
+    img.onerror=()=>{
+      mx.fillStyle='#4a4a6a'; mx.fillRect(0,0,512,512);
+      mx.restore();
+      mx.beginPath(); mx.arc(256,256,248,0,Math.PI*2);
+      mx.strokeStyle='#7a7a9a'; mx.lineWidth=6; mx.stroke();
+      mx.fillStyle='#b0b0c0'; mx.font='bold 48px sans-serif';
+      mx.textAlign='center'; mx.textBaseline='middle';
+      mx.fillText('PHOTO',256,256);
+      if(moonMesh) moonMesh.material.map.needsUpdate=true;
+    };
+    img.src='moon-photo.jpg';
+    const moonTex=new THREE.CanvasTexture(tc);
+    const moonMat=new THREE.MeshLambertMaterial({map:moonTex,emissive:0x222244,emissiveIntensity:0.5});
+    moonMesh=new THREE.Mesh(moonGeo,moonMat);
+    // Place in group but compensate current rotation so moon appears on screen-left
+    const a=-group.rotation.y;
+    moonMesh.position.set(
+      MOON_X*Math.cos(a)-MOON_Z*Math.sin(a),
+      MOON_Y,
+      MOON_X*Math.sin(a)+MOON_Z*Math.cos(a)
+    );
+    group.add(moonMesh); // rotates with earth
+  }
+
+  function exitIdleMode(){
+    if(!idleActive) return;
+    idleActive=false;
+    idleCameraTarget=savedCameraZ;
+    idleCameraAnimating=true;
+    autoRotate=savedAutoRotate;
+    if(hintEl){
+      hintEl.textContent=autoRotate?'drag / MMB to rotate · scroll to zoom · click to stop':'drag / MMB to rotate · scroll to zoom';
+    }
+    if(moonMesh){
+      group.remove(moonMesh);
+      moonMesh.geometry.dispose();
+      moonMesh.material.map.dispose();
+      moonMesh.material.dispose();
+      moonMesh=null;
+    }
+  }
+
+  // ── EXPANDED ANIMATE LOOP ──
+  (function animate(){
+    requestAnimationFrame(animate);
+    if(autoRotate&&!isDragging) group.rotation.y+=0.0006;
+    if(idleCameraAnimating){
+      const dz=idleCameraTarget-camera.position.z;
+      if(Math.abs(dz)>0.005){ camera.position.z+=dz*0.01; }
+      else{ camera.position.z=idleCameraTarget; idleCameraAnimating=false; }
+    }
+    if(moonMesh){
+      moonMesh.lookAt(camera.position); // always face camera
+    }
+    renderer.render(scene,camera);
+  })();
   window.addEventListener('resize',()=>{const nW=container.clientWidth;camera.aspect=nW/H;camera.updateProjectionMatrix();renderer.setSize(nW,H);});
 }
 

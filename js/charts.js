@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════════════
 // CHARTS
 // ══════════════════════════════════════════════════════
-let chartsInited=false;
+var chartsInited=false;
 function initCharts(){
   if(chartsInited)return; chartsInited=true;
   Chart.defaults.color='#c2c2d8'; Chart.defaults.font={family:"'Rajdhani',sans-serif",size:11};

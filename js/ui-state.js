@@ -24,7 +24,19 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     });
     const tbl = document.getElementById('tab-table');
     if(tbl) tbl.style.display=(tab==='table')?'block':'none';
-    if(tab==='spectrum') drawSpectrum();
+    if(tab==='spectrum'){
+      specZoom=1; specPanFrac=0;
+      ['spec-level','spec-emp','spec-sphere','spec-city'].forEach(id=>{document.getElementById(id).value='';});
+      document.getElementById('spec-color').value='level';
+      drawSpectrum();
+    }
+    if(tab==='table'){
+      sortCol='salary'; sortDir=-1;
+      document.getElementById('t-search').value='';
+      ['tf-level','tf-emp','tf-fmt'].forEach(id=>{document.getElementById(id).value='';});
+      document.querySelectorAll('thead th').forEach(h=>h.classList.remove('sort-asc','sort-desc'));
+      renderTable();
+    }
     if(tab==='charts') setTimeout(()=>initCharts(),50);
   });
 });

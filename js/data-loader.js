@@ -39,42 +39,34 @@ function processCSVText(text, source) {
 async function loadData() {
   // 0. Load lookup tables from JSON files
   setLoader(5, 'Загружаем справочники...');
-  const [coordsData, canonData, isoData, colData, snapshotText] = await Promise.all([
+  const [coordsData, canonData, isoData, colData] = await Promise.all([
     fetch('data/city-coords.json').then(r => r.json()).catch(() => ({})),
     fetch('data/city-canonical.json').then(r => r.json()).catch(() => ({})),
     fetch('data/city-iso.json').then(r => r.json()).catch(() => ({})),
     fetch('data/cost-of-living.json').then(r => r.json()).catch(() => ({})),
-    fetch('data/snapshot.csv').then(r => r.text()).catch(() => ''),
   ]);
   CITY_COORDS = coordsData;
   CITY_CANONICAL_MAP = canonData;
   CITY_ISO = isoData;
   COST_OF_LIVING = colData;
 
-  // 1. Load snapshot (from fetched CSV or empty)
-  setLoader(20, 'Загружаем встроенный снапшот...');
-  if (snapshotText) {
-    D = processCSVText(snapshotText, 'snapshot');
-  }
-  setLoader(50, `Снапшот: ${D.length} записей. Пробуем получить свежие данные...`);
-  document.getElementById('last-updated').textContent =
-    `Снапшот от 26.02.2026 · ${D.length} записей`;
-
-  // 2. Try to fetch live data (works when page is hosted on a server)
+  // Fetch live data from Google Sheets
+  setLoader(30, 'Загружаем данные из Google Sheets...');
   try {
     const res = await fetch(CSV_URL);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const text = await res.text();
-    setLoader(80, 'Парсим свежие данные из Google Sheets...');
-    const fresh = processCSVText(text, 'live');
-    if (fresh.length > 0) {
-      D = fresh;
-      document.getElementById('last-updated').textContent =
-        `Live · обновлено ${new Date().toLocaleString('ru-RU')} · ${D.length} записей`;
-    }
+    setLoader(70, 'Парсим данные...');
+    D = processCSVText(text, 'live');
+    if (D.length === 0) throw new Error('Нет валидных записей');
+    document.getElementById('last-updated').textContent =
+      `Live · обновлено ${new Date().toLocaleString('ru-RU')} · ${D.length} записей`;
   } catch(e) {
     document.getElementById('last-updated').textContent =
-      `Снапшот от 26.02.2026 · ${D.length} записей · (live недоступен при открытии локально)`;
+      `Ошибка загрузки: ${e.message}`;
+    document.getElementById('err-msg').textContent = e.message;
+    document.getElementById('error-screen').style.display = 'flex';
+    return;
   }
 
   if (skippedCount > 0) {

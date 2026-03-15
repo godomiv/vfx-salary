@@ -34,10 +34,12 @@ function initGlobe(){
   renderer.setSize(W,H); renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
   renderer.setClearColor(0x000000,0); container.appendChild(renderer.domElement);
 
-  // Soft ambient + directional
-  scene.add(new THREE.AmbientLight(0x223355,3));
-  const dLight=new THREE.DirectionalLight(0x4466cc,0.6);
-  dLight.position.set(3,2,3); scene.add(dLight);
+  // Lighting: sun always to the right of camera
+  scene.add(new THREE.AmbientLight(0x0a0e1a,4.0));
+  const sunLight=new THREE.DirectionalLight(0xffeedd,5.0);
+  scene.add(sunLight);
+  const rimLight=new THREE.DirectionalLight(0x112244,1.5);
+  rimLight.position.set(-3,-1,-4); scene.add(rimLight);
 
   const group=new THREE.Group(); scene.add(group);
 
@@ -77,16 +79,25 @@ function initGlobe(){
   tctx.fillStyle='#040d1a'; tctx.fillRect(0,0,TEX_W,TEX_H);
 
   const globeTexture=new THREE.CanvasTexture(texCanvas);
-  const sphereMat=new THREE.MeshLambertMaterial({map:globeTexture,emissive:0x010308});
+  // Specular map: white=ocean(reflective), black=land(matte)
+  var specCanvas=document.createElement('canvas');
+  specCanvas.width=TEX_W; specCanvas.height=TEX_H;
+  var sctx=specCanvas.getContext('2d');
+  sctx.fillStyle='#ffffff'; sctx.fillRect(0,0,TEX_W,TEX_H);
+  var specTex=new THREE.CanvasTexture(specCanvas);
+  const sphereMat=new THREE.MeshPhongMaterial({map:globeTexture,shininess:8,specular:0x050b10,specularMap:specTex});
   const sphereMesh=new THREE.Mesh(new THREE.SphereGeometry(1,64,64),sphereMat);
   group.add(sphereMesh);
 
-  // No atmosphere sphere — it creates ring artifact at oblique angles
-
-  // Lat/lng grid (very subtle — nearly invisible, only visible on close zoom)
-  const gridMat=new THREE.LineBasicMaterial({color:0x0a1830,transparent:true,opacity:0.12,depthWrite:false});
-  for(let lat=-60;lat<=60;lat+=30){const pts=[];for(let ln=-180;ln<=180;ln+=3)pts.push(latToVec3(lat,ln,1.004));group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));}
-  for(let ln=-180;ln<=180;ln+=30){const pts=[];for(let la=-88;la<=88;la+=3)pts.push(latToVec3(la,ln,1.004));group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));}
+  // Atmosphere glow — very subtle thin halo
+  var glowMat=new THREE.ShaderMaterial({
+    uniforms:{glowColor:{value:new THREE.Color(0x3a6a9a)},coef:{value:0.6},power:{value:6.0}},
+    vertexShader:'varying vec3 vNormal;varying vec3 vPos;void main(){vNormal=normalize(normalMatrix*normal);vPos=vec3(modelViewMatrix*vec4(position,1.0));gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+    fragmentShader:'uniform vec3 glowColor;uniform float coef;uniform float power;varying vec3 vNormal;varying vec3 vPos;void main(){float intensity=pow(coef-dot(vNormal,normalize(-vPos)),power);gl_FragColor=vec4(glowColor,intensity*0.08);}',
+    side:THREE.BackSide,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false
+  });
+  var glowMesh=new THREE.Mesh(new THREE.SphereGeometry(1.06,64,64),glowMat);
+  group.add(glowMesh);
 
   // Build city data
   const cityMap={};
@@ -122,17 +133,26 @@ function initGlobe(){
     //   tip  = center - normal * coneH/2  → want this = normal * 1.0 (surface)
     //   base = center + normal * coneH/2  → sticks outward
     // Therefore: center = normal * (1.0 + coneH/2)
-    const pyramidGeo=new THREE.ConeGeometry(coneR,coneH,4,1);
+    const pyramidGeo=new THREE.ConeGeometry(coneR,coneH,32,1,true);
+    const dimColor=threeColor.clone().multiplyScalar(1.0);
     const pyramidMat=new THREE.MeshLambertMaterial({
-      color:threeColor, emissive:threeColor, emissiveIntensity:0.3,
+      color:dimColor, emissive:0x000000, emissiveIntensity:0,
     });
     const pyramid=new THREE.Mesh(pyramidGeo,pyramidMat);
+    // Dark cap circle
+    const capColor=dimColor.clone().multiplyScalar(0.5);
+    const capGeo=new THREE.CircleGeometry(coneR,32);
+    const capMat=new THREE.MeshLambertMaterial({color:capColor,emissive:0x000000,emissiveIntensity:0,side:THREE.DoubleSide});
+    const cap=new THREE.Mesh(capGeo,capMat);
+    cap.position.y=-coneH/2;
+    cap.rotation.x=Math.PI/2;
+    pyramid.add(cap);
     pyramid.position.copy(normal.clone().multiplyScalar(1.0+coneH/2));
     pyramid.quaternion.setFromUnitVectors(yUp, normal.clone().negate());
-    // 45° spin so square base looks like ◆ diamond
-    pyramid.rotateOnAxis(new THREE.Vector3(0,1,0), Math.PI/4);
     const _ck=ci.city.toLowerCase().replace(/,.*$/,'').trim();
-    pyramid.userData={...ci,avgSalary:Math.round(med_s),count:ci.salaries.length,col:COST_OF_LIVING[_ck]||COST_OF_LIVING[ci.city.toLowerCase()]||null};
+    var coneUserData={...ci,avgSalary:Math.round(med_s),count:ci.salaries.length,col:COST_OF_LIVING[_ck]||COST_OF_LIVING[ci.city.toLowerCase()]||null};
+    pyramid.userData=coneUserData;
+    cap.userData=coneUserData;
     group.add(pyramid); barMeshes.push(pyramid);
   });
 
@@ -150,77 +170,81 @@ function initGlobe(){
       }
       function geoToTex(lon,lat){return[(lon+180)/360*TEX_W,(90-lat)/180*TEX_H];}
 
-      function fillCountry(arcIdxArrays, fillColor){
-        tctx.fillStyle=fillColor;
+      function drawRingPath(coords,ctx){
+        ctx=ctx||tctx;
+        // Draw coords onto current path, splitting at antimeridian
+        let sub=[];
+        const commitSub=()=>{
+          if(sub.length<2)return;
+          const [sx,sy]=geoToTex(sub[0][0],sub[0][1]);
+          ctx.moveTo(sx,sy);
+          for(let k=1;k<sub.length;k++){
+            const [cx,cy]=geoToTex(sub[k][0],sub[k][1]);
+            ctx.lineTo(cx,cy);
+          }
+          ctx.closePath();
+          sub=[];
+        };
+        for(let i=0;i<coords.length;i++){
+          if(i>0&&Math.abs(coords[i][0]-coords[i-1][0])>90){
+            // Antimeridian crossing — interpolate boundary lat and close sub-path
+            const [lon0,lat0]=coords[i-1], [lon1,lat1]=coords[i];
+            const t=(lon0>0?(180-lon0):(lon0+180))/Math.abs(lon1-lon0);
+            const latM=lat0+(lat1-lat0)*t;
+            const edgeLon=lon0>0?180:-180;
+            sub.push([edgeLon,latM]);
+            commitSub();
+            sub.push([-edgeLon,latM]); // start new sub on other side
+          }
+          sub.push(coords[i]);
+        }
+        commitSub();
+      }
+
+      function fillCountry(arcIdxArrays, fillColor, ctx){
+        ctx=ctx||tctx;
+        ctx.save();
+        ctx.fillStyle=fillColor;
+        ctx.beginPath();
         arcIdxArrays.forEach(ring=>{
           let coords=[];
           ring.forEach(i=>coords=coords.concat(decodeArc(i)));
-          if(!coords.length)return;
-          // Detect antimeridian crossing — if any consecutive pair jumps >90° lon, skip ring
-          // (these are wrapping polygons like Russia that create horizontal band artifacts)
-          let crosses=false;
-          for(let i=1;i<coords.length;i++){
-            if(Math.abs(coords[i][0]-coords[i-1][0])>90){crosses=true;break;}
-          }
-          if(crosses){
-            // Split into sub-paths at crossing points and fill each separately
-            let subCoords=[];
-            const fillSub=()=>{
-              if(subCoords.length<3)return;
-              tctx.beginPath();
-              subCoords.forEach(([lon,lat],i)=>{
-                const [cx,cy]=geoToTex(lon,lat);
-                i===0?tctx.moveTo(cx,cy):tctx.lineTo(cx,cy);
-              });
-              tctx.closePath();tctx.fill();
-            };
-            coords.forEach(([lon,lat],i)=>{
-              if(i>0&&Math.abs(lon-coords[i-1][0])>90){
-                fillSub(); subCoords=[];
-              }
-              subCoords.push([lon,lat]);
-            });
-            fillSub();
-            return;
-          }
-          tctx.beginPath();
-          coords.forEach(([lon,lat],i)=>{
-            const [cx,cy]=geoToTex(lon,lat);
-            i===0?tctx.moveTo(cx,cy):tctx.lineTo(cx,cy);
-          });
-          tctx.closePath();
-          tctx.fill();
+          if(coords.length) drawRingPath(coords,ctx);
         });
+        ctx.fill('evenodd');
+        ctx.restore();
       }
 
-      // Fill land: first pass — all land (no-data color)
+      // Fill all land with uniform color + black on specular map
       world.objects.countries.geometries.forEach(g=>{
         const fill=(g.type==='Polygon')?[g.arcs]:g.arcs;
-        fill.forEach(p=>fillCountry(p,'#0d1d30'));
+        fill.forEach(p=>{
+          fillCountry(p,'#0d1d30');
+          fillCountry(p,'#000000',sctx);
+        });
       });
+      specTex.needsUpdate=true;
 
-      // Second pass — countries WITH data get gradient color
-      world.objects.countries.geometries.forEach(g=>{
-        const id=parseInt(g.id);
-        const count=isoCount[id]||0;
-        if(!count)return;
-        const t=Math.sqrt(count/maxIsoCount);
-        const r=Math.round(15+t*45), gv=Math.round(40+t*80), b=Math.round(80+t*120);
-        const fill=(g.type==='Polygon')?[g.arcs]:g.arcs;
-        fill.forEach(p=>fillCountry(p,`rgb(${r},${gv},${b})`));
-      });
+      specTex.needsUpdate=true;
 
       // Update texture
       globeTexture.needsUpdate=true;
 
-      // 3D border lines on top (crisp)
-      const borderMat=new THREE.LineBasicMaterial({color:0x1a3a6e,transparent:true,opacity:0.4,depthWrite:false});
+      // Border lines — simple dark
+      var borderMat=new THREE.LineBasicMaterial({color:0x040d1a,depthWrite:false});
       function drawBorderArcs(arcIdxArrays){
         arcIdxArrays.forEach(ring=>{
           let coords=[];
           ring.forEach(i=>coords=coords.concat(decodeArc(i)));
-          const v3=coords.map(([lon,lat])=>latToVec3(lat,lon,1.005));
-          if(v3.length>1) group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(v3),borderMat));
+          let seg=[];
+          for(let i=0;i<coords.length;i++){
+            if(i>0&&Math.abs(coords[i][0]-coords[i-1][0])>90){
+              if(seg.length>1) group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(seg),borderMat));
+              seg=[];
+            }
+            seg.push(latToVec3(coords[i][1],coords[i][0],1.001));
+          }
+          if(seg.length>1) group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(seg),borderMat));
         });
       }
       world.objects.countries.geometries.forEach(g=>{
@@ -243,7 +267,7 @@ function initGlobe(){
     const rect=container.getBoundingClientRect();
     mouse2.x=((e.clientX-rect.left)/W)*2-1; mouse2.y=-((e.clientY-rect.top)/H)*2+1;
     raycaster.setFromCamera(mouse2,camera);
-    const hits=raycaster.intersectObjects(barMeshes);
+    const hits=raycaster.intersectObjects(barMeshes,true);
     if(hits.length>0){
       const d=hits[0].object.userData;
       // Per-level breakdown
@@ -332,7 +356,7 @@ function initGlobe(){
     const mx=((e.clientX-rect.left)/W)*2-1;
     const my=-((e.clientY-rect.top)/H)*2+1;
     raycaster.setFromCamera(new THREE.Vector2(mx,my),camera);
-    if(raycaster.intersectObjects(barMeshes).length>0) return;
+    if(raycaster.intersectObjects(barMeshes,true).length>0) return;
     if(raycaster.intersectObject(sphereMesh).length>0){
       matrixClickCount++;
       if(matrixClickCount>=5){ matrixClickCount=0; triggerMatrixEffect(); }
@@ -444,10 +468,20 @@ function initGlobe(){
   // ══════════════════════════════════════════════════════
   let idleTimer=null, idleActive=false;
   let moonMesh=null;
-  let savedCameraZ=camera.position.z, savedAutoRotate=autoRotate;
-  let idleCameraTarget=3.5, idleCameraAnimating=false;
+  // Дефолтное положение камеры (при старте)
+  const CAM_DEFAULT={x:camera.position.x, y:camera.position.y, z:camera.position.z};
+  // Целевое положение камеры в idle-режиме
+  const CAM_IDLE={x:0, y:0, z:3.5};
+  let savedCam={x:CAM_DEFAULT.x, y:CAM_DEFAULT.y, z:CAM_DEFAULT.z}, savedAutoRotate=autoRotate;
+  let savedRot={x:0, y:0}, savedAutoRotate_exit=false;
+  let idleCameraTarget=CAM_IDLE, idleCameraAnimating=false;
+  let idleRotTarget={x:0,y:0}, idleRotAnimating=false;
+  let idleAnimFactor=0.05, idleAnimMinRot=0.003, idleAnimMinCam=0.001;
+  const IDLE_DEFAULT_ROT=0;
   const IDLE_TIMEOUT=20000;
-  const MOON_X=-1.8, MOON_Y=0.0, MOON_Z=0.8;
+  const MOON_X=-1.5, MOON_Y=0.0, MOON_Z=0.3;
+
+  function normAngle(a){ a=a%(2*Math.PI); if(a>Math.PI)a-=2*Math.PI; if(a<-Math.PI)a+=2*Math.PI; return a; }
 
   function resetIdleTimer(){
     if(idleTimer) clearTimeout(idleTimer);
@@ -463,88 +497,106 @@ function initGlobe(){
   function enterIdleMode(){
     if(idleActive||matrixActive) return;
     idleActive=true;
-    savedCameraZ=camera.position.z;
+    savedCam={x:camera.position.x, y:camera.position.y, z:camera.position.z};
+    savedRot={x:group.rotation.x, y:group.rotation.y};
     savedAutoRotate=autoRotate;
-    autoRotate=true;
-    idleCameraTarget=3.5;
+    autoRotate=false;
+    idleCameraTarget=CAM_IDLE;
     idleCameraAnimating=true;
+    idleRotTarget={x:0, y:IDLE_DEFAULT_ROT};
+    idleRotAnimating=true;
+    idleAnimFactor=0.017; idleAnimMinRot=0.001; idleAnimMinCam=0.0003; // 3x медленнее
     createMoon();
   }
 
   function createMoon(){
-    const moonGeo=new THREE.SphereGeometry(0.5,48,48); // large — ~50% of earth radius(1)
-    const tc=document.createElement('canvas');
-    tc.width=512; tc.height=512;
-    const mx=tc.getContext('2d');
-    mx.fillStyle='#0a0a1e'; mx.fillRect(0,0,512,512);
-    mx.save();
-    mx.beginPath(); mx.arc(256,256,248,0,Math.PI*2); mx.clip();
-    const img=new Image();
-    img.crossOrigin='anonymous';
-    img.onload=()=>{
-      // Cover-fit the image into circle
-      const s=Math.max(512/img.width,512/img.height);
-      const w=img.width*s, h=img.height*s;
-      mx.drawImage(img,(512-w)/2,(512-h)/2,w,h);
-      mx.restore();
-      mx.beginPath(); mx.arc(256,256,248,0,Math.PI*2);
-      mx.strokeStyle='rgba(100,160,255,0.5)'; mx.lineWidth=6; mx.stroke();
-      if(moonMesh) moonMesh.material.map.needsUpdate=true;
+    // Canvas: ocean base + moon photo at 10% opacity
+    var mW=1024,mH=512;
+    var mc=document.createElement('canvas');
+    mc.width=mW; mc.height=mH;
+    var mx=mc.getContext('2d');
+    // Ocean base fill
+    mx.fillStyle='#040d1a'; mx.fillRect(0,0,mW,mH);
+    var moonTex=new THREE.CanvasTexture(mc);
+    // Layer 1: moon-photo.jpg at 10%
+    var moonImg=new Image();
+    moonImg.onload=function(){
+      mx.globalAlpha=0.1;
+      mx.drawImage(moonImg,0,0,mW,mH);
+      mx.globalAlpha=1;
+      moonTex.needsUpdate=true;
     };
-    img.onerror=()=>{
-      mx.fillStyle='#4a4a6a'; mx.fillRect(0,0,512,512);
-      mx.restore();
-      mx.beginPath(); mx.arc(256,256,248,0,Math.PI*2);
-      mx.strokeStyle='#7a7a9a'; mx.lineWidth=6; mx.stroke();
-      mx.fillStyle='#b0b0c0'; mx.font='bold 48px sans-serif';
-      mx.textAlign='center'; mx.textBaseline='middle';
-      mx.fillText('PHOTO',256,256);
-      if(moonMesh) moonMesh.material.map.needsUpdate=true;
-    };
-    img.src='moon-photo.jpg';
-    const moonTex=new THREE.CanvasTexture(tc);
-    const moonMat=new THREE.MeshLambertMaterial({map:moonTex,emissive:0x222244,emissiveIntensity:0.5});
+    moonImg.src='moon-photo.jpg';
+    var moonGeo=new THREE.SphereGeometry(0.333,48,48);
+    var moonMat=new THREE.MeshLambertMaterial({map:moonTex});
     moonMesh=new THREE.Mesh(moonGeo,moonMat);
-    // Place in group but compensate current rotation so moon appears on screen-left
-    const a=-group.rotation.y;
-    moonMesh.position.set(
-      MOON_X*Math.cos(a)-MOON_Z*Math.sin(a),
-      MOON_Y,
-      MOON_X*Math.sin(a)+MOON_Z*Math.cos(a)
-    );
-    group.add(moonMesh); // rotates with earth
+    moonMesh.position.set(MOON_X, MOON_Y, MOON_Z);
+    group.add(moonMesh);
+  }
+
+  function removeMoon(){
+    if(!moonMesh) return;
+    group.remove(moonMesh);
+    moonMesh.geometry.dispose();
+    if(moonMesh.material.map) moonMesh.material.map.dispose();
+    moonMesh.material.dispose();
+    moonMesh=null;
   }
 
   function exitIdleMode(){
     if(!idleActive) return;
     idleActive=false;
-    idleCameraTarget=savedCameraZ;
+    idleCameraTarget=savedCam;
     idleCameraAnimating=true;
-    autoRotate=savedAutoRotate;
-    if(hintEl){
-      hintEl.textContent=autoRotate?'drag / MMB to rotate · scroll to zoom · click to stop':'drag / MMB to rotate · scroll to zoom';
-    }
-    if(moonMesh){
-      group.remove(moonMesh);
-      moonMesh.geometry.dispose();
-      moonMesh.material.map.dispose();
-      moonMesh.material.dispose();
-      moonMesh=null;
-    }
+    idleRotTarget=savedRot;
+    idleRotAnimating=true;
+    autoRotate=false;
+    savedAutoRotate_exit=savedAutoRotate;
+    idleAnimFactor=0.05; idleAnimMinRot=0.003; idleAnimMinCam=0.001; // обычная скорость
+    if(hintEl) hintEl.textContent='drag / MMB to rotate · scroll to zoom';
+    removeMoon();
   }
 
   // ── EXPANDED ANIMATE LOOP ──
   (function animate(){
     requestAnimationFrame(animate);
+    // lerp с минимальной линейной скоростью — без затухания в конце
+    function lerpStep(delta, factor, minStep){
+      return Math.sign(delta)*Math.min(Math.abs(delta), Math.max(Math.abs(delta*factor), minStep));
+    }
+    if(idleRotAnimating){
+      const dy=normAngle(idleRotTarget.y-group.rotation.y);
+      const dx=idleRotTarget.x-group.rotation.x;
+      group.rotation.y+=lerpStep(dy,idleAnimFactor,idleAnimMinRot);
+      group.rotation.x+=lerpStep(dx,idleAnimFactor,idleAnimMinRot);
+      if(Math.abs(dy)<idleAnimMinRot&&Math.abs(dx)<idleAnimMinRot){
+        group.rotation.y=idleRotTarget.y;
+        group.rotation.x=idleRotTarget.x;
+        idleRotAnimating=false;
+        if(idleActive){ autoRotate=true; }
+        else{ autoRotate=savedAutoRotate_exit; }
+      }
+    }
     if(autoRotate&&!isDragging) group.rotation.y+=0.0006;
     if(idleCameraAnimating){
-      const dz=idleCameraTarget-camera.position.z;
-      if(Math.abs(dz)>0.005){ camera.position.z+=dz*0.01; }
-      else{ camera.position.z=idleCameraTarget; idleCameraAnimating=false; }
+      const dx=idleCameraTarget.x-camera.position.x;
+      const dy=idleCameraTarget.y-camera.position.y;
+      const dz=idleCameraTarget.z-camera.position.z;
+      camera.position.x+=lerpStep(dx,idleAnimFactor,idleAnimMinCam);
+      camera.position.y+=lerpStep(dy,idleAnimFactor,idleAnimMinCam);
+      camera.position.z+=lerpStep(dz,idleAnimFactor,idleAnimMinRot);
+      if(Math.abs(dx)<idleAnimMinCam&&Math.abs(dy)<idleAnimMinCam&&Math.abs(dz)<idleAnimMinRot){
+        camera.position.set(idleCameraTarget.x,idleCameraTarget.y,idleCameraTarget.z);
+        idleCameraAnimating=false;
+      }
     }
     if(moonMesh){
-      moonMesh.lookAt(camera.position); // always face camera
+      moonMesh.lookAt(camera.position);
     }
+    // Keep sun always to the right of camera
+    var sunDir=new THREE.Vector3(5,2,2);
+    sunDir.applyQuaternion(camera.quaternion);
+    sunLight.position.copy(camera.position).add(sunDir);
     renderer.render(scene,camera);
   })();
   window.addEventListener('resize',()=>{const nW=container.clientWidth;camera.aspect=nW/H;camera.updateProjectionMatrix();renderer.setSize(nW,H);});

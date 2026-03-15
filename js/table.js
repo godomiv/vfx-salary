@@ -1,8 +1,8 @@
 // ══════════════════════════════════════════════════════
 // TABLE
 // ══════════════════════════════════════════════════════
-let sortCol='salary', sortDir=-1;
-let tableRows=[], tableRendered=0;
+var sortCol='salary', sortDir=-1;
+var tableRows=[], tableRendered=0;
 const TABLE_CHUNK=80;
 document.querySelectorAll('thead th[data-col]').forEach(th=>{
   th.addEventListener('click',()=>{

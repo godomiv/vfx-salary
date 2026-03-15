@@ -21,7 +21,7 @@ function getSpecColor(d,mode){
   }
   return '#aaa';
 }
-let specZoom=1.0, specPanFrac=0;
+var specZoom=1.0, specPanFrac=0;
 function drawSpectrum(){
   const canvas=document.getElementById('spectrum-canvas');
   const fL=document.getElementById('spec-level').value;
@@ -144,7 +144,26 @@ document.getElementById('spectrum-canvas').addEventListener('wheel',function(e){
   }
   drawSpectrum();
 },{passive:false});
-['spec-level','spec-emp','spec-color','spec-sphere','spec-city'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{specZoom=1;specPanFrac=0;drawSpectrum();}));
+['spec-level','spec-emp','spec-color','spec-sphere','spec-city'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{
+  // Auto-fit: zoom and pan to show only filtered data points
+  const fL=document.getElementById('spec-level').value;
+  const fE=document.getElementById('spec-emp').value;
+  const fS=document.getElementById('spec-sphere').value;
+  const fC=document.getElementById('spec-city').value;
+  var filt=D.filter(d=>(!fL||d.level===fL)&&(!fE||d.emp===fE)&&(!fS||(d.projects||'').toLowerCase().includes(fS.toLowerCase()))&&(!fC||d.city===fC));
+  if(filt.length>0){
+    var allMax=Math.max(...D.map(d=>d.salary),1);
+    var minS=Math.min(...filt.map(d=>d.salary));
+    var maxS=Math.max(...filt.map(d=>d.salary));
+    var pad=(maxS-minS)*0.08||allMax*0.05;
+    var lo=Math.max(0,minS-pad), hi=maxS+pad;
+    var range=hi-lo;
+    if(range<allMax*0.05) range=allMax*0.05;
+    specZoom=Math.max(1,Math.min(25,allMax/range));
+    specPanFrac=Math.max(0,lo/allMax);
+  } else { specZoom=1; specPanFrac=0; }
+  drawSpectrum();
+}));
 // Left mouse drag pan for spectrum
 (function(){
   const specCanvas=document.getElementById('spectrum-canvas');

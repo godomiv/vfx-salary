@@ -1,6 +1,18 @@
 // ══════════════════════════════════════════════════════
 // TABLE
 // ══════════════════════════════════════════════════════
+
+// HTML escape — защита от XSS из Google Sheets данных
+function esc(s) {
+  if (s === null || s === undefined || s === '—') return '—';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 var sortCol='salary', sortDir=-1;
 var tableRows=[], tableRendered=0;
 const TABLE_CHUNK=80;
@@ -13,9 +25,21 @@ document.querySelectorAll('thead th[data-col]').forEach(th=>{
 });
 ['t-search','tf-level','tf-emp','tf-fmt'].forEach(id=>document.getElementById(id).addEventListener('input',renderTable));
 
-function rowHTML(d,maxSal){
-  const bw=Math.round((d.salary/maxSal)*80), isMy=mySalary>0&&Math.abs(d.salary-mySalary)<150;
-  return `<tr class="${isMy?'my-row':''}"><td>${d.city}</td><td><span class="lvl-badge" style="background:${LEVEL_COLORS[d.level]}22;color:${LEVEL_COLORS[d.level]}">${d.level}</span></td><td class="dept-cell">${d.dept}</td><td class="sal-cell">${fmtSalary(d.salary)}<span class="sal-bar" style="width:${bw}px"></span>${isMy?'<span class="my-dot"></span>':''}</td><td>${expLabel(d.exp)}</td><td>${EMP_LABELS[d.emp]}</td><td>${FMT_LABELS[d.fmt]}</td><td style="color:var(--text-dim);font-size:.8rem">${d.afterTax?'после':'до'} нал.</td><td class="extra-cell" title="${(d.projects||'—').replace(/"/g,'&quot;')}">${d.projects||'—'}</td><td class="extra-cell" title="${(d.software||'—').replace(/"/g,'&quot;')}">${d.software||'—'}</td></tr>`;
+function rowHTML(d, maxSal) {
+  const bw = Math.round((d.salary / maxSal) * 80);
+  const isMy = mySalary > 0 && Math.abs(d.salary - mySalary) < 150;
+  return `<tr class="${isMy ? 'my-row' : ''}">
+    <td>${esc(d.city)}</td>
+    <td><span class="lvl-badge" style="background:${LEVEL_COLORS[d.level]}22;color:${LEVEL_COLORS[d.level]}">${esc(d.level)}</span></td>
+    <td class="dept-cell">${esc(d.dept)}</td>
+    <td class="sal-cell">${fmtSalary(d.salary)}<span class="sal-bar" style="width:${bw}px"></span>${isMy ? '<span class="my-dot"></span>' : ''}</td>
+    <td>${expLabel(d.exp)}</td>
+    <td>${EMP_LABELS[d.emp] || '—'}</td>
+    <td>${FMT_LABELS[d.fmt] || '—'}</td>
+    <td style="color:var(--text-dim);font-size:.8rem">${d.afterTax ? 'после' : 'до'} нал.</td>
+    <td class="extra-cell" title="${esc(d.projects)}">${esc(d.projects)}</td>
+    <td class="extra-cell" title="${esc(d.software)}">${esc(d.software)}</td>
+  </tr>`;
 }
 
 function renderTableChunk(){
@@ -52,7 +76,6 @@ function renderTable(){
   const tbody=document.getElementById('table-body');
   tbody.innerHTML='';
   tableRendered=0;
-  // Render first chunk
   const end=Math.min(TABLE_CHUNK,tableRows.length);
   let html='';
   for(let i=0;i<end;i++) html+=rowHTML(tableRows[i],maxSal);
@@ -60,7 +83,7 @@ function renderTable(){
   tableRendered=end;
 }
 
-// Lazy load more rows on window scroll (table has no inner scroll now)
+// Lazy load more rows on window scroll
 window.addEventListener('scroll',function(){
   const tabTable=document.getElementById('tab-table');
   if(!tabTable||tabTable.style.display==='none')return;

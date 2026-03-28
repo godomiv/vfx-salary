@@ -82,6 +82,34 @@ function normalizeCity(cityRaw) {
   return cityRaw.trim().replace(/^(.)/, c => c.toUpperCase());
 }
 
+function normalizeAge(v) {
+  if (!v) return null;
+  v = v.trim().toLowerCase();
+  if (v.includes('до 25') || v.includes('<25') || v.includes('до25')) return '< 25';
+  if (v.includes('25') && (v.includes('29') || v.includes('-29'))) return '25-29';
+  if (v.includes('30') && (v.includes('34') || v.includes('-34'))) return '30-34';
+  if (v.includes('35') && (v.includes('39') || v.includes('-39'))) return '35-39';
+  if (v.includes('40') && (v.includes('44') || v.includes('-44'))) return '40-44';
+  if (v.includes('45')) return '45+';
+  return null;
+}
+function normalizeHours(v) {
+  if (!v) return null;
+  v = v.trim().toLowerCase();
+  if (v.includes('50+') || v.includes('более 50') || v.includes('50 и')) return '50+';
+  if (v.includes('41') || v.includes('41-50') || v.includes('41–50')) return '41-50';
+  if (v.includes('до 40') || v.includes('40') || v.includes('менее')) return '<=40';
+  return null;
+}
+function normalizeOvertime(v) {
+  if (!v) return null;
+  v = v.trim().toLowerCase();
+  if (v === 'да' || v === 'yes') return 'yes';
+  if (v === 'нет' || v === 'no') return 'no';
+  if (v.includes('иногда') || v.includes('sometimes') || v.includes('частично')) return 'sometimes';
+  return null;
+}
+
 function parseSalary(raw) {
   if (!raw) return null;
   raw = raw.toString().toLowerCase().trim();

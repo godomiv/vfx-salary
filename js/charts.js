@@ -1,90 +1,136 @@
 // ══════════════════════════════════════════════════════
 // CHARTS
 // ══════════════════════════════════════════════════════
+
+// ── Shared options builder ─────────────────────────────
+function chartOpts(overrides) {
+  var base = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: 'rgba(10,10,26,0.95)',
+        titleColor: '#eeeef8',
+        bodyColor: '#c2c2d8',
+        borderColor: 'rgba(0,255,170,0.3)',
+        borderWidth: 1,
+        cornerRadius: 6,
+        padding: 10,
+        titleFont: { family: "'Rajdhani',sans-serif", weight: '600', size: 12 },
+        bodyFont: { family: "'JetBrains Mono',monospace", size: 11 }
+      }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9090b8' } },
+      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9090b8' } }
+    }
+  };
+  // Deep merge overrides
+  if (overrides) {
+    if (overrides.plugins) {
+      if (overrides.plugins.legend) base.plugins.legend = Object.assign(base.plugins.legend, overrides.plugins.legend);
+      if (overrides.plugins.tooltip) base.plugins.tooltip = Object.assign(base.plugins.tooltip, overrides.plugins.tooltip);
+      delete overrides.plugins.legend; delete overrides.plugins.tooltip;
+      Object.assign(base.plugins, overrides.plugins);
+      delete overrides.plugins;
+    }
+    if (overrides.scales) {
+      if (overrides.scales.x) base.scales.x = Object.assign(base.scales.x, overrides.scales.x);
+      if (overrides.scales.y) base.scales.y = Object.assign(base.scales.y, overrides.scales.y);
+      delete overrides.scales;
+    }
+    Object.assign(base, overrides);
+  }
+  return base;
+}
+
 var chartsInited=false;
 function initCharts(){
   if(chartsInited)return; chartsInited=true;
   Chart.defaults.color='#c2c2d8'; Chart.defaults.font={family:"'Rajdhani',sans-serif",size:11};
-  const g='rgba(255,255,255,0.05)', t='#9090b8';
 
   // ── 1. Зарплата по уровню ──────────────────────────
-  const byLevel={};
-  D.forEach(d=>{if(!byLevel[d.level])byLevel[d.level]=[];byLevel[d.level].push(d.salary);});
-  const lo=LEVEL_ORDER.filter(l=>byLevel[l]);
-  new Chart(document.getElementById('chart-level'),{type:'bar',data:{labels:lo,datasets:[{label:'Медиана $',data:lo.map(l=>Math.round(median(byLevel[l]))),backgroundColor:lo.map(l=>LEVEL_COLORS[l]),borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:g},ticks:{color:t}},x:{grid:{color:g},ticks:{color:t}}}}});
-
-  // ── 2. Формат работы — donut ───────────────────────
-  const fc={remote:0,hybrid:0,studio:0}; D.forEach(d=>fc[d.fmt]++);
-  new Chart(document.getElementById('chart-emp'),{type:'doughnut',data:{labels:['Удалённо','Гибрид','В студии'],datasets:[{data:[fc.remote,fc.hybrid,fc.studio],backgroundColor:['#4a9eff','#00ffaa','#ff6b35'],borderColor:'var(--card)',borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:16}}}}});
-
-  // ── 3. Топ городов ─────────────────────────────────
-  const cm={}; D.forEach(d=>{if(!cm[d.city])cm[d.city]=[];cm[d.city].push(d.salary);});
-  const MIN_CITY_COUNT = 3;
-  const topC=Object.entries(cm)
-    .filter(([,v])=>v.length>=MIN_CITY_COUNT)
-    .map(([k,v])=>({k,med:Math.round(median(v)),cnt:v.length}))
-    .sort((a,b)=>b.med-a.med)
-    .slice(0,12);
-  new Chart(document.getElementById('chart-city'),{type:'bar',data:{labels:topC.map(c=>c.k+' (n='+c.cnt+')'),datasets:[{label:'Медиана $',data:topC.map(c=>c.med),backgroundColor:topC.map(c=>salaryColor(c.med)),borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`$${ctx.parsed.x.toLocaleString('en-US')}`}}},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
-
-  // ── 4. Сфера → медиана ────────────────────────────
-  const sphereSalaries={};
-  D.forEach(d=>{
-    if(!d.projects)return;
-    d.projects.split(/[,/]/).map(s=>s.trim()).filter(Boolean).forEach(p=>{
-      const k=p.replace(/сериалы\s*\/?\s*тв/i,'Сериалы/ТВ').replace(/ивенты/i,'Ивенты').trim();
-      if(!sphereSalaries[k])sphereSalaries[k]=[];
-      sphereSalaries[k].push(d.salary);
-    });
+  var byLevel={};
+  D.forEach(function(d){if(!byLevel[d.level])byLevel[d.level]=[];byLevel[d.level].push(d.salary);});
+  var lo=LEVEL_ORDER.filter(function(l){return byLevel[l];});
+  new Chart(document.getElementById('chart-level'),{
+    type:'bar',
+    data:{labels:lo,datasets:[{label:'Медиана $',data:lo.map(function(l){return Math.round(median(byLevel[l]));}),backgroundColor:lo.map(function(l){return LEVEL_COLORS[l];}),borderRadius:4,borderSkipped:false}]},
+    options:chartOpts({plugins:{tooltip:{callbacks:{label:function(ctx){return '$'+ctx.parsed.y.toLocaleString('en-US');}}}}})
   });
-  const sphereMedians=Object.entries(sphereSalaries)
-    .filter(([,v])=>v.length>=2)
-    .map(([k,v])=>({k,med:Math.round(median(v)),cnt:v.length}))
-    .sort((a,b)=>b.med-a.med);
-  const sphereColors2=['#ff3366','#ffa500','#4a9eff','#00e8d3','#ff6b35','#cc44ff','#6b8aff','#00ffaa','#e844ff','#ffcc00'];
-  if(sphereMedians.length) new Chart(document.getElementById('chart-sphere'),{type:'bar',data:{labels:sphereMedians.map(s=>s.k+' (n='+s.cnt+')'),datasets:[{label:'Медиана $',data:sphereMedians.map(s=>s.med),backgroundColor:sphereColors2.slice(0,sphereMedians.length),borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`$${ctx.parsed.x.toLocaleString('en-US')}`}}},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
 
-  // ── 5. Топ софт ────────────────────────────────────
-  const softCount={};
-  D.forEach(d=>{
-    if(!d.software||d.software==='-')return;
-    d.software.split(/[,/]/).map(s=>s.trim()).filter(Boolean).forEach(s=>{
-      let k=s;
-      if(/^ae$/i.test(k)||/after\s*effect/i.test(k))k='After Effects';
-      if(/^c4d$/i.test(k)||/cinema\s*4/i.test(k)||/синь/i.test(k))k='Cinema 4D';
-      if(/^ue$/i.test(k)||/^ue5$/i.test(k)||/unreal/i.test(k))k='Unreal Engine';
-      if(/^nuke$/i.test(k)||/^нюк$/i.test(k)||/^нбк$/i.test(k))k='Nuke';
-      if(/^houdini$/i.test(k))k='Houdini';
-      if(/^blender$/i.test(k)||/блендер/i.test(k))k='Blender';
-      if(/^maya$/i.test(k))k='Maya';
-      if(/^zbrush$/i.test(k))k='ZBrush';
-      if(/substance/i.test(k))k='Substance';
-      if(/photoshop/i.test(k)||/^ps$/i.test(k))k='Photoshop';
-      if(/davinci/i.test(k))k='DaVinci';
-      if(/3ds\s*max/i.test(k))k='3ds Max';
-      if(/redshift/i.test(k))k='Redshift';
-      if(/figma/i.test(k))k='Figma';
-      softCount[k]=(softCount[k]||0)+1;
-    });
+  // ── 2. Возраст vs Зарплата ─────────────────────────
+  var byAge={};
+  D.forEach(function(d){if(d.age){if(!byAge[d.age])byAge[d.age]=[];byAge[d.age].push(d.salary);}});
+  var ageLabels=AGE_ORDER.filter(function(a){return byAge[a]&&byAge[a].length>=2;});
+  var ageMeds=ageLabels.map(function(a){return Math.round(median(byAge[a]));});
+  var peakVal=Math.max.apply(null,ageMeds);
+  new Chart(document.getElementById('chart-age-salary'),{
+    type:'bar',
+    data:{
+      labels:ageLabels,
+      datasets:[
+        {label:'Медиана $',data:ageMeds,backgroundColor:ageLabels.map(function(a){return AGE_COLORS[a]||'#aaa';}),borderRadius:4,borderSkipped:false,order:2},
+        {label:'Пик',data:ageMeds.map(function(){return peakVal;}),type:'line',borderColor:'rgba(255,165,0,0.4)',borderDash:[6,4],borderWidth:1.5,pointRadius:0,fill:false,order:1}
+      ]
+    },
+    options:chartOpts({plugins:{tooltip:{callbacks:{label:function(ctx){
+      if(ctx.datasetIndex===1)return '';
+      var n=byAge[ageLabels[ctx.dataIndex]]?byAge[ageLabels[ctx.dataIndex]].length:0;
+      return '$'+ctx.parsed.y.toLocaleString('en-US')+' ('+n+' чел.)';
+    }}}}})
   });
-  const topSoft=Object.entries(softCount).sort((a,b)=>b[1]-a[1]).slice(0,12);
-  const softColors=['#00ffaa','#4a9eff','#ffa500','#ff6b35','#cc44ff','#00e8d3','#ff3366','#6b8aff','#e844ff','#ffcc00','#33ff99','#ff9966'];
-  if(topSoft.length) new Chart(document.getElementById('chart-soft'),{type:'bar',data:{labels:topSoft.map(s=>s[0]),datasets:[{label:'Чел.',data:topSoft.map(s=>s[1]),backgroundColor:softColors.slice(0,topSoft.length),borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}});
 
-  // ── 6. Scatter: зарплата vs опыт ──────────────────
-  new Chart(document.getElementById('chart-scatter'),{type:'scatter',data:{datasets:LEVEL_ORDER.map(l=>({label:l,data:D.filter(d=>d.level===l).map(d=>({x:d.exp,y:d.salary})),backgroundColor:(LEVEL_COLORS[l]||'#aaa')+'aa',pointRadius:5,pointHoverRadius:8}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10},padding:8}}},scales:{x:{title:{display:true,text:'Опыт (лет)',color:t},grid:{color:g},ticks:{color:t}},y:{title:{display:true,text:'Зарплата $/мес',color:t},grid:{color:g},ticks:{color:t}}}}});
+  // ── 3. Scatter: зарплата vs опыт (jitter + тренд) ──
+  var expBands = [[0,2,1],[3,5,4],[6,9,7.5],[10,14,12],[15,Infinity,17]];
+  var trendData = expBands.map(function(b){
+    var vals = D.filter(function(d){return d.exp>=b[0] && d.exp<=b[1];}).map(function(d){return d.salary;});
+    return vals.length>=2 ? {x:b[2], y:Math.round(median(vals))} : null;
+  }).filter(Boolean);
+  var scatterSets = LEVEL_ORDER.map(function(l){return {
+    label:l,
+    data:D.filter(function(d){return d.level===l;}).map(function(d){return {x:d.exp+(Math.random()-0.5)*0.8, y:d.salary};}),
+    backgroundColor:(LEVEL_COLORS[l]||'#aaa')+'88',
+    pointRadius:3, pointHoverRadius:6, order:2
+  };});
+  scatterSets.push({
+    label:'Медиана', type:'line', data:trendData,
+    borderColor:'#ffa500', backgroundColor:'rgba(255,165,0,0.15)',
+    borderWidth:2, tension:0.3, pointRadius:4, pointHoverRadius:6,
+    pointBackgroundColor:'#ffa500', fill:true, order:1
+  });
+  new Chart(document.getElementById('chart-scatter'),{
+    type:'scatter',
+    data:{datasets:scatterSets},
+    options:chartOpts({
+      plugins:{legend:{display:true,labels:{font:{size:10},padding:8,usePointStyle:true,pointStyle:'circle'}},
+        tooltip:{callbacks:{label:function(ctx){
+          if(ctx.dataset.type==='line') return 'Медиана: $'+ctx.parsed.y.toLocaleString('en-US');
+          return ctx.dataset.label+': $'+ctx.parsed.y.toLocaleString('en-US')+' ('+Math.round(ctx.parsed.x)+' л.)';
+        }}}},
+      scales:{
+        x:{title:{display:true,text:'Опыт (лет)',color:'#9090b8'},grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#9090b8'}},
+        y:{title:{display:true,text:'Зарплата $/мес',color:'#9090b8'},grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#9090b8'}}
+      }
+    })
+  });
 
-  // ── 7. Распределение опыта ─────────────────────────
-  const eb={'0–2':0,'3–5':0,'6–9':0,'10–14':0,'15+':0};
-  D.forEach(d=>{if(d.exp<=1)eb['0–2']++;else if(d.exp<=4)eb['3–5']++;else if(d.exp<=7.5)eb['6–9']++;else if(d.exp<=12)eb['10–14']++;else eb['15+']++;});
-  new Chart(document.getElementById('chart-exp'),{type:'bar',data:{labels:Object.keys(eb),datasets:[{label:'Чел.',data:Object.values(eb),backgroundColor:['#4a9eff','#00e8d3','#ffa500','#ff6b35','#cc44ff'],borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:g},ticks:{color:t}},x:{grid:{color:g},ticks:{color:t}}}}});
+  // ── 4. Топ городов ─────────────────────────────────
+  var cm={}; D.forEach(function(d){if(!cm[d.city])cm[d.city]=[];cm[d.city].push(d.salary);});
+  var MIN_CITY_COUNT=3;
+  var topC=Object.entries(cm).filter(function(e){return e[1].length>=MIN_CITY_COUNT;}).map(function(e){return {k:e[0],med:Math.round(median(e[1])),cnt:e[1].length};}).sort(function(a,b){return b.med-a.med;}).slice(0,12);
+  new Chart(document.getElementById('chart-city'),{
+    type:'bar',
+    data:{labels:topC.map(function(c){return c.k+' ('+c.cnt+' чел.)';}),datasets:[{label:'Медиана $',data:topC.map(function(c){return c.med;}),backgroundColor:topC.map(function(c){return salaryColor(c.med);}),borderRadius:4,borderSkipped:false}]},
+    options:chartOpts({indexAxis:'y',plugins:{tooltip:{callbacks:{label:function(ctx){return '$'+ctx.parsed.x.toLocaleString('en-US');}}}}})
+  });
 
-  // ── 8. НОВЫЙ: Специализация → медиана зарплаты ────
-  const deptMap={};
-  D.forEach(d=>{
+  // ── 5. Специализация → медиана ─────────────────────
+  var deptMap={};
+  D.forEach(function(d){
     if(!d.dept||d.dept==='—')return;
-    // Нормализуем похожие названия
-    let k=d.dept.trim();
+    var k=d.dept.trim();
     if(/composit/i.test(k)||/композ/i.test(k))k='Compositor';
     else if(/3d\s*general|generalist/i.test(k)||/дженерал/i.test(k))k='3D Generalist';
     else if(/light/i.test(k)||/лайт/i.test(k))k='Lighter';
@@ -105,133 +151,247 @@ function initCharts(){
     if(!deptMap[k])deptMap[k]=[];
     deptMap[k].push(d.salary);
   });
-  const deptData=Object.entries(deptMap)
-    .filter(([,v])=>v.length>=2)
-    .map(([k,v])=>({k,med:Math.round(median(v)),cnt:v.length}))
-    .sort((a,b)=>b.med-a.med);
-  const deptColors=['#00e8d3','#4a9eff','#ffa500','#ff3366','#cc44ff','#ff6b35','#00ffaa','#6b8aff','#e844ff','#ffcc00','#33ff99','#ff9966','#aaaaff','#ffaaaa','#aaffaa','#ffaaff'];
+  var deptData=Object.entries(deptMap).filter(function(e){return e[1].length>=2;}).map(function(e){return {k:e[0],med:Math.round(median(e[1])),cnt:e[1].length};}).sort(function(a,b){return b.med-a.med;});
   if(deptData.length){
     new Chart(document.getElementById('chart-dept'),{
       type:'bar',
-      data:{
-        labels:deptData.map(d=>d.k+' (n='+d.cnt+')'),
-        datasets:[{label:'Медиана $',data:deptData.map(d=>d.med),backgroundColor:deptColors.slice(0,deptData.length),borderRadius:4,borderSkipped:false}]
-      },
-      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
-        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`$${ctx.parsed.x.toLocaleString('en-US')}`}}},
-        scales:{x:{grid:{color:g},ticks:{color:t}},y:{grid:{color:g},ticks:{color:t,font:{size:10}}}}}
+      data:{labels:deptData.map(function(d){return d.k+' ('+d.cnt+' чел.)';}),datasets:[{label:'Медиана $',data:deptData.map(function(d){return d.med;}),backgroundColor:deptData.map(function(d){return salaryColor(d.med);}),borderRadius:4,borderSkipped:false}]},
+      options:chartOpts({indexAxis:'y',plugins:{tooltip:{callbacks:{label:function(ctx){return '$'+ctx.parsed.x.toLocaleString('en-US');}}}}})
     });
   }
 
-  // ── 9. НОВЫЙ: Формат работы vs Зарплата ───────────
-  const fmtSal={remote:[],hybrid:[],studio:[]};
-  D.forEach(d=>{if(fmtSal[d.fmt])fmtSal[d.fmt].push(d.salary);});
-  new Chart(document.getElementById('chart-fmt-salary'),{
-    type:'bar',
-    data:{
-      labels:['Удалённо','Гибрид','В студии'],
-      datasets:[{
-        label:'Медиана $',
-        data:[fmtSal.remote,fmtSal.hybrid,fmtSal.studio].map(arr=>arr.length?Math.round(median(arr)):0),
-        backgroundColor:['#4a9eff','#00ffaa','#ff6b35'],
-        borderRadius:4,borderSkipped:false
-      }]
-    },
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`$${ctx.parsed.y.toLocaleString('en-US')}`}}},
-      scales:{y:{grid:{color:g},ticks:{color:t},title:{display:true,text:'Медиана $/мес',color:t}},x:{grid:{color:g},ticks:{color:t}}}}
-  });
-
-  // ── 10. НОВЫЙ: Тип занятости vs Зарплата ──────────
-  const empSal={staff:[],freelance:[],own:[]};
-  D.forEach(d=>{if(empSal[d.emp])empSal[d.emp].push(d.salary);});
-  new Chart(document.getElementById('chart-emp-salary'),{
-    type:'bar',
-    data:{
-      labels:['Штатный','Фрилансер','Своя компания'],
-      datasets:[{
-        label:'Медиана $',
-        data:[empSal.staff,empSal.freelance,empSal.own].map(arr=>arr.length?Math.round(median(arr)):0),
-        backgroundColor:Object.values(EMP_COLORS),
-        borderRadius:4,borderSkipped:false
-      }]
-    },
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`$${ctx.parsed.y.toLocaleString('en-US')}`}}},
-      scales:{y:{grid:{color:g},ticks:{color:t},title:{display:true,text:'Медиана $/мес',color:t}},x:{grid:{color:g},ticks:{color:t}}}}
-  });
-
-  // ── 11. НОВЫЙ: Heatmap Уровень × Сфера ────────────
-  // Собираем уникальные сферы
-  const heatSpheres=new Set();
-  D.forEach(d=>{
+  // ── 6. Сфера → медиана ────────────────────────────
+  var sphereSalaries={};
+  D.forEach(function(d){
     if(!d.projects)return;
-    d.projects.split(/[,/]/).map(s=>s.trim()).filter(Boolean)
-      .forEach(p=>heatSpheres.add(p.replace(/сериалы\s*\/?\s*тв/i,'Сериалы/ТВ').replace(/ивенты/i,'Ивенты').trim()));
-  });
-  // Фильтруем сферы с достаточным числом данных
-  const heatSphereList=[...heatSpheres].filter(sphere=>{
-    return D.filter(d=>d.projects&&d.projects.split(/[,/]/).map(s=>s.trim()).some(p=>p.replace(/сериалы\s*\/?\s*тв/i,'Сериалы/ТВ').replace(/ивенты/i,'Ивенты').trim()===sphere)).length>=3;
-  });
-  const heatLevels=LEVEL_ORDER.filter(l=>byLevel[l]);
-  // Строим матрицу данных для Chart.js bubble/scatter как heatmap
-  const heatDatasets=[];
-  heatLevels.forEach((level,li)=>{
-    heatSphereList.forEach((sphere,si)=>{
-      const vals=D.filter(d=>{
-        if(d.level!==level||!d.projects)return false;
-        return d.projects.split(/[,/]/).map(s=>s.trim()).some(p=>p.replace(/сериалы\s*\/?\s*тв/i,'Сериалы/ТВ').replace(/ивенты/i,'Ивенты').trim()===sphere);
-      }).map(d=>d.salary);
-      if(!vals.length)return;
-      const med=Math.round(median(vals));
-      heatDatasets.push({x:li,y:si,v:med,cnt:vals.length,level,sphere});
+    d.projects.split(/[,/]/).map(function(s){return s.trim();}).filter(Boolean).forEach(function(p){
+      var k=p.replace(/сериалы\s*\/?\s*тв/i,'Сериалы/ТВ').replace(/ивенты/i,'Ивенты').trim();
+      if(!sphereSalaries[k])sphereSalaries[k]=[];
+      sphereSalaries[k].push(d.salary);
     });
   });
-  if(heatDatasets.length){
-    // Нормализуем цвет по диапазону значений
-    const allMeds=heatDatasets.map(p=>p.v);
-    const minM=Math.min(...allMeds), maxM=Math.max(...allMeds);
-    function heatColor(v){
-      const t=(v-minM)/(maxM-minM||1);
-      // cold blue → warm orange → hot pink
-      if(t<0.5){const r=t*2;return `rgba(${Math.round(74+r*(255-74))},${Math.round(158+r*(165-158))},${Math.round(255+r*(0-255))},0.85)`;}
-      else{const r=(t-0.5)*2;return `rgba(${Math.round(255+r*(255-255))},${Math.round(165+r*(51-165))},${Math.round(0+r*(102-0))},0.85)`;}
-    }
-    new Chart(document.getElementById('chart-heatmap'),{
-      type:'bubble',
-      data:{
-        datasets:[{
-          data:heatDatasets.map(p=>({x:p.x,y:p.y,r:Math.max(8,Math.min(28,4+p.cnt*2)),v:p.v,cnt:p.cnt,level:p.level,sphere:p.sphere})),
-          backgroundColor:heatDatasets.map(p=>heatColor(p.v)),
-          borderColor:'rgba(255,255,255,0.1)',
-          borderWidth:1
-        }]
-      },
-      options:{
-        responsive:true,maintainAspectRatio:false,
-        plugins:{
-          legend:{display:false},
-          tooltip:{callbacks:{
-            label:ctx=>{
-              const d=ctx.raw;
-              return [`${d.level} × ${d.sphere}`,`Медиана: $${d.v.toLocaleString('en-US')}`,`Респондентов: ${d.cnt}`];
-            }
-          }}
-        },
-        scales:{
-          x:{type:'linear',min:-0.5,max:heatLevels.length-0.5,
-            ticks:{color:t,stepSize:1,callback:(v)=>heatLevels[v]||''},
-            grid:{color:g},title:{display:true,text:'Уровень',color:t}
-          },
-          y:{type:'linear',min:-0.5,max:heatSphereList.length-0.5,
-            ticks:{color:t,stepSize:1,callback:(v,i,ticks)=>{
-              const idx=Math.round(v);
-              return (idx>=0&&idx<heatSphereList.length)?heatSphereList[idx]:'';
-            }},
-            grid:{color:g}
-          }
-        }
+  var sphereMedians=Object.entries(sphereSalaries).filter(function(e){return e[1].length>=2;}).map(function(e){return {k:e[0],med:Math.round(median(e[1])),cnt:e[1].length};}).sort(function(a,b){return b.med-a.med;});
+  if(sphereMedians.length) new Chart(document.getElementById('chart-sphere'),{
+    type:'bar',
+    data:{labels:sphereMedians.map(function(s){return s.k+' ('+s.cnt+' чел.)';}),datasets:[{label:'Медиана $',data:sphereMedians.map(function(s){return s.med;}),backgroundColor:sphereMedians.map(function(s){return salaryColor(s.med);}),borderRadius:4,borderSkipped:false}]},
+    options:chartOpts({indexAxis:'y',plugins:{tooltip:{callbacks:{label:function(ctx){return '$'+ctx.parsed.x.toLocaleString('en-US');}}}}})
+  });
+
+  // ── 7. Формат × Уровень — зарплата ────────────────
+  var fmtLevelData={};
+  ['remote','hybrid','studio'].forEach(function(f){fmtLevelData[f]={};});
+  D.forEach(function(d){
+    if(!fmtLevelData[d.fmt])return;
+    if(!fmtLevelData[d.fmt][d.level])fmtLevelData[d.fmt][d.level]=[];
+    fmtLevelData[d.fmt][d.level].push(d.salary);
+  });
+  var fmtLevels=LEVEL_ORDER.filter(function(l){return ['remote','hybrid','studio'].some(function(f){return fmtLevelData[f][l]&&fmtLevelData[f][l].length>=2;});});
+  new Chart(document.getElementById('chart-fmt-level'),{
+    type:'bar',
+    data:{
+      labels:fmtLevels,
+      datasets:[
+        {label:'Удалённо',data:fmtLevels.map(function(l){var a=fmtLevelData.remote[l];return a&&a.length>=2?Math.round(median(a)):0;}),backgroundColor:'#4a9eff',borderRadius:4,borderSkipped:false},
+        {label:'Гибрид',data:fmtLevels.map(function(l){var a=fmtLevelData.hybrid[l];return a&&a.length>=2?Math.round(median(a)):0;}),backgroundColor:'#00ffaa',borderRadius:4,borderSkipped:false},
+        {label:'В студии',data:fmtLevels.map(function(l){var a=fmtLevelData.studio[l];return a&&a.length>=2?Math.round(median(a)):0;}),backgroundColor:'#ff6b35',borderRadius:4,borderSkipped:false}
+      ]
+    },
+    options:chartOpts({plugins:{legend:{display:true,labels:{font:{size:10},padding:8,usePointStyle:true,pointStyle:'circle'}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': $'+ctx.parsed.y.toLocaleString('en-US');}}}}})
+  });
+
+  // ── 8. Оплата переработок × Опыт ──────────────────
+  var expBrackets=['0–2','3–5','6–9','10–14','15+'];
+  function expBracket(e){if(e<=1)return '0–2';if(e<=4)return '3–5';if(e<=7.5)return '6–9';if(e<=12)return '10–14';return '15+';}
+  var otExpData={yes:{},no:{},sometimes:{}};
+  D.forEach(function(d){
+    if(!d.overtime)return;
+    var eb=expBracket(d.exp);
+    if(!otExpData[d.overtime])return;
+    if(!otExpData[d.overtime][eb])otExpData[d.overtime][eb]=[];
+    otExpData[d.overtime][eb].push(d.salary);
+  });
+  new Chart(document.getElementById('chart-overtime-exp'),{
+    type:'bar',
+    data:{
+      labels:expBrackets,
+      datasets:[
+        {label:'Да',data:expBrackets.map(function(b){var a=otExpData.yes[b];return a&&a.length>=2?Math.round(median(a)):0;}),backgroundColor:'#00ffaa',borderRadius:4,borderSkipped:false},
+        {label:'Иногда',data:expBrackets.map(function(b){var a=otExpData.sometimes[b];return a&&a.length>=2?Math.round(median(a)):0;}),backgroundColor:'#ffa500',borderRadius:4,borderSkipped:false},
+        {label:'Нет',data:expBrackets.map(function(b){var a=otExpData.no[b];return a&&a.length>=2?Math.round(median(a)):0;}),backgroundColor:'#ff3366',borderRadius:4,borderSkipped:false}
+      ]
+    },
+    options:chartOpts({
+      plugins:{legend:{display:true,labels:{font:{size:10},padding:8,usePointStyle:true,pointStyle:'circle'}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': $'+ctx.parsed.y.toLocaleString('en-US');}}}},
+      scales:{y:{title:{display:true,text:'Медиана $/мес',color:'#9090b8'},grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#9090b8'}}}
+    })
+  });
+
+  // ── 9. Переработки по уровням (stacked %) ─────────
+  var hoursLevel={};
+  LEVEL_ORDER.forEach(function(l){hoursLevel[l]={'<=40':0,'41-50':0,'50+':0};});
+  D.forEach(function(d){if(d.hours&&hoursLevel[d.level])hoursLevel[d.level][d.hours]++;});
+  var hlLevels=LEVEL_ORDER.filter(function(l){var t=hoursLevel[l];return (t['<=40']+t['41-50']+t['50+'])>=3;});
+  function pct(l,h){var t=hoursLevel[l];var total=t['<=40']+t['41-50']+t['50+'];return total?Math.round(t[h]/total*100):0;}
+  new Chart(document.getElementById('chart-hours-level'),{
+    type:'bar',
+    data:{
+      labels:hlLevels,
+      datasets:[
+        {label:'До 40ч',data:hlLevels.map(function(l){return pct(l,'<=40');}),backgroundColor:'#00ffaa',borderRadius:0,borderSkipped:false,stack:'s'},
+        {label:'41-50ч',data:hlLevels.map(function(l){return pct(l,'41-50');}),backgroundColor:'#ffa500',borderRadius:0,borderSkipped:false,stack:'s'},
+        {label:'50+ч',data:hlLevels.map(function(l){return pct(l,'50+');}),backgroundColor:'#ff3366',borderRadius:0,borderSkipped:false,stack:'s'}
+      ]
+    },
+    options:chartOpts({
+      indexAxis:'y',
+      plugins:{legend:{display:true,labels:{font:{size:10},padding:8,usePointStyle:true,pointStyle:'circle'}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': '+ctx.parsed.x+'%';}}}},
+      scales:{
+        x:{stacked:true,max:100,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#9090b8',callback:function(v){return v+'%';}}},
+        y:{stacked:true,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#9090b8'}}
       }
+    })
+  });
+
+  // ── 10. Распределение опыта ────────────────────────
+  var eb={'0–2':0,'3–5':0,'6–9':0,'10–14':0,'15+':0};
+  D.forEach(function(d){if(d.exp<=1)eb['0–2']++;else if(d.exp<=4)eb['3–5']++;else if(d.exp<=7.5)eb['6–9']++;else if(d.exp<=12)eb['10–14']++;else eb['15+']++;});
+  new Chart(document.getElementById('chart-exp'),{
+    type:'bar',
+    data:{labels:Object.keys(eb),datasets:[{label:'Чел.',data:Object.values(eb),backgroundColor:['#4a9eff','#00e8d3','#ffa500','#ff6b35','#cc44ff'],borderRadius:4,borderSkipped:false}]},
+    options:chartOpts()
+  });
+
+  // ── 11. Формат работы — donut ──────────────────────
+  var fc={remote:0,hybrid:0,studio:0}; D.forEach(function(d){fc[d.fmt]++;});
+  new Chart(document.getElementById('chart-emp'),{
+    type:'doughnut',
+    data:{labels:['Удалённо','Гибрид','В студии'],datasets:[{data:[fc.remote,fc.hybrid,fc.studio],backgroundColor:['#4a9eff','#00ffaa','#ff6b35'],borderColor:'#101020',borderWidth:3,hoverOffset:8}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{padding:16,color:'#c2c2d8',font:{family:"'Rajdhani',sans-serif",size:11}}},tooltip:{backgroundColor:'rgba(10,10,26,0.95)',titleColor:'#eeeef8',bodyColor:'#c2c2d8',borderColor:'rgba(0,255,170,0.3)',borderWidth:1,cornerRadius:6,padding:10}}}
+  });
+
+  // ── 12. Топ софт ───────────────────────────────────
+  var softCount={};
+  D.forEach(function(d){
+    if(!d.software||d.software==='-')return;
+    d.software.split(/[,/]/).map(function(s){return s.trim();}).filter(Boolean).forEach(function(s){
+      var k=s;
+      if(/^ae$/i.test(k)||/after\s*effect/i.test(k))k='After Effects';
+      if(/^c4d$/i.test(k)||/cinema\s*4/i.test(k)||/синь/i.test(k))k='Cinema 4D';
+      if(/^ue$/i.test(k)||/^ue5$/i.test(k)||/unreal/i.test(k))k='Unreal Engine';
+      if(/^nuke$/i.test(k)||/^нюк$/i.test(k)||/^нбк$/i.test(k))k='Nuke';
+      if(/^houdini$/i.test(k))k='Houdini';
+      if(/^blender$/i.test(k)||/блендер/i.test(k))k='Blender';
+      if(/^maya$/i.test(k))k='Maya';
+      if(/^zbrush$/i.test(k))k='ZBrush';
+      if(/substance/i.test(k))k='Substance';
+      if(/photoshop/i.test(k)||/^ps$/i.test(k))k='Photoshop';
+      if(/davinci/i.test(k))k='DaVinci';
+      if(/3ds\s*max/i.test(k))k='3ds Max';
+      if(/redshift/i.test(k))k='Redshift';
+      if(/figma/i.test(k))k='Figma';
+      softCount[k]=(softCount[k]||0)+1;
     });
+  });
+  var topSoft=Object.entries(softCount).sort(function(a,b){return b[1]-a[1];}).slice(0,12);
+  if(topSoft.length) new Chart(document.getElementById('chart-soft'),{
+    type:'bar',
+    data:{labels:topSoft.map(function(s){return s[0];}),datasets:[{label:'Чел.',data:topSoft.map(function(s){return s[1];}),backgroundColor:'rgba(0,255,170,0.6)',hoverBackgroundColor:'#00ffaa',borderRadius:4,borderSkipped:false}]},
+    options:chartOpts({indexAxis:'y'})
+  });
+
+  // ── 12b. Софт × зарплата ───────────────────────────
+  var softSal={};
+  D.forEach(function(d){
+    if(!d.software||d.software==='-')return;
+    d.software.split(/[,/]/).map(function(s){return s.trim();}).filter(Boolean).forEach(function(s){
+      var k=s;
+      if(/^ae$/i.test(k)||/after\s*effect/i.test(k))k='After Effects';
+      if(/^c4d$/i.test(k)||/cinema\s*4/i.test(k)||/синь/i.test(k))k='Cinema 4D';
+      if(/^ue$/i.test(k)||/^ue5$/i.test(k)||/unreal/i.test(k))k='Unreal Engine';
+      if(/^nuke$/i.test(k)||/^нюк$/i.test(k)||/^нбк$/i.test(k))k='Nuke';
+      if(/^houdini$/i.test(k))k='Houdini';
+      if(/^blender$/i.test(k)||/блендер/i.test(k))k='Blender';
+      if(/^maya$/i.test(k))k='Maya';
+      if(/^zbrush$/i.test(k))k='ZBrush';
+      if(/substance/i.test(k))k='Substance';
+      if(/photoshop/i.test(k)||/^ps$/i.test(k))k='Photoshop';
+      if(/davinci/i.test(k))k='DaVinci';
+      if(/3ds\s*max/i.test(k))k='3ds Max';
+      if(/redshift/i.test(k))k='Redshift';
+      if(/figma/i.test(k))k='Figma';
+      if(!softSal[k])softSal[k]=[];
+      softSal[k].push(d.salary);
+    });
+  });
+  var topSoftSal=Object.entries(softSal).filter(function(e){return e[1].length>=3;}).map(function(e){return {k:e[0],med:Math.round(median(e[1])),cnt:e[1].length};}).sort(function(a,b){return b.med-a.med;}).slice(0,12);
+  if(topSoftSal.length) new Chart(document.getElementById('chart-soft-salary'),{
+    type:'bar',
+    data:{labels:topSoftSal.map(function(s){return s.k+' ('+s.cnt+')';}),datasets:[{label:'Медиана $',data:topSoftSal.map(function(s){return s.med;}),backgroundColor:topSoftSal.map(function(s){return salaryColor(s.med);}),borderRadius:4,borderSkipped:false}]},
+    options:chartOpts({indexAxis:'y',plugins:{tooltip:{callbacks:{label:function(ctx){return '$'+ctx.parsed.x.toLocaleString('en-US');}}}}})
+  });
+
+  // ── 13. Heatmap: Уровень × Сфера (HTML table) ─────
+  var heatSpheres=new Set();
+  D.forEach(function(d){
+    if(!d.projects)return;
+    d.projects.split(/[,/]/).map(function(s){return s.trim();}).filter(Boolean)
+      .forEach(function(p){heatSpheres.add(p.replace(/сериалы\s*\/?\s*тв/i,'Сериалы/ТВ').replace(/ивенты/i,'Ивенты').trim());});
+  });
+  var heatSphereList=Array.from(heatSpheres).filter(function(sphere){
+    return D.filter(function(d){return d.projects&&d.projects.split(/[,/]/).map(function(s){return s.trim();}).some(function(p){return p.replace(/сериалы\s*\/?\s*тв/i,'Сериалы/ТВ').replace(/ивенты/i,'Ивенты').trim()===sphere;});}).length>=3;
+  });
+  var heatLevels=LEVEL_ORDER.filter(function(l){return byLevel[l];});
+  // Build lookup: heatMap[sphere][level] = {med, cnt}
+  var heatMap={};
+  heatSphereList.forEach(function(sphere){
+    heatMap[sphere]={};
+    heatLevels.forEach(function(level){
+      var vals=D.filter(function(d){
+        if(d.level!==level||!d.projects)return false;
+        return d.projects.split(/[,/]/).map(function(s){return s.trim();}).some(function(p){return p.replace(/сериалы\s*\/?\s*тв/i,'Сериалы/ТВ').replace(/ивенты/i,'Ивенты').trim()===sphere;});
+      }).map(function(d){return d.salary;});
+      if(vals.length>=2) heatMap[sphere][level]={med:Math.round(median(vals)),cnt:vals.length};
+    });
+  });
+  // Sort spheres by max median desc
+  heatSphereList.sort(function(a,b){
+    var maxA=0,maxB=0;
+    heatLevels.forEach(function(l){if(heatMap[a][l])maxA=Math.max(maxA,heatMap[a][l].med);if(heatMap[b][l])maxB=Math.max(maxB,heatMap[b][l].med);});
+    return maxB-maxA;
+  });
+  // Collect all medians for color normalization
+  var allHeatMeds=[];
+  heatSphereList.forEach(function(sphere){heatLevels.forEach(function(level){if(heatMap[sphere][level])allHeatMeds.push(heatMap[sphere][level].med);});});
+  var heatMin=Math.min.apply(null,allHeatMeds)||0, heatMax=Math.max.apply(null,allHeatMeds)||1;
+  function heatmapColor(v,mn,mx){
+    var t=(v-mn)/(mx-mn||1);
+    // Deep teal → emerald → amber → warm coral
+    var r,g,b;
+    if(t<0.33){var p=t/0.33;r=Math.round(25+p*15);g=Math.round(60+p*70);b=Math.round(100-p*20);}
+    else if(t<0.66){var p=(t-0.33)/0.33;r=Math.round(40+p*160);g=Math.round(130+p*10);b=Math.round(80-p*50);}
+    else{var p=(t-0.66)/0.34;r=Math.round(200+p*30);g=Math.round(140-p*80);b=Math.round(30+p*15);}
+    return 'rgba('+r+','+g+','+b+',0.7)';
+  }
+  // Render HTML table
+  var hmEl=document.getElementById('heatmap-container');
+  if(heatSphereList.length&&hmEl){
+    var html='<div class="heatmap-wrap"><table class="heatmap-tbl"><thead><tr><th class="hm-corner"></th>';
+    heatLevels.forEach(function(l){html+='<th class="hm-col" style="color:'+LEVEL_COLORS[l]+'">'+esc(l)+'</th>';});
+    html+='</tr></thead><tbody>';
+    heatSphereList.forEach(function(sphere){
+      html+='<tr><th class="hm-row">'+esc(sphere)+'</th>';
+      heatLevels.forEach(function(level){
+        var cell=heatMap[sphere][level];
+        if(cell){
+          var bg=heatmapColor(cell.med,heatMin,heatMax);
+          html+='<td style="background:'+bg+'" title="'+esc(sphere)+' × '+esc(level)+': $'+cell.med.toLocaleString('en-US')+' · '+cell.cnt+' чел.">$'+cell.med.toLocaleString('en-US')+'<span class="hm-n">('+cell.cnt+' чел.)</span></td>';
+        } else {
+          html+='<td class="hm-empty">—</td>';
+        }
+      });
+      html+='</tr>';
+    });
+    html+='</tbody></table></div>';
+    hmEl.innerHTML=html;
   }
 }

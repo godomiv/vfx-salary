@@ -99,8 +99,20 @@ input[type=number]{-moz-appearance:textfield;}
 .chart-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem;}
 .chart-card h3{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.2rem;}
 .chart-container{position:relative;height:280px;}
+.chart-tall{height:480px;}
 .chart-card.full{grid-column:1/-1;}
 .chart-card.full .chart-container{height:240px;}
+/* ── HEATMAP TABLE ── */
+.heatmap-wrap{overflow:hidden;margin-top:.5rem;}
+.heatmap-tbl{border-collapse:separate;border-spacing:4px;width:100%;}
+.heatmap-tbl th{font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);padding:.5rem .6rem;white-space:nowrap;font-weight:500;}
+.heatmap-tbl th.hm-corner{background:none;}
+.heatmap-tbl th.hm-col{text-align:center;min-width:80px;}
+.heatmap-tbl th.hm-row{text-align:right;padding-right:1rem;font-size:.72rem;color:var(--text);}
+.heatmap-tbl td{text-align:center;padding:.8rem .5rem;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:600;color:#fff;position:relative;transition:transform .15s,box-shadow .15s;cursor:default;line-height:1;}
+.heatmap-tbl td:hover{transform:scale(1.06);box-shadow:0 0 14px rgba(0,0,0,.5);z-index:1;}
+.heatmap-tbl td.hm-empty{background:rgba(255,255,255,.03);color:var(--text-dim);font-weight:400;font-size:.65rem;}
+.heatmap-tbl td .hm-n{display:block;font-size:.5rem;font-weight:400;color:rgba(255,255,255,.35);margin-top:5px;letter-spacing:.04em;line-height:1;font-family:'Rajdhani',sans-serif;}
 
 /* ── SPECTRUM VIEW ── */
 .spectrum-section{padding:3rem 5vw;display:none;}
@@ -142,14 +154,14 @@ tbody td{padding:.55rem 1rem;color:var(--text-light);}
 .sal-cell{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--text-light);}
 .dept-cell{color:var(--text-light);font-size:.84rem;font-weight:500;letter-spacing:.01em;}
 .extra-cell{color:var(--text-dim);font-size:.78rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.sal-bar{display:inline-block;height:3px;background:var(--accent2);border-radius:2px;vertical-align:middle;margin-left:.4rem;opacity:.6;}
+.sal-bar{display:none;}
 .my-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-left:.4rem;animation:blink 2s infinite;}
 @keyframes blink{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.6);}}
 .rows-count{font-size:.75rem;color:var(--text-dim);margin-left:auto;}
 .skipped-badge{font-size:.7rem;color:var(--text-dim);padding:.2rem .5rem;background:rgba(255,255,255,.04);border-radius:3px;margin-left:auto;}
 
-@media(max-width:900px){.globe-layout{grid-template-columns:1fr;}.charts-grid{grid-template-columns:1fr;}.chart-card.full{grid-column:1;}}
-@media(max-width:600px){.header{padding:1.5rem 4vw 1.5rem;}.section,.table-section,.spectrum-section{padding:2rem 4vw;}.my-salary-bar{padding:1.2rem 4vw;gap:1.5rem;}}
+@media(max-width:900px){.globe-layout{grid-template-columns:1fr;}.charts-grid{grid-template-columns:1fr;}.chart-card.full{grid-column:1;}.heatmap-wrap{overflow-x:auto;}}
+@media(max-width:600px){.header{padding:1.5rem 4vw 1.5rem;}.section,.table-section,.spectrum-section{padding:2rem 4vw;}.my-salary-bar{padding:1.2rem 4vw;gap:1.5rem;}.chart-tall{height:280px;}}
 
 /* ── EASTER EGG: MATRIX ── */
 #matrix-overlay{position:absolute;inset:0;z-index:50;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;border-radius:inherit;}

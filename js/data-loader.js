@@ -15,8 +15,11 @@ function processCSVText(text, source) {
     const deptRaw  = (r[4]||'').trim();
     const levelRaw = (r[5]||'').trim();
     const expRaw   = (r[6]||'').trim();
+    const ageRaw   = (r[7]||'').trim();
     const salRaw   = (r[8]||'').trim();
     const taxRaw   = (r[9]||'').trim();
+    const hoursRaw = (r[10]||'').trim();
+    const overtimeRaw = (r[11]||'').trim();
     const projRaw  = (r[12]||'').trim();
     const softRaw  = (r[13]||'').trim();
     const salary = parseSalary(salRaw);
@@ -29,6 +32,9 @@ function processCSVText(text, source) {
       dept: deptRaw||'—', level: normalizeLevel(levelRaw),
       exp: normalizeExp(expRaw), salary,
       afterTax: taxRaw.toLowerCase().includes('после'),
+      age: normalizeAge(ageRaw),
+      hours: normalizeHours(hoursRaw),
+      overtime: normalizeOvertime(overtimeRaw),
       lat: coords?coords[0]:null, lng: coords?coords[1]:null,
       projects: projRaw, software: softRaw,
     });
@@ -63,7 +69,7 @@ async function loadData() {
       `Live · обновлено ${new Date().toLocaleString('ru-RU')} · ${D.length} записей`;
   } catch(e) {
     document.getElementById('last-updated').textContent =
-      `Ошибка загрузки: ${e.message}`;
+      'Ошибка загрузки: ' + e.message;
     document.getElementById('err-msg').textContent = e.message;
     document.getElementById('error-screen').style.display = 'flex';
     return;

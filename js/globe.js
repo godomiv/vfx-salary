@@ -1,6 +1,17 @@
 // ══════════════════════════════════════════════════════
 // GLOBE
 // ══════════════════════════════════════════════════════
+// HTML escape — защита от XSS в тултипах глобуса
+function escGlobe(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function latToVec3(lat,lng,r){
   const phi=(90-lat)*Math.PI/180, theta=(lng+180)*Math.PI/180;
   return new THREE.Vector3(-r*Math.sin(phi)*Math.cos(theta),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));
@@ -34,12 +45,10 @@ function initGlobe(){
   renderer.setSize(W,H); renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
   renderer.setClearColor(0x000000,0); container.appendChild(renderer.domElement);
 
-  // Lighting: sun always to the right of camera
-  scene.add(new THREE.AmbientLight(0x0a0e1a,4.0));
-  const sunLight=new THREE.DirectionalLight(0xffeedd,5.0);
+  // Lighting (globe.gl adapted for Three.js 3.x legacy mode)
+  scene.add(new THREE.AmbientLight(0xcccccc,1.0));
+  const sunLight=new THREE.DirectionalLight(0xffffff,0.6);
   scene.add(sunLight);
-  const rimLight=new THREE.DirectionalLight(0x112244,1.5);
-  rimLight.position.set(-3,-1,-4); scene.add(rimLight);
 
   const group=new THREE.Group(); scene.add(group);
 
@@ -62,41 +71,61 @@ function initGlobe(){
   const starMat=new THREE.PointsMaterial({size:0.12,vertexColors:true,transparent:true,opacity:0.85,sizeAttenuation:true});
   group.add(new THREE.Points(starGeo,starMat));
 
-  // Count data per country ISO
-  const isoCount={};
-  D.forEach(d=>{
-    const iso=cityToISO(d.city);
-    if(iso) isoCount[iso]=(isoCount[iso]||0)+1;
-  });
-  const maxIsoCount=Math.max(...Object.values(isoCount),1);
-
-  // ── CANVAS TEXTURE for ocean/land/data fill ──
-  const TEX_W=2048, TEX_H=1024;
-  const texCanvas=document.createElement('canvas');
-  texCanvas.width=TEX_W; texCanvas.height=TEX_H;
-  const tctx=texCanvas.getContext('2d');
-  // Ocean fill
-  tctx.fillStyle='#040d1a'; tctx.fillRect(0,0,TEX_W,TEX_H);
-
-  const globeTexture=new THREE.CanvasTexture(texCanvas);
-  // Specular map: white=ocean(reflective), black=land(matte)
-  var specCanvas=document.createElement('canvas');
-  specCanvas.width=TEX_W; specCanvas.height=TEX_H;
-  var sctx=specCanvas.getContext('2d');
-  sctx.fillStyle='#ffffff'; sctx.fillRect(0,0,TEX_W,TEX_H);
-  var specTex=new THREE.CanvasTexture(specCanvas);
-  const sphereMat=new THREE.MeshPhongMaterial({map:globeTexture,shininess:8,specular:0x050b10,specularMap:specTex});
+  // ── Earth texture from CDN (like globe.gl) ──
+  const loader=new THREE.TextureLoader();
+  loader.crossOrigin='anonymous';
+  const globeTexture=loader.load('earth-night.jpg');
+  const sphereMat=new THREE.MeshPhongMaterial({map:globeTexture,shininess:6,specular:0x111122});
   const sphereMesh=new THREE.Mesh(new THREE.SphereGeometry(1,64,64),sphereMat);
   group.add(sphereMesh);
 
-  // Atmosphere glow — very subtle thin halo
+  // Atmosphere glow (exact three-globe GlowMesh shader)
   var glowMat=new THREE.ShaderMaterial({
-    uniforms:{glowColor:{value:new THREE.Color(0x3a6a9a)},coef:{value:0.6},power:{value:6.0}},
-    vertexShader:'varying vec3 vNormal;varying vec3 vPos;void main(){vNormal=normalize(normalMatrix*normal);vPos=vec3(modelViewMatrix*vec4(position,1.0));gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
-    fragmentShader:'uniform vec3 glowColor;uniform float coef;uniform float power;varying vec3 vNormal;varying vec3 vPos;void main(){float intensity=pow(coef-dot(vNormal,normalize(-vPos)),power);gl_FragColor=vec4(glowColor,intensity*0.08);}',
+    uniforms:{
+      color:{value:new THREE.Color('lightskyblue')},
+      coefficient:{value:0.3},
+      power:{value:12.0},
+      hollowRadius:{value:1.0}
+    },
+    vertexShader:[
+      'uniform float hollowRadius;',
+      'varying vec3 vVertexWorldPosition;',
+      'varying vec3 vVertexNormal;',
+      'varying float vCameraDistanceToObjCenter;',
+      'varying float vVertexAngularDistanceToHollowRadius;',
+      'void main(){',
+      '  vVertexNormal=normalize(normalMatrix*normal);',
+      '  vVertexWorldPosition=(modelMatrix*vec4(position,1.0)).xyz;',
+      '  vec4 objCenterViewPosition=modelViewMatrix*vec4(0.0,0.0,0.0,1.0);',
+      '  vCameraDistanceToObjCenter=length(objCenterViewPosition);',
+      '  float edgeAngle=atan(hollowRadius/vCameraDistanceToObjCenter);',
+      '  float vertexAngle=acos(dot(normalize(modelViewMatrix*vec4(position,1.0)),normalize(objCenterViewPosition)));',
+      '  vVertexAngularDistanceToHollowRadius=vertexAngle-edgeAngle;',
+      '  gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);',
+      '}'
+    ].join('\n'),
+    fragmentShader:[
+      'uniform vec3 color;',
+      'uniform float coefficient;',
+      'uniform float power;',
+      'uniform float hollowRadius;',
+      'varying vec3 vVertexNormal;',
+      'varying vec3 vVertexWorldPosition;',
+      'varying float vCameraDistanceToObjCenter;',
+      'varying float vVertexAngularDistanceToHollowRadius;',
+      'void main(){',
+      '  if(vCameraDistanceToObjCenter<hollowRadius)discard;',
+      '  if(vVertexAngularDistanceToHollowRadius<0.0)discard;',
+      '  vec3 worldCameraToVertex=vVertexWorldPosition-cameraPosition;',
+      '  vec3 viewCameraToVertex=(viewMatrix*vec4(worldCameraToVertex,0.0)).xyz;',
+      '  viewCameraToVertex=normalize(viewCameraToVertex);',
+      '  float intensity=pow(coefficient+dot(vVertexNormal,viewCameraToVertex),power);',
+      '  gl_FragColor=vec4(color,intensity);',
+      '}'
+    ].join('\n'),
     side:THREE.BackSide,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false
   });
-  var glowMesh=new THREE.Mesh(new THREE.SphereGeometry(1.06,64,64),glowMat);
+  var glowMesh=new THREE.Mesh(new THREE.SphereGeometry(1.15,64,64),glowMat);
   group.add(glowMesh);
 
   // Build city data
@@ -156,108 +185,11 @@ function initGlobe(){
     group.add(pyramid); barMeshes.push(pyramid);
   });
 
-  // ── LOAD TOPOJSON — fill countries + draw borders ──
-  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
-    .then(r=>r.json())
-    .then(world=>{
-      const sc=world.transform.scale, tr=world.transform.translate;
-      const rawArcs=world.arcs;
-      function decodeArc(idx){
-        const rev=idx<0, arc=rawArcs[rev?~idx:idx];
-        let x=0,y=0;
-        const pts=arc.map(p=>{x+=p[0];y+=p[1];return[x*sc[0]+tr[0],y*sc[1]+tr[1]];});
-        if(rev)pts.reverse(); return pts;
-      }
-      function geoToTex(lon,lat){return[(lon+180)/360*TEX_W,(90-lat)/180*TEX_H];}
-
-      function drawRingPath(coords,ctx){
-        ctx=ctx||tctx;
-        // Draw coords onto current path, splitting at antimeridian
-        let sub=[];
-        const commitSub=()=>{
-          if(sub.length<2)return;
-          const [sx,sy]=geoToTex(sub[0][0],sub[0][1]);
-          ctx.moveTo(sx,sy);
-          for(let k=1;k<sub.length;k++){
-            const [cx,cy]=geoToTex(sub[k][0],sub[k][1]);
-            ctx.lineTo(cx,cy);
-          }
-          ctx.closePath();
-          sub=[];
-        };
-        for(let i=0;i<coords.length;i++){
-          if(i>0&&Math.abs(coords[i][0]-coords[i-1][0])>90){
-            // Antimeridian crossing — interpolate boundary lat and close sub-path
-            const [lon0,lat0]=coords[i-1], [lon1,lat1]=coords[i];
-            const t=(lon0>0?(180-lon0):(lon0+180))/Math.abs(lon1-lon0);
-            const latM=lat0+(lat1-lat0)*t;
-            const edgeLon=lon0>0?180:-180;
-            sub.push([edgeLon,latM]);
-            commitSub();
-            sub.push([-edgeLon,latM]); // start new sub on other side
-          }
-          sub.push(coords[i]);
-        }
-        commitSub();
-      }
-
-      function fillCountry(arcIdxArrays, fillColor, ctx){
-        ctx=ctx||tctx;
-        ctx.save();
-        ctx.fillStyle=fillColor;
-        ctx.beginPath();
-        arcIdxArrays.forEach(ring=>{
-          let coords=[];
-          ring.forEach(i=>coords=coords.concat(decodeArc(i)));
-          if(coords.length) drawRingPath(coords,ctx);
-        });
-        ctx.fill('evenodd');
-        ctx.restore();
-      }
-
-      // Fill all land with uniform color + black on specular map
-      world.objects.countries.geometries.forEach(g=>{
-        const fill=(g.type==='Polygon')?[g.arcs]:g.arcs;
-        fill.forEach(p=>{
-          fillCountry(p,'#0d1d30');
-          fillCountry(p,'#000000',sctx);
-        });
-      });
-      specTex.needsUpdate=true;
-
-      specTex.needsUpdate=true;
-
-      // Update texture
-      globeTexture.needsUpdate=true;
-
-      // Border lines — simple dark
-      var borderMat=new THREE.LineBasicMaterial({color:0x040d1a,depthWrite:false});
-      function drawBorderArcs(arcIdxArrays){
-        arcIdxArrays.forEach(ring=>{
-          let coords=[];
-          ring.forEach(i=>coords=coords.concat(decodeArc(i)));
-          let seg=[];
-          for(let i=0;i<coords.length;i++){
-            if(i>0&&Math.abs(coords[i][0]-coords[i-1][0])>90){
-              if(seg.length>1) group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(seg),borderMat));
-              seg=[];
-            }
-            seg.push(latToVec3(coords[i][1],coords[i][0],1.001));
-          }
-          if(seg.length>1) group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(seg),borderMat));
-        });
-      }
-      world.objects.countries.geometries.forEach(g=>{
-        if(g.type==='Polygon') drawBorderArcs(g.arcs);
-        else if(g.type==='MultiPolygon') g.arcs.forEach(p=>drawBorderArcs(p));
-      });
-    })
-    .catch(()=>{});
 
   // Top cities list
   const topCities=Object.values(cityMap).filter(c=>c.salaries.length>1).map(c=>({city:c.city,med:median(c.salaries),count:c.salaries.length})).sort((a,b)=>b.med-a.med).slice(0,14);
   const listEl=document.getElementById('city-top-list');
-  listEl.innerHTML=topCities.map(c=>`<div class="city-top-item"><span class="city-name">${c.city} <small style="color:#7878a0">(${c.count})</small></span><span class="city-avg">$${Math.round(c.med).toLocaleString('en-US')}</span></div>`).join('');
+  listEl.innerHTML=topCities.map(c=>`<div class="city-top-item"><span class="city-name">${escGlobe(c.city)} <small style="color:#7878a0">(${c.count})</small></span><span class="city-avg">$${Math.round(c.med).toLocaleString('en-US')}</span></div>`).join('');
 
   // Raycaster hover
   const raycaster=new THREE.Raycaster(),mouse2=new THREE.Vector2();
@@ -275,7 +207,7 @@ function initGlobe(){
         const cnt=d.levelMap[l].length;
         const med=Math.round(median(d.levelMap[l]));
         const dot=`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${LEVEL_COLORS[l]};margin-right:4px;"></span>`;
-        return `${dot}<b>${l}</b>: $${med.toLocaleString('en-US')} <span style="color:#7878a0">(${cnt})</span>`;
+        return `${dot}<b>${escGlobe(l)}</b>: $${med.toLocaleString('en-US')} <span style="color:#7878a0">(${cnt})</span>`;
       }).join('<br>');
       // Top software
       const swCount={};
@@ -285,7 +217,7 @@ function initGlobe(){
       const projCount={};
       d.projects.forEach(p=>{projCount[p]=(projCount[p]||0)+1;});
       const topProj=Object.entries(projCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([p])=>p).join(', ');
-      tooltip.innerHTML=`<b style="font-size:.9rem">${d.city}</b><br><span style="color:#7878a0;font-size:.72rem">${d.count} респондентов</span>${d.col?`<br><span style="color:#ffaa44;font-size:.72rem">~$${(d.col[0]+d.col[1]).toLocaleString('en-US')}/мес · cost of living</span>`:''}<br><hr style="border-color:#1a2a4a;margin:4px 0">${lvlRows}${topProj?`<br><span style="color:#6b8aff;font-size:.7rem">${topProj}</span>`:''}${topSw?`<br><span style="color:#7878a0;font-size:.7rem">${topSw}</span>`:''}`;
+      tooltip.innerHTML=`<b style="font-size:.9rem">${escGlobe(d.city)}</b><br><span style="color:#7878a0;font-size:.72rem">${d.count} респондентов</span>${d.col?`<br><span style="color:#ffaa44;font-size:.72rem">~$${(d.col[0]+d.col[1]).toLocaleString('en-US')}/мес · cost of living</span>`:''}<br><hr style="border-color:#1a2a4a;margin:4px 0">${lvlRows}${topProj?`<br><span style="color:#6b8aff;font-size:.7rem">${escGlobe(topProj)}</span>`:''}${topSw?`<br><span style="color:#7878a0;font-size:.7rem">${escGlobe(topSw)}</span>`:''}`;
       const rect2=container.getBoundingClientRect();
       const mx=e.clientX-rect2.left,my=e.clientY-rect2.top;
       const TW=230,TH=130;
@@ -479,20 +411,17 @@ function initGlobe(){
   let idleAnimFactor=0.05, idleAnimMinRot=0.003, idleAnimMinCam=0.001;
   const IDLE_DEFAULT_ROT=0;
   const IDLE_TIMEOUT=20000;
-  const MOON_X=-1.5, MOON_Y=0.0, MOON_Z=0.3;
+  const MOON_X=-3.0, MOON_Y=0.0, MOON_Z=0.6;
 
   function normAngle(a){ a=a%(2*Math.PI); if(a>Math.PI)a-=2*Math.PI; if(a<-Math.PI)a+=2*Math.PI; return a; }
 
-  function resetIdleTimer(){
-    if(idleTimer) clearTimeout(idleTimer);
-    if(idleActive) exitIdleMode();
-    idleTimer=setTimeout(enterIdleMode,IDLE_TIMEOUT);
-  }
-  ['mousemove','mousedown','wheel','click'].forEach(evt=>
-    container.addEventListener(evt,resetIdleTimer,{passive:true}));
-  ['touchstart','touchmove'].forEach(evt=>
-    container.addEventListener(evt,resetIdleTimer,{passive:true}));
-  resetIdleTimer();
+  // TEMPORARILY DISABLED: moon idle easter egg
+  function resetIdleTimer(){ return; }
+  //['mousemove','mousedown','wheel','click'].forEach(evt=>
+  //  container.addEventListener(evt,resetIdleTimer,{passive:true}));
+  //['touchstart','touchmove'].forEach(evt=>
+  //  container.addEventListener(evt,resetIdleTimer,{passive:true}));
+  //resetIdleTimer();
 
   function enterIdleMode(){
     if(idleActive||matrixActive) return;
@@ -503,7 +432,9 @@ function initGlobe(){
     autoRotate=false;
     idleCameraTarget=CAM_IDLE;
     idleCameraAnimating=true;
-    idleRotTarget={x:0, y:IDLE_DEFAULT_ROT};
+    // Forward-only: continue rotating in positive direction to reach target
+    var fwdY=((IDLE_DEFAULT_ROT-group.rotation.y)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+    idleRotTarget={x:0, y:group.rotation.y+fwdY};
     idleRotAnimating=true;
     idleAnimFactor=0.017; idleAnimMinRot=0.001; idleAnimMinCam=0.0003; // 3x медленнее
     createMoon();
@@ -548,7 +479,9 @@ function initGlobe(){
     idleActive=false;
     idleCameraTarget=savedCam;
     idleCameraAnimating=true;
-    idleRotTarget=savedRot;
+    // Forward-only: continue rotating in positive direction to saved position
+    var fwdY=((savedRot.y-group.rotation.y)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+    idleRotTarget={x:savedRot.x, y:group.rotation.y+fwdY};
     idleRotAnimating=true;
     autoRotate=false;
     savedAutoRotate_exit=savedAutoRotate;
@@ -565,7 +498,7 @@ function initGlobe(){
       return Math.sign(delta)*Math.min(Math.abs(delta), Math.max(Math.abs(delta*factor), minStep));
     }
     if(idleRotAnimating){
-      const dy=normAngle(idleRotTarget.y-group.rotation.y);
+      const dy=idleRotTarget.y-group.rotation.y;
       const dx=idleRotTarget.x-group.rotation.x;
       group.rotation.y+=lerpStep(dy,idleAnimFactor,idleAnimMinRot);
       group.rotation.x+=lerpStep(dx,idleAnimFactor,idleAnimMinRot);

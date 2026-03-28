@@ -2,11 +2,19 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' https://cdnjs.cloudflare.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com;
+  font-src https://fonts.gstatic.com;
+  connect-src 'self' https://docs.google.com https://sheets.googleapis.com https://*.googleusercontent.com https://cdn.jsdelivr.net;
+  img-src 'self' data:;
+">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VFX Salary Survey 2026 · CG Подкаст №1</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha384-9MhbyIRcBVQiiC7FSd7T38oJNj2Zh+EfxS7/vjhBi4OOT78NlHSnzM31EZRWR1LZ" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -100,17 +108,20 @@
 <div class="section" id="tab-charts">
   <div class="section-title">Аналитика по ключевым срезам</div>
   <div class="charts-grid">
-    <div class="chart-card"><h3>Зарплата по уровню (медиана $)</h3><div class="chart-container"><canvas id="chart-level"></canvas></div></div>
-    <div class="chart-card"><h3>Формат работы — распределение</h3><div class="chart-container"><canvas id="chart-emp"></canvas></div></div>
+    <div class="chart-card"><h3>Зарплата vs Опыт</h3><div class="chart-container chart-tall"><canvas id="chart-scatter"></canvas></div></div>
+    <div class="chart-card"><h3>Зарплата по уровню (медиана $)</h3><div class="chart-container chart-tall"><canvas id="chart-level"></canvas></div></div>
+    <div class="chart-card full"><h3>Возраст vs Зарплата — обвал после 45</h3><div class="chart-container"><canvas id="chart-age-salary"></canvas></div></div>
     <div class="chart-card full"><h3>Топ городов по медианной зарплате ($)</h3><div class="chart-container"><canvas id="chart-city"></canvas></div></div>
-    <div class="chart-card"><h3>Сфера — медианная зарплата ($)</h3><div class="chart-container"><canvas id="chart-sphere"></canvas></div></div>
-    <div class="chart-card"><h3>Топ софт — популярность</h3><div class="chart-container"><canvas id="chart-soft"></canvas></div></div>
-    <div class="chart-card"><h3>Зарплата vs Опыт</h3><div class="chart-container"><canvas id="chart-scatter"></canvas></div></div>
-    <div class="chart-card"><h3>Опыт в индустрии — распределение</h3><div class="chart-container"><canvas id="chart-exp"></canvas></div></div>
     <div class="chart-card full"><h3>Специализация — медианная зарплата ($)</h3><div class="chart-container"><canvas id="chart-dept"></canvas></div></div>
-    <div class="chart-card"><h3>Формат работы vs Зарплата (медиана $)</h3><div class="chart-container"><canvas id="chart-fmt-salary"></canvas></div></div>
-    <div class="chart-card"><h3>Тип занятости vs Зарплата (медиана $)</h3><div class="chart-container"><canvas id="chart-emp-salary"></canvas></div></div>
-    <div class="chart-card full"><h3>Уровень × Сфера — медианная зарплата ($)</h3><div class="chart-container chart-container--heatmap"><canvas id="chart-heatmap"></canvas></div></div>
+    <div class="chart-card full"><h3>Уровень × Сфера — медианная зарплата ($)</h3><div id="heatmap-container"></div></div>
+    <div class="chart-card"><h3>Сфера — медианная зарплата ($)</h3><div class="chart-container"><canvas id="chart-sphere"></canvas></div></div>
+    <div class="chart-card"><h3>Формат × Уровень — зарплата (медиана $)</h3><div class="chart-container"><canvas id="chart-fmt-level"></canvas></div></div>
+    <div class="chart-card"><h3>Оплата переработок × Опыт — зарплата ($)</h3><div class="chart-container"><canvas id="chart-overtime-exp"></canvas></div></div>
+    <div class="chart-card"><h3>Переработки по уровням (%)</h3><div class="chart-container"><canvas id="chart-hours-level"></canvas></div></div>
+    <div class="chart-card"><h3>Опыт в индустрии — распределение</h3><div class="chart-container"><canvas id="chart-exp"></canvas></div></div>
+    <div class="chart-card"><h3>Формат работы — распределение</h3><div class="chart-container"><canvas id="chart-emp"></canvas></div></div>
+    <div class="chart-card"><h3>Топ софт — популярность</h3><div class="chart-container"><canvas id="chart-soft"></canvas></div></div>
+    <div class="chart-card"><h3>Софт — медианная зарплата ($)</h3><div class="chart-container"><canvas id="chart-soft-salary"></canvas></div></div>
   </div>
 </div>
 
@@ -160,15 +171,15 @@
   </tr></thead><tbody id="table-body"></tbody></table></div>
 </div>
 
-<script src="js/constants.js?v=2"></script>
-<script src="js/parsers.js?v=2"></script>
-<script src="js/utils.js?v=2"></script>
-<script src="js/ui-state.js?v=2"></script>
-<script src="js/data-loader.js?v=2"></script>
-<script src="js/globe.js?v=2"></script>
-<script src="js/charts.js?v=3"></script>
-<script src="js/spectrum.js?v=2"></script>
-<script src="js/table.js?v=2"></script>
-<script src="js/main.js?v=2"></script>
+<script src="js/constants.js?v=3"></script>
+<script src="js/parsers.js?v=3"></script>
+<script src="js/utils.js?v=3"></script>
+<script src="js/ui-state.js?v=3"></script>
+<script src="js/data-loader.js?v=3"></script>
+<script src="js/globe.js?v=4"></script>
+<script src="js/charts.js?v=4"></script>
+<script src="js/spectrum.js?v=3"></script>
+<script src="js/table.js?v=3"></script>
+<script src="js/main.js?v=3"></script>
 </body>
 </html>

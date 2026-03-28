@@ -12,6 +12,12 @@ const FMT_COLORS   = {remote:'#4a9eff',hybrid:'#00ffaa',studio:'#ff6b35'};
 const EMP_LABELS   = {staff:'Штатный',freelance:'Фрилансер',own:'Своя компания'};
 const FMT_LABELS   = {remote:'Удалённо',hybrid:'Гибрид',studio:'В студии'};
 
+const AGE_ORDER   = ['< 25','25-29','30-34','35-39','40-44','45+'];
+const HOURS_ORDER = ['<=40','41-50','50+'];
+const OT_LABELS   = {yes:'Да',no:'Нет',sometimes:'Иногда'};
+const HOURS_LABELS= {'<=40':'До 40ч','41-50':'41-50ч','50+':'50+ч'};
+const AGE_COLORS  = {'< 25':'#4a9eff','25-29':'#00e8d3','30-34':'#00ffaa','35-39':'#ffa500','40-44':'#ff6b35','45+':'#ff3366'};
+
 // Global data (populated by data-loader.js from JSON files)
 var CITY_COORDS = {};
 var CITY_CANONICAL_MAP = {};

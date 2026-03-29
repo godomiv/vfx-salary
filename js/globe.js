@@ -74,7 +74,7 @@ function initGlobe(){
   // ── Earth texture from CDN (like globe.gl) ──
   const loader=new THREE.TextureLoader();
   loader.crossOrigin='anonymous';
-  const globeTexture=loader.load('earth-night.jpg');
+  const globeTexture=loader.load('Dx9Xd_cr.jpg');
   const sphereMat=new THREE.MeshPhongMaterial({map:globeTexture,shininess:6,specular:0x111122});
   const sphereMesh=new THREE.Mesh(new THREE.SphereGeometry(1,64,64),sphereMat);
   group.add(sphereMesh);
@@ -307,7 +307,7 @@ function initGlobe(){
   // Update hint
   const hintEl=container.parentElement.querySelector('.globe-hint');
   if(hintEl){
-    const updateHint=()=>{hintEl.textContent=autoRotate?'drag / MMB to rotate · scroll to zoom · click to stop':'drag / MMB to rotate · scroll to zoom';};
+    const updateHint=()=>{hintEl.textContent=autoRotate?'drag to rotate · scroll to zoom · click to stop':'drag to rotate · scroll to zoom';};
     updateHint();
     container.addEventListener('mousedown',updateHint);
   }
@@ -512,19 +512,23 @@ function initGlobe(){
     // Ocean base fill
     mx.fillStyle='#040d1a'; mx.fillRect(0,0,mW,mH);
     var moonTex=new THREE.CanvasTexture(mc);
-    // Layer 1: moon-photo.jpg at 10%
+    moonTex.wrapS=THREE.RepeatWrapping;
+    moonTex.wrapT=THREE.RepeatWrapping;
+    moonTex.offset.set(-0.24,0.03);
+    // Layer 1: moon-photo at 25% opacity
     var moonImg=new Image();
     moonImg.onload=function(){
-      mx.globalAlpha=0.1;
+      mx.globalAlpha=0.25;
       mx.drawImage(moonImg,0,0,mW,mH);
       mx.globalAlpha=1;
       moonTex.needsUpdate=true;
     };
-    moonImg.src='moon-photo.jpg';
+    moonImg.src='moon-photo_8.jpg';
     var moonGeo=new THREE.SphereGeometry(0.333,48,48);
     var moonMat=new THREE.MeshLambertMaterial({map:moonTex});
     moonMesh=new THREE.Mesh(moonGeo,moonMat);
     moonMesh.position.set(MOON_X, MOON_Y, MOON_Z);
+    moonMesh.rotation.y=Math.PI;
     group.add(moonMesh);
   }
 
@@ -551,7 +555,7 @@ function initGlobe(){
     autoRotate=false;
     savedAutoRotate_exit=savedAutoRotate;
     idleAnimFactor=0.05; idleAnimMinRot=0.003; idleAnimMinCam=0.001; // обычная скорость
-    if(hintEl) hintEl.textContent='drag / MMB to rotate · scroll to zoom';
+    if(hintEl) hintEl.textContent='drag to rotate · scroll to zoom';
     removeMoon();
   }
 
@@ -590,6 +594,7 @@ function initGlobe(){
     }
     if(moonMesh){
       moonMesh.lookAt(camera.position);
+      moonMesh.rotation.y+=Math.PI;
     }
     // Keep sun always to the right of camera
     var sunDir=new THREE.Vector3(5,2,2);

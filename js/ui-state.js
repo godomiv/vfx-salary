@@ -7,7 +7,18 @@ function updateStats(){
   document.getElementById('s-median').innerHTML = '$'+fmt(med)+'<span>/мес</span>';
   document.getElementById('s-max').innerHTML = '$'+fmt(Math.max(...salaries))+'<span>/мес</span>';
   document.getElementById('s-cities').textContent = [...new Set(D.map(d=>d.city))].length;
-  var mvEl=document.getElementById('median-val'); if(mvEl) mvEl.textContent='$'+fmt(med);
+  // Market progress bar
+  var totalAnnual = salaries.reduce(function(s,v){return s+v;},0) * 12;
+  var marketB = 206.6; // $206.6B — мировой рынок CG 2025
+  var marketTotal = marketB * 1e9;
+  var marketPct = totalAnnual / marketTotal * 100;
+  var mFill = document.getElementById('market-fill');
+  var mText = document.getElementById('market-text');
+  if(mFill && mText){
+    mFill.style.width = Math.max(marketPct, 0.3) + '%';
+    var totalM = (totalAnnual/1e6).toFixed(1);
+    mText.innerHTML = '$' + totalM + 'M <span style="color:var(--text-dim);font-size:.75rem">из $' + marketB + 'B</span> <span style="color:var(--text-dim);font-size:.7rem">(' + marketPct.toFixed(4) + '%)</span>';
+  }
 }
 
 // ══════════════════════════════════════════════════════

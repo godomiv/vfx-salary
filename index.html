@@ -15,7 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha384-9MhbyIRcBVQiiC7FSd7T38oJNj2Zh+EfxS7/vjhBi4OOT78NlHSnzM31EZRWR1LZ" crossorigin="anonymous"></script>
-<link rel="stylesheet" href="style.css?v=8">
+<link rel="stylesheet" href="style.css?v=19">
 </head>
 <body>
 
@@ -59,15 +59,18 @@
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#ff3366" opacity=".15"/><line x1="5" y1="5" x2="11" y2="11" stroke="#ff3366" stroke-width="2" stroke-linecap="round"/><line x1="11" y1="5" x2="5" y2="11" stroke="#ff3366" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
     </div>
-    <div class="sal-hint">Узнай сколько получают меньше тебя</div>
   </div>
   <div class="percentile-block">
+    <div class="pct-label">Твой перцентиль</div>
     <div class="pct-track"><div class="pct-fill" id="pct-fill"></div></div>
     <div class="pct-text" id="pct-text">—</div>
     <div class="pct-rank" id="pct-rank"></div>
   </div>
-  <div class="sal-meta-col">
-    <div class="last-updated" id="last-updated"></div>
+  <div class="market-col">
+    <div class="market-label">Суммарный годовой доход респондентов</div>
+    <div class="market-track"><div class="market-fill" id="market-fill"></div></div>
+    <div class="market-text" id="market-text">—</div>
+    <div class="market-quote">Рынок CG в 2025 — $206.6B · <a href="https://www.fortunebusinessinsights.com/computer-graphics-market-110236" target="_blank" style="color:var(--text-dim);text-decoration:underline;text-underline-offset:2px;">Fortune Business Insights</a></div>
   </div>
 </div>
 
@@ -154,8 +157,9 @@
     <select class="t-filter" id="tf-level"><option value="">Все уровни</option><option>Junior</option><option>Middle</option><option>Senior</option><option>Lead</option><option>Supervisor</option><option>Head</option></select>
     <select class="t-filter" id="tf-emp"><option value="">Все типы</option><option value="staff">Штатный</option><option value="freelance">Фрилансер</option><option value="own">Своя компания</option></select>
     <select class="t-filter" id="tf-fmt"><option value="">Все форматы</option><option value="remote">Удалённо</option><option value="hybrid">Гибрид</option><option value="studio">В студии</option></select>
-    <span class="rows-count" id="rows-count"></span>
     <span class="skipped-badge" id="skipped-badge"></span>
+    <span class="last-updated" id="last-updated"></span>
+    <span class="rows-count" id="rows-count" style="display:none"></span>
   </div>
   <div class="table-wrap"><table><thead><tr>
     <th data-col="city">Город</th>
@@ -174,8 +178,8 @@
 <script src="js/constants.js?v=4"></script>
 <script src="js/parsers.js?v=7"></script>
 <script src="js/utils.js?v=3"></script>
-<script src="js/ui-state.js?v=7"></script>
-<script src="js/data-loader.js?v=8"></script>
+<script src="js/ui-state.js?v=9"></script>
+<script src="js/data-loader.js?v=10"></script>
 <script src="js/globe.js?v=33"></script>
 <script src="js/charts.js?v=13"></script>
 <script src="js/spectrum.js?v=3"></script>

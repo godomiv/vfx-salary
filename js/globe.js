@@ -406,7 +406,7 @@ function initGlobe(){
   let idleAnimFactor=0.05, idleAnimMinRot=0.003, idleAnimMinCam=0.001;
   const IDLE_DEFAULT_ROT=0;
   const IDLE_TIMEOUT=20000;
-  const MOON_X=-3.0, MOON_Y=0.0, MOON_Z=0.6;
+  const MOON_X=-2.25, MOON_Y=0.0, MOON_Z=0.45;
 
   function normAngle(a){ a=a%(2*Math.PI); if(a>Math.PI)a-=2*Math.PI; if(a<-Math.PI)a+=2*Math.PI; return a; }
 

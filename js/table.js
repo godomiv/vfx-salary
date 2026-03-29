@@ -15,15 +15,20 @@ function esc(s) {
 
 var sortCol='salary', sortDir=-1;
 var tableRows=[], tableRendered=0;
+var tableCachedMaxSal=1;
+var tableListenersAttached=false;
 const TABLE_CHUNK=80;
-document.querySelectorAll('thead th[data-col]').forEach(th=>{
-  th.addEventListener('click',()=>{
-    const col=th.dataset.col; if(sortCol===col)sortDir*=-1; else{sortCol=col;sortDir=-1;}
-    document.querySelectorAll('thead th').forEach(h=>h.classList.remove('sort-asc','sort-desc'));
-    th.classList.add(sortDir>0?'sort-asc':'sort-desc'); renderTable();
+if(!tableListenersAttached){
+  tableListenersAttached=true;
+  document.querySelectorAll('thead th[data-col]').forEach(th=>{
+    th.addEventListener('click',()=>{
+      const col=th.dataset.col; if(sortCol===col)sortDir*=-1; else{sortCol=col;sortDir=-1;}
+      document.querySelectorAll('thead th').forEach(h=>h.classList.remove('sort-asc','sort-desc'));
+      th.classList.add(sortDir>0?'sort-asc':'sort-desc'); renderTable();
+    });
   });
-});
-['t-search','tf-level','tf-emp','tf-fmt'].forEach(id=>document.getElementById(id).addEventListener('input',renderTable));
+  ['t-search','tf-level','tf-emp','tf-fmt'].forEach(id=>{var el=document.getElementById(id);if(el) el.addEventListener('input',renderTable);});
+}
 
 function rowHTML(d, maxSal) {
   const bw = Math.round((d.salary / maxSal) * 80);
@@ -42,14 +47,17 @@ function rowHTML(d, maxSal) {
   </tr>`;
 }
 
+function updateTableMaxSal(){
+  tableCachedMaxSal=D.length?Math.max.apply(null,D.map(function(d){return d.salary;}))||1:1;
+}
 function renderTableChunk(){
   if(tableRendered>=tableRows.length)return;
-  const maxSal=Math.max(...D.map(d=>d.salary),1);
+  const maxSal=tableCachedMaxSal;
   const end=Math.min(tableRendered+TABLE_CHUNK,tableRows.length);
   const frag=document.createDocumentFragment();
   const tmp=document.createElement('tbody');
   let html='';
-  for(let i=tableRendered;i<end;i++) html+=rowHTML(tableRows[i],maxSal);
+  for(var i=tableRendered;i<end;i++) html+=rowHTML(tableRows[i],maxSal);
   tmp.innerHTML=html;
   while(tmp.firstChild)frag.appendChild(tmp.firstChild);
   document.getElementById('table-body').appendChild(frag);
@@ -57,11 +65,12 @@ function renderTableChunk(){
 }
 
 function renderTable(){
+  updateTableMaxSal();
   const q=document.getElementById('t-search').value.toLowerCase();
   const lvl=document.getElementById('tf-level').value;
   const emp=document.getElementById('tf-emp').value;
   const fmt=document.getElementById('tf-fmt').value;
-  const maxSal=Math.max(...D.map(d=>d.salary),1);
+  const maxSal=tableCachedMaxSal;
   tableRows=D.filter(d=>{
     if(q&&!d.city.toLowerCase().includes(q)&&!d.dept.toLowerCase().includes(q)&&!d.level.toLowerCase().includes(q)&&!(d.projects||'').toLowerCase().includes(q)&&!(d.software||'').toLowerCase().includes(q))return false;
     if(lvl&&d.level!==lvl)return false; if(emp&&d.emp!==emp)return false; if(fmt&&d.fmt!==fmt)return false; return true;

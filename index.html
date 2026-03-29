@@ -55,7 +55,7 @@
     <div class="salary-input-wrap">
       <span class="prefix">$</span>
       <input type="number" id="my-salary-input" placeholder="3000" min="0" max="50000">
-      <button class="sal-reset-btn" id="sal-reset-btn" title="Сбросить">
+      <button class="sal-reset-btn" id="sal-reset-btn" title="Сбросить" aria-label="Сбросить">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#ff3366" opacity=".15"/><line x1="5" y1="5" x2="11" y2="11" stroke="#ff3366" stroke-width="2" stroke-linecap="round"/><line x1="11" y1="5" x2="5" y2="11" stroke="#ff3366" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
     </div>
@@ -75,11 +75,11 @@
 </div>
 
 <!-- NAV TABS -->
-<nav class="nav-tabs">
-  <button class="tab-btn active" data-tab="globe">Карта мира</button>
-  <button class="tab-btn" data-tab="charts">Чарты</button>
-  <button class="tab-btn" data-tab="spectrum">Спектр</button>
-  <button class="tab-btn" data-tab="table">Таблица</button>
+<nav class="nav-tabs" role="tablist">
+  <button role="tab" class="tab-btn active" data-tab="globe">Карта мира</button>
+  <button role="tab" class="tab-btn" data-tab="charts">Чарты</button>
+  <button role="tab" class="tab-btn" data-tab="spectrum">Спектр</button>
+  <button role="tab" class="tab-btn" data-tab="table">Таблица</button>
 </nav>
 
 <!-- GLOBE -->
@@ -141,7 +141,7 @@
   </div>
   <div id="spectrum-container">
     <div class="spectrum-canvas-wrap">
-      <canvas id="spectrum-canvas" height="380"></canvas>
+      <canvas id="spectrum-canvas" height="380" aria-label="Спектр зарплат"></canvas>
       <div id="spectrum-tooltip"></div>
       <div class="spectrum-my-line" id="spec-my-line"><span class="spectrum-my-label" id="spec-my-label">Ты</span></div>
     </div>
@@ -162,16 +162,16 @@
     <span class="rows-count" id="rows-count" style="display:none"></span>
   </div>
   <div class="table-wrap"><table><thead><tr>
-    <th data-col="city">Город</th>
-    <th data-col="level">Уровень</th>
-    <th data-col="dept">Специализация</th>
-    <th data-col="salary">Зарплата $/мес</th>
-    <th data-col="exp">Опыт</th>
-    <th data-col="emp">Занятость</th>
-    <th data-col="fmt">Формат</th>
-    <th data-col="tax">Налоги</th>
-    <th data-col="projects">Сфера</th>
-    <th data-col="software">Софт</th>
+    <th data-col="city" scope="col">Город</th>
+    <th data-col="level" scope="col">Уровень</th>
+    <th data-col="dept" scope="col">Специализация</th>
+    <th data-col="salary" scope="col">Зарплата $/мес</th>
+    <th data-col="exp" scope="col">Опыт</th>
+    <th data-col="emp" scope="col">Занятость</th>
+    <th data-col="fmt" scope="col">Формат</th>
+    <th data-col="tax" scope="col">Налоги</th>
+    <th data-col="projects" scope="col">Сфера</th>
+    <th data-col="software" scope="col">Софт</th>
   </tr></thead><tbody id="table-body"></tbody></table></div>
 </div>
 
@@ -180,7 +180,7 @@
 <script src="js/utils.js?v=3"></script>
 <script src="js/ui-state.js?v=9"></script>
 <script src="js/data-loader.js?v=10"></script>
-<script src="js/globe.js?v=45"></script>
+<script src="js/globe.js?v=46"></script>
 <script src="js/charts.js?v=13"></script>
 <script src="js/spectrum.js?v=3"></script>
 <script src="js/table.js?v=4"></script>

@@ -74,7 +74,7 @@ function initGlobe(){
   // ── Earth texture from CDN (like globe.gl) ──
   const loader=new THREE.TextureLoader();
   loader.crossOrigin='anonymous';
-  const globeTexture=loader.load('Dx9Xd_cr.jpg');
+  const globeTexture=loader.load('Dx9Xd_cr.jpg', undefined, undefined, function(err){ console.warn('Earth texture failed to load', err); });
   const sphereMat=new THREE.MeshPhongMaterial({map:globeTexture,shininess:6,specular:0x111122});
   const sphereMesh=new THREE.Mesh(new THREE.SphereGeometry(1,64,64),sphereMat);
   group.add(sphereMesh);
@@ -470,7 +470,7 @@ function initGlobe(){
   let idleRotTarget={x:0,y:0}, idleRotAnimating=false;
   let idleAnimFactor=0.05, idleAnimMinRot=0.003, idleAnimMinCam=0.001;
   const IDLE_DEFAULT_ROT=0;
-  const IDLE_TIMEOUT=20000;
+  const IDLE_TIMEOUT=30000;
   const MOON_X=-2.25, MOON_Y=0.0, MOON_Z=0.45;
 
   function normAngle(a){ a=a%(2*Math.PI); if(a>Math.PI)a-=2*Math.PI; if(a<-Math.PI)a+=2*Math.PI; return a; }
@@ -523,6 +523,7 @@ function initGlobe(){
       mx.globalAlpha=1;
       moonTex.needsUpdate=true;
     };
+    moonImg.onerror=function(){ console.warn('Moon texture failed to load'); };
     moonImg.src='moon-photo_8.jpg';
     var moonGeo=new THREE.SphereGeometry(0.333,48,48);
     var moonMat=new THREE.MeshLambertMaterial({map:moonTex});

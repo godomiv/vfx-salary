@@ -69,6 +69,7 @@ function populateCountryFilter(){
     if(name)countryCount[name]=(countryCount[name]||0)+1;
   });
   var sel=document.getElementById('chart-country-filter');
+  if(!sel) return;
   Object.entries(countryCount).sort(function(a,b){return b[1]-a[1];}).forEach(function(e){
     var o=document.createElement('option');
     o.value=e[0];

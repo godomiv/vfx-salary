@@ -35,6 +35,7 @@ function getSpecColor(d,mode){
 var specZoom=1.0, specPanFrac=0;
 function drawSpectrum(){
   const canvas=document.getElementById('spectrum-canvas');
+  if(!canvas) return;
   const fL=document.getElementById('spec-level').value;
   const fE=document.getElementById('spec-emp').value;
   const fS=document.getElementById('spec-sphere').value;
@@ -134,7 +135,8 @@ function drawSpectrum(){
   canvas.onmouseleave=()=>specTip.style.display='none';
 }
 // Wheel: zoom or pan
-document.getElementById('spectrum-canvas').addEventListener('wheel',function(e){
+var _specCanvas=document.getElementById('spectrum-canvas');
+if(_specCanvas) _specCanvas.addEventListener('wheel',function(e){
   e.preventDefault();
   const rect=this.getBoundingClientRect();
   const mxFrac=Math.max(0,Math.min(1,(e.clientX-rect.left-70)/(rect.width-140)));
@@ -149,7 +151,7 @@ document.getElementById('spectrum-canvas').addEventListener('wheel',function(e){
   }
   drawSpectrum();
 },{passive:false});
-['spec-level','spec-emp','spec-color','spec-sphere','spec-city'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{
+['spec-level','spec-emp','spec-color','spec-sphere','spec-city'].forEach(id=>{var el=document.getElementById(id);if(el) el.addEventListener('change',()=>{
   const fL=document.getElementById('spec-level').value;
   const fE=document.getElementById('spec-emp').value;
   const fS=document.getElementById('spec-sphere').value;
@@ -167,10 +169,11 @@ document.getElementById('spectrum-canvas').addEventListener('wheel',function(e){
     specPanFrac=Math.max(0,lo/allMax);
   } else { specZoom=1; specPanFrac=0; }
   drawSpectrum();
-}));
+});});
 // Left mouse drag pan for spectrum
 (function(){
   const specCanvas=document.getElementById('spectrum-canvas');
+  if(!specCanvas) return;
   let specDrag=false, specDragX=0;
   specCanvas.addEventListener('mousedown',e=>{
     if(e.button===0){e.preventDefault();specDrag=true;specDragX=e.clientX;specCanvas.style.cursor='grabbing';}

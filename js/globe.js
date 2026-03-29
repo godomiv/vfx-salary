@@ -80,7 +80,7 @@ function initGlobe(){
   group.add(sphereMesh);
 
   // ── Atmosphere glow (globe.gl style) ─────────────────────────────────────
-  var GLOBE_R=1.0, ATMO_SIZE=GLOBE_R*0.15;
+  var GLOBE_R=1.0, ATMO_SIZE=GLOBE_R*0.3;
   var atmoGeo=new THREE.SphereGeometry(1,64,64);
   var pos=atmoGeo.attributes.position;
   var nor=atmoGeo.attributes.normal;
@@ -95,8 +95,9 @@ function initGlobe(){
   var atmoMat=new THREE.ShaderMaterial({
     uniforms:{
       color:{value:new THREE.Color('lightskyblue')},
-      coefficient:{value:0.025},
+      coefficient:{value:0.1},
       power:{value:3.5},
+      brightness:{value:0.15},
       hollowRadius:{value:GLOBE_R}
     },
     vertexShader:[
@@ -120,6 +121,7 @@ function initGlobe(){
       'uniform vec3 color;',
       'uniform float coefficient;',
       'uniform float power;',
+      'uniform float brightness;',
       'uniform float hollowRadius;',
       'varying vec3 vVertexNormal;',
       'varying vec3 vVertexWorldPosition;',
@@ -130,7 +132,7 @@ function initGlobe(){
       '  if(vAngDist<0.0)discard;',
       '  vec3 wCamToVert=vVertexWorldPosition-cameraPosition;',
       '  vec3 vCamToVert=normalize((viewMatrix*vec4(wCamToVert,0.0)).xyz);',
-      '  float intensity=pow(coefficient+dot(vVertexNormal,vCamToVert),power);',
+      '  float intensity=pow(coefficient+dot(vVertexNormal,vCamToVert),power)*brightness;',
       '  gl_FragColor=vec4(color,intensity);',
       '}'
     ].join('\n'),

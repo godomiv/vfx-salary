@@ -144,11 +144,18 @@ function parseSalary(raw) {
   return null;
 }
 function resolveCoords(cityRaw) {
-  let key = cityRaw.toLowerCase().trim()
-    .replace(/,$/, '')
-    .replace(/\s*\(.*?\)/g,'')       // strip "(иммигрант из РФ)" etc
-    .replace(/,?\s*(россия|russia|рф|украина|ukraine|беларусь|belarus|казахстан|kazakhstan|кипр|cyprus|грузия|georgia|польша|poland|германия|germany|но работаю.*$)/gi,'')
+  const raw = cityRaw.toLowerCase().trim().replace(/,$/, '').replace(/\s*\(.*?\)/g,'').trim();
+  // 1. Direct lookup first (before any stripping — handles country names like "Польша", "Германия")
+  if (CITY_COORDS[raw]) return CITY_COORDS[raw];
+  const rawNoDash = raw.replace(/-/g,' ');
+  if (CITY_COORDS[rawNoDash]) return CITY_COORDS[rawNoDash];
+
+  // 2. Strip country suffix after COMMA only (e.g. "Варшава, Польша" → "Варшава")
+  let key = raw
+    .replace(/,\s*(россия|russia|рф|украина|ukraine|беларусь|belarus|казахстан|kazakhstan|кипр|cyprus|грузия|georgia|польша|poland|германия|germany|но работаю.*$)/gi,'')
     .trim();
+  if (!key) key = raw; // guard: if stripping ate everything, restore original
+
   if (CITY_COORDS[key]) return CITY_COORDS[key];
   // try without dashes
   const noDash = key.replace(/-/g,' ');
@@ -160,14 +167,14 @@ function resolveCoords(cityRaw) {
   const cleaned = key.replace(/^(город|г\.|city of|city)\s*/i,'');
   if (CITY_COORDS[cleaned]) return CITY_COORDS[cleaned];
   // try partial match — key contains or is contained by a known city
+  const firstWord = key.split(/[\s,]/)[0];
   for (const k of Object.keys(CITY_COORDS)) {
-    if (key.startsWith(k) || k.startsWith(key.split(/[\s,]/)[0])) return CITY_COORDS[k];
-    // also check if key contains the city name
+    if (firstWord.length > 2 && k.startsWith(firstWord)) return CITY_COORDS[k];
+    if (firstWord.length > 2 && key.startsWith(k) && k.length > 2) return CITY_COORDS[k];
     if (key.length > 3 && key.includes(k) && k.length > 3) return CITY_COORDS[k];
     if (k.length > 3 && k.includes(key) && key.length > 3) return CITY_COORDS[k];
   }
   // try first word alone (for "Екатеринбург, сейчас Москва" → "екатеринбург")
-  const firstWord = key.split(/[\s,]/)[0];
   if (firstWord.length > 2 && CITY_COORDS[firstWord]) return CITY_COORDS[firstWord];
   // Log unmatched for debugging
   if (typeof console !== 'undefined') console.warn('[GEO] Unmatched city:', cityRaw);

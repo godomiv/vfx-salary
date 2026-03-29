@@ -45,7 +45,7 @@ function processCSVText(text, source) {
 async function loadData() {
   // 0. Load lookup tables from JSON files
   setLoader(5, 'Загружаем справочники...');
-  const _v='?v=6';
+  const _v='?v=7';
   const [coordsData, canonData, isoData, colData] = await Promise.all([
     fetch('data/city-coords.json'+_v).then(r => r.json()).catch(() => ({})),
     fetch('data/city-canonical.json'+_v).then(r => r.json()).catch(() => ({})),

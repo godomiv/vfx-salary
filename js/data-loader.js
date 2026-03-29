@@ -45,7 +45,7 @@ function processCSVText(text, source) {
 async function loadData() {
   // 0. Load lookup tables from JSON files
   setLoader(5, 'Загружаем справочники...');
-  const _v='?v=7';
+  const _v='?v=8';
   const [coordsData, canonData, isoData, colData] = await Promise.all([
     fetch('data/city-coords.json'+_v).then(r => r.json()).catch(() => ({})),
     fetch('data/city-canonical.json'+_v).then(r => r.json()).catch(() => ({})),
@@ -101,5 +101,7 @@ async function loadData() {
     setTimeout(()=>document.getElementById('loading-screen').style.display='none', 500);
     initGlobe();
     renderTable();
+    // Restore last active tab (after globe is inited)
+    setTimeout(()=>{ if(window._restoreTab) window._restoreTab(); }, 100);
   }, 300);
 }

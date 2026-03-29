@@ -521,5 +521,8 @@ function initGlobe(){
     sunLight.position.copy(camera.position).add(sunDir);
     renderer.render(scene,camera);
   })();
-  window.addEventListener('resize',()=>{const nW=container.clientWidth;camera.aspect=nW/H;camera.updateProjectionMatrix();renderer.setSize(nW,H);});
+  function onGlobeResize(){const nW=container.clientWidth||window.innerWidth;if(nW<10)return;camera.aspect=nW/H;camera.updateProjectionMatrix();renderer.setSize(nW,H);}
+  window.addEventListener('resize', onGlobeResize);
+  // Expose so tab switcher can force a resize when globe tab becomes visible
+  window._globeForceResize = onGlobeResize;
 }

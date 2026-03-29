@@ -13,33 +13,47 @@ function updateStats(){
 // ══════════════════════════════════════════════════════
 // TABS
 // ══════════════════════════════════════════════════════
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    const tab = btn.dataset.tab;
-    ['globe','charts','spectrum'].forEach(t=>{
-      const el=document.getElementById('tab-'+t);
-      if(el) el.classList.toggle('active',t===tab);
-    });
-    const tbl = document.getElementById('tab-table');
-    if(tbl) tbl.style.display=(tab==='table')?'block':'none';
-    if(tab==='spectrum'){
-      specZoom=1; specPanFrac=0;
-      ['spec-level','spec-emp','spec-sphere','spec-city'].forEach(id=>{document.getElementById(id).value='';});
-      document.getElementById('spec-color').value='level';
-      drawSpectrum();
-    }
-    if(tab==='table'){
-      sortCol='salary'; sortDir=-1;
-      document.getElementById('t-search').value='';
-      ['tf-level','tf-emp','tf-fmt'].forEach(id=>{document.getElementById(id).value='';});
-      document.querySelectorAll('thead th').forEach(h=>h.classList.remove('sort-asc','sort-desc'));
-      renderTable();
-    }
-    if(tab==='charts') setTimeout(()=>initCharts(),50);
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  ['globe','charts','spectrum'].forEach(t=>{
+    const el=document.getElementById('tab-'+t);
+    if(el) el.classList.toggle('active',t===tab);
   });
+  const tbl = document.getElementById('tab-table');
+  if(tbl) tbl.style.display=(tab==='table')?'block':'none';
+  // Save to localStorage
+  try{ localStorage.setItem('vfx_active_tab', tab); }catch(e){}
+  if(tab==='globe'){
+    // Force renderer resize in case canvas was hidden
+    setTimeout(()=>{ if(window._globeForceResize) window._globeForceResize(); }, 50);
+  }
+  if(tab==='spectrum'){
+    specZoom=1; specPanFrac=0;
+    ['spec-level','spec-emp','spec-sphere','spec-city'].forEach(id=>{document.getElementById(id).value='';});
+    document.getElementById('spec-color').value='level';
+    drawSpectrum();
+  }
+  if(tab==='table'){
+    sortCol='salary'; sortDir=-1;
+    document.getElementById('t-search').value='';
+    ['tf-level','tf-emp','tf-fmt'].forEach(id=>{document.getElementById(id).value='';});
+    document.querySelectorAll('thead th').forEach(h=>h.classList.remove('sort-asc','sort-desc'));
+    renderTable();
+  }
+  if(tab==='charts') setTimeout(()=>initCharts(),50);
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>switchTab(btn.dataset.tab));
 });
+
+// Restore last active tab after data loads
+var _savedTab = (function(){ try{ return localStorage.getItem('vfx_active_tab'); }catch(e){ return null; } })();
+window._restoreTab = function(){
+  if(_savedTab && _savedTab !== 'globe' && document.querySelector('[data-tab="'+_savedTab+'"]')){
+    switchTab(_savedTab);
+  }
+};
 
 // ══════════════════════════════════════════════════════
 // MY SALARY

@@ -152,37 +152,26 @@ function initGlobe(){
     const threeColor=new THREE.Color(col);
 
     // Height encodes respondent count; colour encodes median salary
-    const coneH=0.028+(count/maxCount)*0.26;
-    const coneR=0.011+Math.sqrt(count/maxCount)*0.012;
+    // Thin vertical bar (like globe.gl world-population example)
+    const barH=0.022+(count/maxCount)*0.50;  // height by count
+    const barR=0.0045;                        // fixed thin radius
     const normal=latToVec3(ci.lat,ci.lng,1).normalize();
 
-    // ── Inverted pyramid: tip ON the surface, base sticks outward ──
-    // ConeGeometry local axes: tip at +Y (coneH/2), base at -Y (-coneH/2).
-    // We rotate local +Y → -normal (inward), so:
-    //   tip  = center - normal * coneH/2  → want this = normal * 1.0 (surface)
-    //   base = center + normal * coneH/2  → sticks outward
-    // Therefore: center = normal * (1.0 + coneH/2)
-    const pyramidGeo=new THREE.ConeGeometry(coneR,coneH,32,1,true);
-    const dimColor=threeColor.clone().multiplyScalar(1.0);
-    const pyramidMat=new THREE.MeshLambertMaterial({
-      color:dimColor, emissive:0x000000, emissiveIntensity:0,
+    // CylinderGeometry: base at surface (1.0), tip sticks outward
+    // Local Y axis aligned with outward normal
+    const barGeo=new THREE.CylinderGeometry(barR*0.6, barR, barH, 6, 1);
+    const barMat=new THREE.MeshLambertMaterial({
+      color: threeColor,
+      emissive: threeColor.clone().multiplyScalar(0.25),
     });
-    const pyramid=new THREE.Mesh(pyramidGeo,pyramidMat);
-    // Dark cap circle
-    const capColor=dimColor.clone().multiplyScalar(0.5);
-    const capGeo=new THREE.CircleGeometry(coneR,32);
-    const capMat=new THREE.MeshLambertMaterial({color:capColor,emissive:0x000000,emissiveIntensity:0,side:THREE.DoubleSide});
-    const cap=new THREE.Mesh(capGeo,capMat);
-    cap.position.y=-coneH/2;
-    cap.rotation.x=Math.PI/2;
-    pyramid.add(cap);
-    pyramid.position.copy(normal.clone().multiplyScalar(1.0+coneH/2));
-    pyramid.quaternion.setFromUnitVectors(yUp, normal.clone().negate());
+    const bar=new THREE.Mesh(barGeo,barMat);
+    // Center of cylinder = surface + barH/2 along normal
+    bar.position.copy(normal.clone().multiplyScalar(1.0+barH/2));
+    bar.quaternion.setFromUnitVectors(yUp, normal);
     const _ck=ci.city.toLowerCase().replace(/,.*$/,'').trim();
-    var coneUserData={...ci,avgSalary:Math.round(med_s),count:ci.salaries.length,col:COST_OF_LIVING[_ck]||COST_OF_LIVING[ci.city.toLowerCase()]||null};
-    pyramid.userData=coneUserData;
-    cap.userData=coneUserData;
-    group.add(pyramid); barMeshes.push(pyramid);
+    var barUserData={...ci,avgSalary:Math.round(med_s),count:ci.salaries.length,col:COST_OF_LIVING[_ck]||COST_OF_LIVING[ci.city.toLowerCase()]||null};
+    bar.userData=barUserData;
+    group.add(bar); barMeshes.push(bar);
   });
 
 

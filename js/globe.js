@@ -79,32 +79,44 @@ function initGlobe(){
   const sphereMesh=new THREE.Mesh(new THREE.SphereGeometry(1,64,64),sphereMat);
   group.add(sphereMesh);
 
-  // ── Atmosphere: limb glow (FrontSide — bright ring at Earth edge) ──────────
-  // Classic limb shader: intensity = pow(1 - dot(normal, viewDir), power)
-  // Glows brightest where normal ⊥ view (= at the edge silhouette)
+  // ── Atmosphere: glow bright at Earth edge, fades outward into space ────────
+  // BackSide large sphere: compute angular distance from Earth silhouette.
+  // t=1 right at Earth's edge, t=0 in open space → correct gradient direction.
   var glowMat=new THREE.ShaderMaterial({
     uniforms:{
-      glowColor:{value:new THREE.Color(0x4fc3f7)}, // cyan-blue
+      color:{value:new THREE.Color(0x4fc3f7)},
+      hollowRadius:{value:1.0}
     },
     vertexShader:[
-      'varying float vIntensity;',
+      'uniform float hollowRadius;',
+      'varying float vAngDist;',
+      'varying float vCamDist;',
       'void main(){',
-      '  vec3 n=normalize(normalMatrix*normal);',
-      '  vec3 v=normalize(-(modelViewMatrix*vec4(position,1.0)).xyz);',
-      '  vIntensity=pow(1.0-max(dot(n,v),0.0),4.0);',
+      '  vec4 objCenter=modelViewMatrix*vec4(0.0,0.0,0.0,1.0);',
+      '  vCamDist=length(objCenter);',
+      '  float edgeAngle=atan(hollowRadius/vCamDist);',
+      '  float vertAngle=acos(clamp(dot(normalize(modelViewMatrix*vec4(position,1.0)),normalize(objCenter)),-1.0,1.0));',
+      '  vAngDist=vertAngle-edgeAngle;',
       '  gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);',
       '}'
     ].join('\n'),
     fragmentShader:[
-      'uniform vec3 glowColor;',
-      'varying float vIntensity;',
+      'uniform vec3 color;',
+      'uniform float hollowRadius;',
+      'varying float vAngDist;',
+      'varying float vCamDist;',
       'void main(){',
-      '  gl_FragColor=vec4(glowColor, vIntensity*0.18);', // 5x weaker than ref
+      '  if(vCamDist<hollowRadius)discard;',
+      '  if(vAngDist<0.0)discard;',
+      // t=1 at Earth edge (angDist=0), fades to 0 outward
+      '  float t=1.0-clamp(vAngDist*2.2,0.0,1.0);',
+      '  float intensity=pow(t,1.1)*0.045;',
+      '  gl_FragColor=vec4(color,intensity);',
       '}'
     ].join('\n'),
-    side:THREE.FrontSide,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false
+    side:THREE.BackSide,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false
   });
-  var glowMesh=new THREE.Mesh(new THREE.SphereGeometry(1.12,64,64),glowMat);
+  var glowMesh=new THREE.Mesh(new THREE.SphereGeometry(2.0,64,64),glowMat);
   group.add(glowMesh);
 
   // Build city data

@@ -106,12 +106,13 @@
 
 <!-- CHARTS -->
 <div class="section" id="tab-charts">
-  <div class="section-title">Аналитика по ключевым срезам</div>
+  <div class="section-title" style="display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap">Аналитика по ключевым срезам <select id="chart-country-filter" style="background:#181830;color:#eee;border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:4px 10px;font-family:inherit;font-size:.85rem"><option value="">Все страны</option></select></div>
   <div class="charts-grid">
     <div class="chart-card"><h3>Зарплата vs Опыт</h3><div class="chart-container chart-tall"><canvas id="chart-scatter"></canvas></div></div>
     <div class="chart-card"><h3>Зарплата по уровню (медиана $)</h3><div class="chart-container chart-tall"><canvas id="chart-level"></canvas></div></div>
     <div class="chart-card full"><h3>Возраст vs Зарплата — обвал после 45</h3><div class="chart-container"><canvas id="chart-age-salary"></canvas></div></div>
     <div class="chart-card full"><h3>Топ городов по медианной зарплате ($)</h3><div class="chart-container"><canvas id="chart-city"></canvas></div></div>
+
     <div class="chart-card full"><h3>Специализация — медианная зарплата ($)</h3><div class="chart-container"><canvas id="chart-dept"></canvas></div></div>
     <div class="chart-card full"><h3>Уровень × Сфера — медианная зарплата ($)</h3><div id="heatmap-container"></div></div>
     <div class="chart-card"><h3>Сфера — медианная зарплата ($)</h3><div class="chart-container"><canvas id="chart-sphere"></canvas></div></div>
@@ -171,13 +172,13 @@
   </tr></thead><tbody id="table-body"></tbody></table></div>
 </div>
 
-<script src="js/constants.js?v=3"></script>
+<script src="js/constants.js?v=4"></script>
 <script src="js/parsers.js?v=6"></script>
 <script src="js/utils.js?v=3"></script>
 <script src="js/ui-state.js?v=6"></script>
 <script src="js/data-loader.js?v=8"></script>
-<script src="js/globe.js?v=27"></script>
-<script src="js/charts.js?v=4"></script>
+<script src="js/globe.js?v=32"></script>
+<script src="js/charts.js?v=7"></script>
 <script src="js/spectrum.js?v=3"></script>
 <script src="js/table.js?v=4"></script>
 <script src="js/main.js?v=3"></script>

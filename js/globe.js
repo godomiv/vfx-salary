@@ -172,19 +172,67 @@ function initGlobe(){
     // CylinderGeometry: base at surface (1.0), tip sticks outward
     // Local Y axis aligned with outward normal
     const barGeo=new THREE.CylinderGeometry(barR, 0, barH, 6, 1);
+    barGeo.translate(0, barH/2, 0); // shift so base is at origin
     const barMat=new THREE.MeshLambertMaterial({
       color: threeColor,
       emissive: threeColor.clone().multiplyScalar(0.25),
     });
     const bar=new THREE.Mesh(barGeo,barMat);
-    // Center of cylinder = surface + barH/2 along normal
-    bar.position.copy(normal.clone().multiplyScalar(1.0+barH/2));
+    // Position = point on surface; quaternion aims the bar outward
+    bar.position.copy(normal.clone().multiplyScalar(1.0));
     bar.quaternion.setFromUnitVectors(yUp, normal);
     const _ck=ci.city.toLowerCase().replace(/,.*$/,'').trim();
     var barUserData={...ci,avgSalary:Math.round(med_s),count:ci.salaries.length,col:COST_OF_LIVING[_ck]||COST_OF_LIVING[ci.city.toLowerCase()]||null};
     bar.userData=barUserData;
+    bar._barH=barH;
+    bar._normal=normal.clone();
+    bar._origNormal=normal.clone();
     group.add(bar); barMeshes.push(bar);
   });
+
+  // ── Tilt overlapping bars apart (base stays, tips fan out) ──
+  // Group nearby bars into clusters, then fan shorter bars around tallest
+  const SPREAD_DIST=0.06;   // angular proximity threshold (radians)
+  const TILT_ANGLE=0.25;    // max tilt in radians (~14°)
+  var visited=new Set();
+  for(var i=0;i<barMeshes.length;i++){
+    if(visited.has(i))continue;
+    // Find cluster: all bars within SPREAD_DIST of bar i
+    var cluster=[i];
+    for(var j=0;j<barMeshes.length;j++){
+      if(j===i)continue;
+      var ang=Math.acos(Math.min(1,barMeshes[i]._origNormal.dot(barMeshes[j]._origNormal)));
+      if(ang<SPREAD_DIST) cluster.push(j);
+    }
+    if(cluster.length<2)continue;
+    // Mark all as visited
+    cluster.forEach(function(idx){visited.add(idx);});
+    // Find tallest bar in cluster
+    cluster.sort(function(a,b){return barMeshes[b]._barH-barMeshes[a]._barH;});
+    var tallestIdx=cluster[0];
+    var tallest=barMeshes[tallestIdx];
+    // Build two orthogonal tangent vectors on the surface at tallest position
+    var n=tallest._origNormal;
+    var t1=new THREE.Vector3();
+    if(Math.abs(n.y)<0.9) t1.crossVectors(n,new THREE.Vector3(0,1,0)).normalize();
+    else t1.crossVectors(n,new THREE.Vector3(1,0,0)).normalize();
+    var t2=new THREE.Vector3().crossVectors(n,t1).normalize();
+    // Fan the remaining bars evenly around the tallest
+    var others=cluster.slice(1);
+    for(var k=0;k<others.length;k++){
+      var bar=barMeshes[others[k]];
+      var angle=(2*Math.PI*k)/others.length;  // even angular distribution
+      var dist=Math.acos(Math.min(1,n.dot(bar._origNormal)));
+      var tilt=TILT_ANGLE*(1-dist/SPREAD_DIST);
+      // Tangent direction for this bar
+      var tangent=t1.clone().multiplyScalar(Math.cos(angle))
+        .add(t2.clone().multiplyScalar(Math.sin(angle))).normalize();
+      // Tilt the bar's aim direction
+      var aimed=bar._origNormal.clone().multiplyScalar(Math.cos(tilt))
+        .add(tangent.multiplyScalar(Math.sin(tilt))).normalize();
+      bar.quaternion.setFromUnitVectors(yUp, aimed);
+    }
+  }
 
 
   // Top cities list
@@ -260,7 +308,7 @@ function initGlobe(){
   }
 
   // Zoom limits: normal mode vs idle/moon mode
-  const ZOOM_NORMAL={min:2.2, max:3.5};
+  const ZOOM_NORMAL={min:1.4, max:2.85};
   const ZOOM_IDLE  ={min:1.4, max:5.0};
   function zoomLimits(){ return idleActive ? ZOOM_IDLE : ZOOM_NORMAL; }
 

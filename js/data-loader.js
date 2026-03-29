@@ -45,11 +45,12 @@ function processCSVText(text, source) {
 async function loadData() {
   // 0. Load lookup tables from JSON files
   setLoader(5, 'Загружаем справочники...');
+  const _v='?v=6';
   const [coordsData, canonData, isoData, colData] = await Promise.all([
-    fetch('data/city-coords.json').then(r => r.json()).catch(() => ({})),
-    fetch('data/city-canonical.json').then(r => r.json()).catch(() => ({})),
-    fetch('data/city-iso.json').then(r => r.json()).catch(() => ({})),
-    fetch('data/cost-of-living.json').then(r => r.json()).catch(() => ({})),
+    fetch('data/city-coords.json'+_v).then(r => r.json()).catch(() => ({})),
+    fetch('data/city-canonical.json'+_v).then(r => r.json()).catch(() => ({})),
+    fetch('data/city-iso.json'+_v).then(r => r.json()).catch(() => ({})),
+    fetch('data/cost-of-living.json'+_v).then(r => r.json()).catch(() => ({})),
   ]);
   CITY_COORDS = coordsData;
   CITY_CANONICAL_MAP = canonData;

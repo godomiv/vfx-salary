@@ -79,57 +79,32 @@ function initGlobe(){
   const sphereMesh=new THREE.Mesh(new THREE.SphereGeometry(1,64,64),sphereMat);
   group.add(sphereMesh);
 
-  // Atmosphere glow (exact three-globe GlowMesh shader)
-  // ── Atmosphere: wide soft corona behind Earth ─────────────────────────────
+  // ── Atmosphere: limb glow (FrontSide — bright ring at Earth edge) ──────────
+  // Classic limb shader: intensity = pow(1 - dot(normal, viewDir), power)
+  // Glows brightest where normal ⊥ view (= at the edge silhouette)
   var glowMat=new THREE.ShaderMaterial({
     uniforms:{
-      color:{value:new THREE.Color('lightskyblue')},
-      coefficient:{value:0.30},
-      power:{value:3.8},
-      hollowRadius:{value:1.0}
+      glowColor:{value:new THREE.Color(0x4fc3f7)}, // cyan-blue
     },
     vertexShader:[
-      'uniform float hollowRadius;',
-      'varying vec3 vVertexWorldPosition;',
-      'varying vec3 vVertexNormal;',
-      'varying float vCameraDistanceToObjCenter;',
-      'varying float vVertexAngularDistanceToHollowRadius;',
+      'varying float vIntensity;',
       'void main(){',
-      '  vVertexNormal=normalize(normalMatrix*normal);',
-      '  vVertexWorldPosition=(modelMatrix*vec4(position,1.0)).xyz;',
-      '  vec4 objCenterViewPosition=modelViewMatrix*vec4(0.0,0.0,0.0,1.0);',
-      '  vCameraDistanceToObjCenter=length(objCenterViewPosition);',
-      '  float edgeAngle=atan(hollowRadius/vCameraDistanceToObjCenter);',
-      '  float vertexAngle=acos(dot(normalize(modelViewMatrix*vec4(position,1.0)),normalize(objCenterViewPosition)));',
-      '  vVertexAngularDistanceToHollowRadius=vertexAngle-edgeAngle;',
+      '  vec3 n=normalize(normalMatrix*normal);',
+      '  vec3 v=normalize(-(modelViewMatrix*vec4(position,1.0)).xyz);',
+      '  vIntensity=pow(1.0-max(dot(n,v),0.0),4.0);',
       '  gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);',
       '}'
     ].join('\n'),
     fragmentShader:[
-      'uniform vec3 color;',
-      'uniform float coefficient;',
-      'uniform float power;',
-      'uniform float hollowRadius;',
-      'varying vec3 vVertexNormal;',
-      'varying vec3 vVertexWorldPosition;',
-      'varying float vCameraDistanceToObjCenter;',
-      'varying float vVertexAngularDistanceToHollowRadius;',
+      'uniform vec3 glowColor;',
+      'varying float vIntensity;',
       'void main(){',
-      '  if(vCameraDistanceToObjCenter<hollowRadius)discard;',
-      '  if(vVertexAngularDistanceToHollowRadius<0.0)discard;',
-      '  vec3 worldCameraToVertex=vVertexWorldPosition-cameraPosition;',
-      '  vec3 viewCameraToVertex=(viewMatrix*vec4(worldCameraToVertex,0.0)).xyz;',
-      '  viewCameraToVertex=normalize(viewCameraToVertex);',
-      '  float intensity=pow(coefficient+dot(vVertexNormal,viewCameraToVertex),power);',
-      // Smooth gradient: soft fade at very outer edge only
-      '  float angFade=clamp(vVertexAngularDistanceToHollowRadius*3.5,0.0,1.0);',
-      '  intensity*=angFade;',
-      '  gl_FragColor=vec4(color,intensity);',
+      '  gl_FragColor=vec4(glowColor, vIntensity*0.18);', // 5x weaker than ref
       '}'
     ].join('\n'),
-    side:THREE.BackSide,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false
+    side:THREE.FrontSide,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false
   });
-  var glowMesh=new THREE.Mesh(new THREE.SphereGeometry(2.0,64,64),glowMat);
+  var glowMesh=new THREE.Mesh(new THREE.SphereGeometry(1.12,64,64),glowMat);
   group.add(glowMesh);
 
   // Build city data

@@ -247,10 +247,16 @@ function initGlobe(){
     container.addEventListener('mousedown',updateHint);
   }
 
+  // Zoom limits: normal mode vs idle/moon mode
+  const ZOOM_NORMAL={min:2.2, max:3.5};
+  const ZOOM_IDLE  ={min:1.4, max:5.0};
+  function zoomLimits(){ return idleActive ? ZOOM_IDLE : ZOOM_NORMAL; }
+
   // Wheel zoom
   container.addEventListener('wheel',e=>{
     e.preventDefault();
-    camera.position.z=Math.max(1.4,Math.min(5.0,camera.position.z+e.deltaY*0.003));
+    const lim=zoomLimits();
+    camera.position.z=Math.max(lim.min,Math.min(lim.max,camera.position.z+e.deltaY*0.003));
   },{passive:false});
 
   // Touch drag
@@ -260,7 +266,7 @@ function initGlobe(){
   // Pinch zoom
   let lastDist=0;
   container.addEventListener('touchstart',e=>{if(e.touches.length===2)lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);},{passive:true});
-  container.addEventListener('touchmove',e=>{if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);camera.position.z=Math.max(1.4,Math.min(5.0,camera.position.z-(d-lastDist)*0.008));lastDist=d;}},{passive:true});
+  container.addEventListener('touchmove',e=>{if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);const lim=zoomLimits();camera.position.z=Math.max(lim.min,Math.min(lim.max,camera.position.z-(d-lastDist)*0.008));lastDist=d;}},{passive:true});
 
   // ══════════════════════════════════════════════════════
   // EASTER EGG 1: MATRIX (5 clicks on the globe)
@@ -404,13 +410,16 @@ function initGlobe(){
 
   function normAngle(a){ a=a%(2*Math.PI); if(a>Math.PI)a-=2*Math.PI; if(a<-Math.PI)a+=2*Math.PI; return a; }
 
-  // TEMPORARILY DISABLED: moon idle easter egg
-  function resetIdleTimer(){ return; }
-  //['mousemove','mousedown','wheel','click'].forEach(evt=>
-  //  container.addEventListener(evt,resetIdleTimer,{passive:true}));
-  //['touchstart','touchmove'].forEach(evt=>
-  //  container.addEventListener(evt,resetIdleTimer,{passive:true}));
-  //resetIdleTimer();
+  function resetIdleTimer(){
+    if(idleTimer) clearTimeout(idleTimer);
+    if(idleActive) exitIdleMode();
+    idleTimer=setTimeout(enterIdleMode,IDLE_TIMEOUT);
+  }
+  ['mousemove','mousedown','wheel','click'].forEach(evt=>
+    container.addEventListener(evt,resetIdleTimer,{passive:true}));
+  ['touchstart','touchmove'].forEach(evt=>
+    container.addEventListener(evt,resetIdleTimer,{passive:true}));
+  resetIdleTimer();
 
   function enterIdleMode(){
     if(idleActive||matrixActive) return;
@@ -466,6 +475,8 @@ function initGlobe(){
   function exitIdleMode(){
     if(!idleActive) return;
     idleActive=false;
+    // Clamp saved camera z back to normal limits
+    savedCam.z=Math.max(ZOOM_NORMAL.min,Math.min(ZOOM_NORMAL.max,savedCam.z));
     idleCameraTarget=savedCam;
     idleCameraAnimating=true;
     // Forward-only: continue rotating in positive direction to saved position

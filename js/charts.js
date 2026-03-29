@@ -195,8 +195,10 @@ function buildCharts(){
     if(!deptMap[k])deptMap[k]=[];
     deptMap[k].push(d.salary);
   });
-  var deptData=Object.entries(deptMap).filter(function(e){return e[1].length>=2;}).map(function(e){return {k:e[0],med:Math.round(median(e[1])),cnt:e[1].length};}).sort(function(a,b){return b.med-a.med;});
+  var deptData=Object.entries(deptMap).filter(function(e){return e[1].length>=3;}).map(function(e){return {k:e[0],med:Math.round(median(e[1])),cnt:e[1].length};}).sort(function(a,b){return b.med-a.med;});
   if(deptData.length){
+    var deptChartContainer=document.getElementById('chart-dept').parentElement;
+    deptChartContainer.style.height=Math.max(240,deptData.length*28)+'px';
     chartInstances.push(new Chart(document.getElementById('chart-dept'),{
       type:'bar',
       data:{labels:deptData.map(function(d){return d.k+' ('+d.cnt+' чел.)';}),datasets:[{label:'Медиана $',data:deptData.map(function(d){return d.med;}),backgroundColor:deptData.map(function(d){return salaryColor(d.med);}),borderRadius:4,borderSkipped:false}]},
@@ -214,7 +216,7 @@ function buildCharts(){
       sphereSalaries[k].push(d.salary);
     });
   });
-  var sphereMedians=Object.entries(sphereSalaries).filter(function(e){return e[1].length>=2;}).map(function(e){return {k:e[0],med:Math.round(median(e[1])),cnt:e[1].length};}).sort(function(a,b){return b.med-a.med;});
+  var sphereMedians=Object.entries(sphereSalaries).filter(function(e){return e[1].length>=3;}).map(function(e){return {k:e[0],med:Math.round(median(e[1])),cnt:e[1].length};}).sort(function(a,b){return b.med-a.med;});
   if(sphereMedians.length) chartInstances.push(new Chart(document.getElementById('chart-sphere'),{
     type:'bar',
     data:{labels:sphereMedians.map(function(s){return s.k+' ('+s.cnt+' чел.)';}),datasets:[{label:'Медиана $',data:sphereMedians.map(function(s){return s.med;}),backgroundColor:sphereMedians.map(function(s){return salaryColor(s.med);}),borderRadius:4,borderSkipped:false}]},
@@ -235,39 +237,33 @@ function buildCharts(){
     data:{
       labels:fmtLevels,
       datasets:[
-        {label:'Удалённо',data:fmtLevels.map(function(l){var a=fmtLevelData.remote[l];return a&&a.length>=2?Math.round(median(a)):0;}),backgroundColor:'#4a9eff',borderRadius:4,borderSkipped:false},
-        {label:'Гибрид',data:fmtLevels.map(function(l){var a=fmtLevelData.hybrid[l];return a&&a.length>=2?Math.round(median(a)):0;}),backgroundColor:'#00ffaa',borderRadius:4,borderSkipped:false},
-        {label:'В студии',data:fmtLevels.map(function(l){var a=fmtLevelData.studio[l];return a&&a.length>=2?Math.round(median(a)):0;}),backgroundColor:'#ff6b35',borderRadius:4,borderSkipped:false}
+        {label:'Удалённо',data:fmtLevels.map(function(l){var a=fmtLevelData.remote[l];return a&&a.length>=1?Math.round(avg(a)):null;}),backgroundColor:'#4a9eff',borderRadius:4,borderSkipped:false},
+        {label:'Гибрид',data:fmtLevels.map(function(l){var a=fmtLevelData.hybrid[l];return a&&a.length>=1?Math.round(avg(a)):null;}),backgroundColor:'#00ffaa',borderRadius:4,borderSkipped:false},
+        {label:'В студии',data:fmtLevels.map(function(l){var a=fmtLevelData.studio[l];return a&&a.length>=1?Math.round(avg(a)):null;}),backgroundColor:'#ff6b35',borderRadius:4,borderSkipped:false}
       ]
     },
-    options:chartOpts({plugins:{legend:{display:true,labels:{font:{size:10},padding:8,usePointStyle:true,pointStyle:'circle'}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': $'+ctx.parsed.y.toLocaleString('en-US');}}}}})
+    options:chartOpts({plugins:{legend:{display:true,labels:{font:{size:10},padding:8,usePointStyle:true,pointStyle:'circle'}},tooltip:{callbacks:{label:function(ctx){if(ctx.parsed.y===null||ctx.parsed.y===0)return ctx.dataset.label+': нет данных';return ctx.dataset.label+': $'+ctx.parsed.y.toLocaleString('en-US');}}}}})
   }));
 
-  // ── 8. Оплата переработок × Опыт ──────────────────
-  var expBrackets=['0–2','3–5','6–9','10–14','15+'];
-  function expBracket(e){if(e<=1)return '0–2';if(e<=4)return '3–5';if(e<=7.5)return '6–9';if(e<=12)return '10–14';return '15+';}
-  var otExpData={yes:{},no:{},sometimes:{}};
+  // ── 8. Оплата переработок × Уровень ──────────────
+  var otLevelData={yes:{},sometimes:{},no:{}};
   FD.forEach(function(d){
-    if(!d.overtime)return;
-    var eb=expBracket(d.exp);
-    if(!otExpData[d.overtime])return;
-    if(!otExpData[d.overtime][eb])otExpData[d.overtime][eb]=[];
-    otExpData[d.overtime][eb].push(d.salary);
+    if(!d.overtime||!otLevelData[d.overtime])return;
+    if(!otLevelData[d.overtime][d.level])otLevelData[d.overtime][d.level]=[];
+    otLevelData[d.overtime][d.level].push(d.salary);
   });
+  var otLevels=LEVEL_ORDER.filter(function(l){return ['yes','sometimes','no'].some(function(o){return otLevelData[o][l]&&otLevelData[o][l].length>=2;});});
   chartInstances.push(new Chart(document.getElementById('chart-overtime-exp'),{
     type:'bar',
     data:{
-      labels:expBrackets,
+      labels:otLevels,
       datasets:[
-        {label:'Да',data:expBrackets.map(function(b){var a=otExpData.yes[b];return a&&a.length>=2?Math.round(median(a)):0;}),backgroundColor:'#00ffaa',borderRadius:4,borderSkipped:false},
-        {label:'Иногда',data:expBrackets.map(function(b){var a=otExpData.sometimes[b];return a&&a.length>=2?Math.round(median(a)):0;}),backgroundColor:'#ffa500',borderRadius:4,borderSkipped:false},
-        {label:'Нет',data:expBrackets.map(function(b){var a=otExpData.no[b];return a&&a.length>=2?Math.round(median(a)):0;}),backgroundColor:'#ff3366',borderRadius:4,borderSkipped:false}
+        {label:'Оплачивают',data:otLevels.map(function(l){var a=otLevelData.yes[l];return a&&a.length>=2?Math.round(median(a)):null;}),backgroundColor:'#00ffaa',borderRadius:4,borderSkipped:false},
+        {label:'Иногда',data:otLevels.map(function(l){var a=otLevelData.sometimes[l];return a&&a.length>=2?Math.round(median(a)):null;}),backgroundColor:'#ffa500',borderRadius:4,borderSkipped:false},
+        {label:'Не оплачивают',data:otLevels.map(function(l){var a=otLevelData.no[l];return a&&a.length>=2?Math.round(median(a)):null;}),backgroundColor:'#ff3366',borderRadius:4,borderSkipped:false}
       ]
     },
-    options:chartOpts({
-      plugins:{legend:{display:true,labels:{font:{size:10},padding:8,usePointStyle:true,pointStyle:'circle'}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': $'+ctx.parsed.y.toLocaleString('en-US');}}}},
-      scales:{y:{title:{display:true,text:'Медиана $/мес',color:'#9090b8'},grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#9090b8'}}}
-    })
+    options:chartOpts({plugins:{legend:{display:true,labels:{font:{size:10},padding:8,usePointStyle:true,pointStyle:'circle'}},tooltip:{callbacks:{label:function(ctx){if(ctx.parsed.y===null)return ctx.dataset.label+': нет данных';return ctx.dataset.label+': $'+ctx.parsed.y.toLocaleString('en-US');}}}}})
   }));
 
   // ── 9. Переработки по уровням (stacked %) ─────────
@@ -275,7 +271,7 @@ function buildCharts(){
   LEVEL_ORDER.forEach(function(l){hoursLevel[l]={'<=40':0,'41-50':0,'50+':0};});
   FD.forEach(function(d){if(d.hours&&hoursLevel[d.level])hoursLevel[d.level][d.hours]++;});
   var hlLevels=LEVEL_ORDER.filter(function(l){var t=hoursLevel[l];return (t['<=40']+t['41-50']+t['50+'])>=3;});
-  function pct(l,h){var t=hoursLevel[l];var total=t['<=40']+t['41-50']+t['50+'];return total?Math.round(t[h]/total*100):0;}
+  function pct(l,h){var t=hoursLevel[l];var total=t['<=40']+t['41-50']+t['50+'];if(!total)return 0;if(h==='50+')return 100-Math.round(t['<=40']/total*100)-Math.round(t['41-50']/total*100);return Math.round(t[h]/total*100);}
   chartInstances.push(new Chart(document.getElementById('chart-hours-level'),{
     type:'bar',
     data:{
@@ -310,7 +306,7 @@ function buildCharts(){
   chartInstances.push(new Chart(document.getElementById('chart-emp'),{
     type:'doughnut',
     data:{labels:['Удалённо','Гибрид','В студии'],datasets:[{data:[fc.remote,fc.hybrid,fc.studio],backgroundColor:['#4a9eff','#00ffaa','#ff6b35'],borderColor:'#101020',borderWidth:3,hoverOffset:8}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{padding:16,color:'#c2c2d8',font:{family:"'Rajdhani',sans-serif",size:11}}},tooltip:{backgroundColor:'rgba(10,10,26,0.95)',titleColor:'#eeeef8',bodyColor:'#c2c2d8',borderColor:'rgba(0,255,170,0.3)',borderWidth:1,cornerRadius:6,padding:10}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{padding:16,color:'#c2c2d8',font:{family:"'Rajdhani',sans-serif",size:11},usePointStyle:true,pointStyle:'circle'}},tooltip:{backgroundColor:'rgba(10,10,26,0.95)',titleColor:'#eeeef8',bodyColor:'#c2c2d8',borderColor:'rgba(0,255,170,0.3)',borderWidth:1,cornerRadius:6,padding:10,titleFont:{family:"'Rajdhani',sans-serif",weight:'600',size:12},bodyFont:{family:"'JetBrains Mono',monospace",size:11}}}}
   }));
 
   // ── 12. Топ софт ───────────────────────────────────
@@ -393,7 +389,7 @@ function buildCharts(){
         if(d.level!==level||!d.projects)return false;
         return d.projects.split(/[,/]/).map(function(s){return s.trim();}).some(function(p){return p.replace(/сериалы\s*\/?\s*тв/i,'Сериалы/ТВ').replace(/ивенты/i,'Ивенты').trim()===sphere;});
       }).map(function(d){return d.salary;});
-      if(vals.length>=2) heatMap[sphere][level]={med:Math.round(median(vals)),cnt:vals.length};
+      if(vals.length>=3) heatMap[sphere][level]={med:Math.round(median(vals)),cnt:vals.length};
     });
   });
   heatSphereList.sort(function(a,b){

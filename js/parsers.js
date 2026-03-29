@@ -118,7 +118,10 @@ function parseSalary(raw) {
   // "302000 йен" → skip (non-USD)
   if (raw.includes('йен') || raw.includes('yen') || raw.includes('¥')) return null;
   // Remove currency symbols and common noise
-  raw = raw.replace(/[$€£руб рублей]/g, '').replace(/[,]/g,'.');
+  raw = raw.replace(/[$€£руб рублей]/g, '');
+  // Comma as thousands separator: "1,000" → "1000" (before comma→dot for decimals)
+  raw = raw.replace(/(\d),(\d{3})(?!\d)/g, '$1$2');
+  raw = raw.replace(/[,]/g,'.');
   // "5-7k" or "5000-7000"
   const rangeK = raw.match(/(\d+\.?\d*)\s*k?\s*[-–—]\s*(\d+\.?\d*)\s*k?/);
   if (rangeK) {

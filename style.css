@@ -45,21 +45,24 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
 .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
 
 /* ── MY SALARY ── */
-.my-salary-bar{padding:1.5rem 5vw;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:3rem;flex-wrap:wrap;}
-.sal-label{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:#9090b8;margin-bottom:.4rem;}
+.my-salary-bar{padding:1.2rem 5vw;background:var(--surface);border-bottom:1px solid var(--border);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2.5rem;}
+.sal-input-col{display:flex;flex-direction:column;gap:.35rem;}
+.sal-label{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#9090b8;}
+.sal-hint{font-size:.68rem;color:var(--text-dim);}
 .salary-input-wrap{display:flex;align-items:center;gap:.5rem;border:1px solid var(--border);border-radius:5px;padding:.5rem 1rem;background:var(--card);transition:border-color .2s;}
 .salary-input-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,255,170,.1);}
 .salary-input-wrap .prefix{font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:1.1rem;}
 .salary-input-wrap input{background:none;border:none;outline:none;color:var(--text-light);font-family:'JetBrains Mono',monospace;font-size:1.2rem;width:130px;}
-.percentile-block{display:flex;flex-direction:column;gap:.5rem;min-width:260px;}
-.pct-track{height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.percentile-block{display:flex;flex-direction:column;gap:.4rem;}
+.pct-track{height:6px;background:var(--border);border-radius:4px;overflow:hidden;}
 .pct-fill{height:100%;background:linear-gradient(90deg,#4a9eff,#00ffaa,#ffa500,#ff3366);border-radius:4px;transition:width .5s cubic-bezier(.34,1.56,.64,1);width:0%;}
-.pct-text{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--accent);}
-.pct-rank{font-size:.75rem;color:var(--text-dim);}
-.median-badge{display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;border:1px solid rgba(255,165,0,.3);border-radius:5px;background:rgba(255,165,0,.05);}
-.median-badge .mb-val{font-family:'JetBrains Mono',monospace;font-size:1rem;color:#ffa500;}
-.median-badge .mb-lbl{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);}
-.last-updated{font-size:.65rem;letter-spacing:.08em;color:var(--text-dim);font-family:'JetBrains Mono',monospace;}
+.pct-text{font-family:'JetBrains Mono',monospace;font-size:.95rem;color:var(--accent);}
+.pct-rank{font-size:.72rem;color:var(--text-dim);}
+.sal-meta-col{display:flex;flex-direction:column;align-items:flex-end;gap:.5rem;}
+.median-badge{display:flex;align-items:baseline;gap:.5rem;}
+.median-badge .mb-val{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:600;color:#ffa500;}
+.median-badge .mb-lbl{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);}
+.last-updated{font-size:.62rem;letter-spacing:.06em;color:var(--text-dim);font-family:'JetBrains Mono',monospace;text-align:right;}
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
 input[type=number]{-moz-appearance:textfield;}
@@ -95,10 +98,10 @@ input[type=number]{-moz-appearance:textfield;}
 .city-avg{font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:600;}
 
 /* ── CHARTS ── */
-.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
-.chart-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem;}
+.charts-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2rem;}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem;min-width:0;}
 .chart-card h3{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.2rem;}
-.chart-container{position:relative;height:280px;}
+.chart-container{position:relative;height:280px;overflow:hidden;}
 .chart-tall{height:480px;}
 .chart-card.full{grid-column:1/-1;}
 .chart-card.full .chart-container{height:240px;}
@@ -160,8 +163,8 @@ tbody td{padding:.55rem 1rem;color:var(--text-light);}
 .rows-count{font-size:.75rem;color:var(--text-dim);margin-left:auto;}
 .skipped-badge{font-size:.7rem;color:var(--text-dim);padding:.2rem .5rem;background:rgba(255,255,255,.04);border-radius:3px;margin-left:auto;}
 
-@media(max-width:900px){.globe-layout{grid-template-columns:1fr;}.charts-grid{grid-template-columns:1fr;}.chart-card.full{grid-column:1;}.heatmap-wrap{overflow-x:auto;}}
-@media(max-width:600px){.header{padding:1.5rem 4vw 1.5rem;}.section,.table-section,.spectrum-section{padding:2rem 4vw;}.my-salary-bar{padding:1.2rem 4vw;gap:1.5rem;}.chart-tall{height:280px;}}
+@media(max-width:900px){.globe-layout{grid-template-columns:1fr;}.charts-grid{grid-template-columns:1fr;}.chart-card.full{grid-column:1;}.heatmap-wrap{overflow-x:auto;}.my-salary-bar{grid-template-columns:1fr;gap:1.2rem;}}
+@media(max-width:600px){.header{padding:1.5rem 4vw 1.5rem;}.section,.table-section,.spectrum-section{padding:2rem 4vw;}.my-salary-bar{grid-template-columns:1fr;padding:1.2rem 4vw;gap:1.2rem;}.sal-meta-col{align-items:flex-start;}.chart-tall{height:280px;}}
 
 /* ── EASTER EGG: MATRIX ── */
 #matrix-overlay{position:absolute;inset:0;z-index:50;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;border-radius:inherit;}

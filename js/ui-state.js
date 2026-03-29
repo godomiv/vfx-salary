@@ -7,7 +7,7 @@ function updateStats(){
   document.getElementById('s-median').innerHTML = '$'+fmt(med)+'<span>/мес</span>';
   document.getElementById('s-max').innerHTML = '$'+fmt(Math.max(...salaries))+'<span>/мес</span>';
   document.getElementById('s-cities').textContent = [...new Set(D.map(d=>d.city))].length;
-  document.getElementById('median-val').textContent = '$'+fmt(med);
+  var mvEl=document.getElementById('median-val'); if(mvEl) mvEl.textContent='$'+fmt(med);
 }
 
 // ══════════════════════════════════════════════════════

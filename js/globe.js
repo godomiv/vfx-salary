@@ -217,17 +217,22 @@ function initGlobe(){
     if(Math.abs(n.y)<0.9) t1.crossVectors(n,new THREE.Vector3(0,1,0)).normalize();
     else t1.crossVectors(n,new THREE.Vector3(1,0,0)).normalize();
     var t2=new THREE.Vector3().crossVectors(n,t1).normalize();
-    // Fan the remaining bars evenly around the tallest
+    // Fan the remaining bars: use real direction from tallest, fallback to even spread
     var others=cluster.slice(1);
+    var usedAngles=[];
     for(var k=0;k<others.length;k++){
       var bar=barMeshes[others[k]];
-      var angle=(2*Math.PI*k)/others.length;  // even angular distribution
       var dist=Math.acos(Math.min(1,n.dot(bar._origNormal)));
       var tilt=TILT_ANGLE*(1-dist/SPREAD_DIST);
-      // Tangent direction for this bar
-      var tangent=t1.clone().multiplyScalar(Math.cos(angle))
-        .add(t2.clone().multiplyScalar(Math.sin(angle))).normalize();
-      // Tilt the bar's aim direction
+      // Try to get real direction from tallest to this bar on the surface
+      var tangent=bar._origNormal.clone().sub(n.clone().multiplyScalar(n.dot(bar._origNormal)));
+      if(tangent.lengthSq()<1e-8){
+        // Identical coords — assign even angle avoiding used angles
+        var angle=(2*Math.PI*k)/others.length;
+        tangent=t1.clone().multiplyScalar(Math.cos(angle))
+          .add(t2.clone().multiplyScalar(Math.sin(angle)));
+      }
+      tangent.normalize();
       var aimed=bar._origNormal.clone().multiplyScalar(Math.cos(tilt))
         .add(tangent.multiplyScalar(Math.sin(tilt))).normalize();
       bar.quaternion.setFromUnitVectors(yUp, aimed);

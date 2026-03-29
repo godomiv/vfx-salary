@@ -69,6 +69,7 @@ function renderTable(){
   tableRows.sort((a,b)=>{
     let va=a[sortCol],vb=b[sortCol];
     if(sortCol==='level'){va=LEVEL_ORDER.indexOf(a.level);vb=LEVEL_ORDER.indexOf(b.level);}
+    if(sortCol==='tax'){va=a.afterTax?1:0;vb=b.afterTax?1:0;}
     if(typeof va==='string')return sortDir*va.localeCompare(vb,'ru');
     return sortDir*(va-vb);
   });

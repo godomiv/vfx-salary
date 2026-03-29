@@ -80,11 +80,12 @@ function initGlobe(){
   group.add(sphereMesh);
 
   // Atmosphere glow (exact three-globe GlowMesh shader)
+  // ── Atmosphere: wide soft corona behind Earth ─────────────────────────────
   var glowMat=new THREE.ShaderMaterial({
     uniforms:{
       color:{value:new THREE.Color('lightskyblue')},
-      coefficient:{value:0.3},
-      power:{value:12.0},
+      coefficient:{value:0.30},
+      power:{value:3.8},
       hollowRadius:{value:1.0}
     },
     vertexShader:[
@@ -120,12 +121,15 @@ function initGlobe(){
       '  vec3 viewCameraToVertex=(viewMatrix*vec4(worldCameraToVertex,0.0)).xyz;',
       '  viewCameraToVertex=normalize(viewCameraToVertex);',
       '  float intensity=pow(coefficient+dot(vVertexNormal,viewCameraToVertex),power);',
+      // Smooth gradient: soft fade at very outer edge only
+      '  float angFade=clamp(vVertexAngularDistanceToHollowRadius*3.5,0.0,1.0);',
+      '  intensity*=angFade;',
       '  gl_FragColor=vec4(color,intensity);',
       '}'
     ].join('\n'),
     side:THREE.BackSide,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false
   });
-  var glowMesh=new THREE.Mesh(new THREE.SphereGeometry(1.15,64,64),glowMat);
+  var glowMesh=new THREE.Mesh(new THREE.SphereGeometry(2.0,64,64),glowMat);
   group.add(glowMesh);
 
   // Build city data

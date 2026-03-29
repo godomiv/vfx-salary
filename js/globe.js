@@ -159,7 +159,7 @@ function initGlobe(){
 
     // CylinderGeometry: base at surface (1.0), tip sticks outward
     // Local Y axis aligned with outward normal
-    const barGeo=new THREE.CylinderGeometry(barR*0.6, barR, barH, 6, 1);
+    const barGeo=new THREE.CylinderGeometry(barR, 0, barH, 6, 1);
     const barMat=new THREE.MeshLambertMaterial({
       color: threeColor,
       emissive: threeColor.clone().multiplyScalar(0.25),

@@ -40,7 +40,7 @@ function initGlobe(){
   const W=container.clientWidth, H=container.clientHeight||780;
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(42,W/H,0.1,100);
-  camera.position.z=2.85;
+  camera.position.z=3.35;
   const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,logarithmicDepthBuffer:true});
   renderer.setSize(W,H); renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
   renderer.setClearColor(0x000000,0); container.appendChild(renderer.domElement);
@@ -71,10 +71,20 @@ function initGlobe(){
   const starMat=new THREE.PointsMaterial({size:0.12,vertexColors:true,transparent:true,opacity:0.85,sizeAttenuation:true});
   group.add(new THREE.Points(starGeo,starMat));
 
-  // ── Earth texture from CDN (like globe.gl) ──
+  // ── Texture loading overlay ──
+  var texOverlay=document.createElement('div');
+  texOverlay.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;pointer-events:none;';
+  texOverlay.innerHTML='<div style="font:11px/1.4 monospace;color:#7878a0;margin-bottom:8px;letter-spacing:.08em">LOADING TEXTURE</div><div style="width:120px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden"><div id="tex-progress" style="width:0%;height:100%;background:var(--accent,#00ffaa);border-radius:2px;transition:width .3s"></div></div>';
+  container.parentElement.style.position='relative';
+  container.parentElement.appendChild(texOverlay);
+  var texProgress=texOverlay.querySelector('#tex-progress');
+  var texLoaded=0, texTotal=1;
+  function texTick(){ texLoaded++; texProgress.style.width=Math.round(texLoaded/texTotal*100)+'%'; if(texLoaded>=texTotal){ setTimeout(function(){ texOverlay.style.opacity='0'; texOverlay.style.transition='opacity .5s'; setTimeout(function(){ texOverlay.remove(); },500); },200); } }
+
+  // ── Earth texture ──
   const loader=new THREE.TextureLoader();
   loader.crossOrigin='anonymous';
-  const globeTexture=loader.load('Dx9Xd_cr.jpg', undefined, undefined, function(err){ console.warn('Earth texture failed to load', err); });
+  const globeTexture=loader.load('Dx9Xd_cr.jpg', function(){ texTick(); }, undefined, function(err){ console.warn('Earth texture failed to load',err); texTick(); });
   const sphereMat=new THREE.MeshPhongMaterial({map:globeTexture,shininess:6,specular:0x111122});
   const sphereMesh=new THREE.Mesh(new THREE.SphereGeometry(1,64,64),sphereMat);
   group.add(sphereMesh);

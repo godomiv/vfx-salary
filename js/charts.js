@@ -161,6 +161,9 @@ function buildCharts(){
   var cm={}; FD.forEach(function(d){if(!cm[d.city])cm[d.city]=[];cm[d.city].push(d.salary);});
   var MIN_CITY_COUNT=countryFilter?2:3;
   var topC=Object.entries(cm).filter(function(e){return e[1].length>=MIN_CITY_COUNT;}).map(function(e){return {k:e[0],med:Math.round(median(e[1])),cnt:e[1].length};}).sort(function(a,b){return b.med-a.med;});
+  // Dynamic height: 24px per city, min 240px
+  var cityChartContainer=document.getElementById('chart-city').parentElement;
+  cityChartContainer.style.height=Math.max(240,topC.length*24)+'px';
   chartInstances.push(new Chart(document.getElementById('chart-city'),{
     type:'bar',
     data:{labels:topC.map(function(c){return c.k+' ('+c.cnt+' чел.)';}),datasets:[{label:'Медиана $',data:topC.map(function(c){return c.med;}),backgroundColor:topC.map(function(c){return salaryColor(c.med);}),borderRadius:4,borderSkipped:false}]},
